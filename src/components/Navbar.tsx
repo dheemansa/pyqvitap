@@ -7,8 +7,10 @@ import { usePathname } from "next/navigation";
 import ModeToggle from "@/components/toggle-theme";
 import {
   ArrowDownLeftIcon,
+  ArrowUpRight,
   ChevronDown,
   Github,
+  Pin,
 } from "lucide-react";
 import FloatingNavbar from "./FloatingNavbar";
 import PWAInstallButton from "./ui/PWAInstallButton";
@@ -25,6 +27,7 @@ import RequestModal from "./ui/RequestModal";
 import Announcement from "./ui/announcement/Announcement";
 import RunningAnnouncement from "./RunningAnnouncement";
 import { getSubjectEvent, type EventData } from "@/config/events";
+import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 function Navbar() {
   const pathname: string = usePathname() ?? "/";
@@ -76,28 +79,45 @@ function Navbar() {
     setCurrentEvent(getSubjectEvent());
   }, []);
 
-  const renderHomePageButtons = () => (
-    <>
-      {/* <Link href="/pinned" className="ml-2">
+  const renderHomePageButtons = () => {
+    if (MAINTENANCE_MODE) {
+      return (
+        <>
+          <Link
+            href="/pinned"
+            className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base"
+          >
+            <Pin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="truncate">Pin Subjects</span>
+          </Link>
+
+          <Link
+            href="/request"
+            className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base"
+          >
+            <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="truncate">Request Paper</span>
+          </Link>
+        </>
+      );
+    }
+
+    return (
+      <>
         <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base">
-          <Pin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          <span className="truncate">Pinned Subjects</span>
+          <span className="truncate">
+            <PinnedModal />
+          </span>
         </div>
-      </Link> */}
 
-      <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base">
-        <span className="truncate">
-          <PinnedModal />
-        </span>
-      </div>
-
-      <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base">
-        <span className="truncate">
-          <RequestModal />
-        </span>
-      </div>
-    </>
-  );
+        <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-2 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:px-4 md:py-2 md:text-base">
+          <span className="truncate">
+            <RequestModal />
+          </span>
+        </div>
+      </>
+    );
+  };
 
   return (
     <div className="sticky top-0 z-[50] w-full bg-[#B2B8FF] dark:bg-[#130E1F]">
@@ -121,7 +141,7 @@ function Navbar() {
             </span>
           </Link>
 
-          {pathname === "/catalogue" ? (
+          {!MAINTENANCE_MODE && pathname === "/catalogue" ? (
             <div className="relative ml-4 hidden xl:block">
               <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                 <DropdownMenuTrigger asChild>
@@ -141,20 +161,46 @@ function Navbar() {
                 >
                   <DropdownMenuItem
                     asChild
-                    onSelect={(e) => e.preventDefault()}
+                    onSelect={(e) => {
+                      if (MAINTENANCE_MODE) setDropdownOpen(false);
+                      else e.preventDefault();
+                    }}
                   >
-                    <div className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white">
-                      <PinnedModal />
-                    </div>
+                    {MAINTENANCE_MODE ? (
+                      <Link
+                        href="/pinned"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white"
+                      >
+                        <Pin className="h-4 w-4" />
+                        <span>Pin Subjects</span>
+                      </Link>
+                    ) : (
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white">
+                        <PinnedModal />
+                      </div>
+                    )}
                   </DropdownMenuItem>
 
                   <DropdownMenuItem
                     asChild
-                    onSelect={(e) => e.preventDefault()}
+                    onSelect={(e) => {
+                      if (MAINTENANCE_MODE) setDropdownOpen(false);
+                      else e.preventDefault();
+                    }}
                   >
-                    <div className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white">
-                      <RequestModal />
-                    </div>
+                    {MAINTENANCE_MODE ? (
+                      <Link
+                        href="/request"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white"
+                      >
+                        <ArrowUpRight className="h-4 w-4" />
+                        <span>Request Paper</span>
+                      </Link>
+                    ) : (
+                      <div className="flex w-full items-center gap-3 rounded-lg px-3 py-1 transition hover:bg-[#1A1823] hover:text-white">
+                        <RequestModal />
+                      </div>
+                    )}
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
@@ -195,15 +241,41 @@ function Navbar() {
                   >
                     <DropdownMenuItem
                       asChild
-                      onSelect={(e) => e.preventDefault()}
+                      onSelect={(e) => {
+                        if (MAINTENANCE_MODE) setDropdownOpen(false);
+                        else e.preventDefault();
+                      }}
                     >
-                      <PinnedModal />
+                      {MAINTENANCE_MODE ? (
+                        <Link
+                          href="/pinned"
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1 text-sm font-medium transition hover:bg-[#1A1823] hover:text-white"
+                        >
+                          <Pin className="h-4 w-4" />
+                          <span>Pin Subjects</span>
+                        </Link>
+                      ) : (
+                        <PinnedModal />
+                      )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       asChild
-                      onSelect={(e) => e.preventDefault()}
+                      onSelect={(e) => {
+                        if (MAINTENANCE_MODE) setDropdownOpen(false);
+                        else e.preventDefault();
+                      }}
                     >
-                      <RequestModal />
+                      {MAINTENANCE_MODE ? (
+                        <Link
+                          href="/request"
+                          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-1 text-sm font-medium transition hover:bg-[#1A1823] hover:text-white"
+                        >
+                          <ArrowUpRight className="h-4 w-4" />
+                          <span>Request Paper</span>
+                        </Link>
+                      ) : (
+                        <RequestModal />
+                      )}
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <a
@@ -227,7 +299,7 @@ function Navbar() {
         </div>
 
         {}
-        {pathname === "/catalogue" && (
+        {!MAINTENANCE_MODE && pathname === "/catalogue" && (
           <div className="ml-8 mr-12 hidden flex-1 justify-center md:flex">
             <div className="w-full max-w-[700px]">
               <SearchBarChild initialSubjects={courses} />
@@ -237,7 +309,7 @@ function Navbar() {
 
         {}
         <div
-          className={`${pathname === "/catalogue" ? "xl:flex" : "lg:flex"} hidden items-center gap-4`}
+          className={`${!MAINTENANCE_MODE && pathname === "/catalogue" ? "xl:flex" : "lg:flex"} hidden items-center gap-4`}
         >
           <a
             href="https://github.com/sabarishwaran-v/pyqvitap"
@@ -256,11 +328,11 @@ function Navbar() {
           <div className="hidden max-w-[200px] md:block">
             <PWAInstallButton />
           </div>
-          <Link href={pathname === "/upload" ? "/" : "/upload"}>
+          <Link href={MAINTENANCE_MODE ? "/upload" : (pathname === "/upload" ? "/" : "/upload")}>
             <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-1.5 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:gap-2 md:px-4 md:py-2 md:text-base">
               <ArrowDownLeftIcon className="h-3.5 w-3.5 rotate-90 sm:h-4 sm:w-4" />
               <span className="truncate">
-                {pathname === "/upload" ? "Search Papers" : "Upload Papers"}
+                {MAINTENANCE_MODE ? "Upload Papers" : (pathname === "/upload" ? "Search Papers" : "Upload Papers")}
               </span>
             </div>
           </Link>
@@ -268,7 +340,7 @@ function Navbar() {
 
         {}
         <div
-          className={`${pathname === "/catalogue" ? "xl:hidden" : "lg:hidden"}`}
+          className={`${!MAINTENANCE_MODE && pathname === "/catalogue" ? "xl:hidden" : "lg:hidden"}`}
         >
           <FloatingNavbar onNavigate={() => void 0} />
         </div>

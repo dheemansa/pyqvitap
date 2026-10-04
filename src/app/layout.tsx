@@ -10,18 +10,25 @@ import ChildrenWrapper from "@/components/ChildrenWrapper";
 import GitHubStarPrompt from "@/components/GitHubStarPrompt";
 import { CoursesProvider } from "@/context/courseContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { MAINTENANCE_MODE } from "@/config/maintenance";
+import MaintenanceGate from "@/components/MaintenanceGate";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pyqvitap.vercel.app/"),
-  title: "PyqVitAp | Explore VIT-AP Previous Year Question Papers",
-  description:
-    "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
+  title: MAINTENANCE_MODE
+    ? "PyqVitAp — Under Maintenance"
+    : "PyqVitAp | Explore VIT-AP Previous Year Question Papers",
+  description: MAINTENANCE_MODE
+    ? "PyqVitAp is temporarily offline while we work on important improvements to the platform."
+    : "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
   icons: [
     { rel: "icon", url: "/assets/images/favicon.svg?v=4" },
     { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=4" },
   ],
   openGraph: {
-    title: "PyqVitAp | Exam Resources",
+    title: MAINTENANCE_MODE
+      ? "PyqVitAp — Under Maintenance"
+      : "PyqVitAp | Exam Resources",
     images: [
       {
         url: "/assets/images/papers.png?v=3",
@@ -32,15 +39,19 @@ export const metadata: Metadata = {
     ],
     url: "https://pyqvitap.vercel.app/",
     type: "website",
-    description:
-      "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
+    description: MAINTENANCE_MODE
+      ? "PyqVitAp is temporarily offline while we work on important improvements to the platform."
+      : "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
     siteName: "PyqVitAp",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PyqVitAp | VIT-AP Previous Year Question Papers",
-    description:
-      "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
+    title: MAINTENANCE_MODE
+      ? "PyqVitAp — Under Maintenance"
+      : "PyqVitAp | VIT-AP Previous Year Question Papers",
+    description: MAINTENANCE_MODE
+      ? "PyqVitAp is temporarily offline while we work on important improvements to the platform."
+      : "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
     images: [
       {
         url: "/assets/images/papers.png?v=3",
@@ -157,12 +168,18 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Toaster position="top-right" reverseOrder={false} />
-          <div className="bg-[#F3F5FF] dark:bg-[#070114]">
+          <div className="flex min-h-screen flex-col justify-between bg-[#F3F5FF] dark:bg-[#070114]">
             <CoursesProvider>
               <Navbar />
-              <ChildrenWrapper>{children}</ChildrenWrapper>
+              {MAINTENANCE_MODE ? (
+                <MaintenanceGate>{children}</MaintenanceGate>
+              ) : (
+                <>
+                  <ChildrenWrapper>{children}</ChildrenWrapper>
+                  <GitHubStarPrompt />
+                </>
+              )}
               <Footer />
-              <GitHubStarPrompt />
             </CoursesProvider>
           </div>
         </ThemeProvider>

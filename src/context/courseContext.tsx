@@ -16,6 +16,7 @@ import {
 } from "@/interface";
 
 import { type ApiResponse } from '@/interface'
+import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 interface CoursesContextType {
   courses: ICourseWithCount[];
@@ -28,10 +29,14 @@ const CoursesContext = createContext<CoursesContextType | undefined>(undefined);
 
 export function CoursesProvider({ children }: { children: React.ReactNode }) {
   const [courses, setCourses] = useState<ICourseWithCount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!MAINTENANCE_MODE);
   const [error, setError] = useState<string | null>(null);
 
   const fetchCourses = useCallback(async () => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -62,6 +67,10 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (MAINTENANCE_MODE) {
+      setLoading(false);
+      return;
+    }
     void fetchCourses();
   }, [fetchCourses]);
 

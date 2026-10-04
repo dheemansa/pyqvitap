@@ -3,8 +3,9 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { ChevronDown, UploadIcon, Github } from "lucide-react";
+import { ChevronDown, UploadIcon, Github, Pin, ArrowUpRight } from "lucide-react";
 import ModeToggle from "./toggle-theme";
+import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 import {
   DropdownMenu,
@@ -46,29 +47,68 @@ export default function FloatingNavbar({ onNavigate }: Props) {
         >
           <DropdownMenuItem asChild className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer">
             <Link
-              href={pathname === "/upload" ? "/" : "/upload"}
-              onClick={() => onNavigate()}
+              href={MAINTENANCE_MODE ? "/upload" : (pathname === "/upload" ? "/" : "/upload")}
+              onClick={() => {
+                setDropdownOpen(false);
+                onNavigate();
+              }}
               className="flex w-full items-center gap-2.5 bg-transparent hover:bg-transparent"
             >
               <UploadIcon className="h-4 w-4" />
               <span className="text-xs font-medium">
-                {pathname === "/upload" ? "Search Papers" : "Upload Papers"}
+                {MAINTENANCE_MODE ? "Upload Papers" : (pathname === "/upload" ? "Search Papers" : "Upload Papers")}
               </span>
             </Link>
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={(e) => e.preventDefault()}
+            asChild={MAINTENANCE_MODE}
+            onSelect={(e) => {
+              if (MAINTENANCE_MODE) {
+                setDropdownOpen(false);
+                onNavigate();
+              } else {
+                e.preventDefault();
+              }
+            }}
             className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer"
           >
-            <PinnedModal />
+            {MAINTENANCE_MODE ? (
+              <Link
+                href="/pinned"
+                className="flex w-full items-center gap-2.5 bg-transparent hover:bg-transparent"
+              >
+                <Pin className="h-4 w-4" />
+                <span className="text-xs font-medium">Pin Subjects</span>
+              </Link>
+            ) : (
+              <PinnedModal />
+            )}
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onSelect={(e) => e.preventDefault()}
+            asChild={MAINTENANCE_MODE}
+            onSelect={(e) => {
+              if (MAINTENANCE_MODE) {
+                setDropdownOpen(false);
+                onNavigate();
+              } else {
+                e.preventDefault();
+              }
+            }}
             className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer"
           >
-            <RequestModal />
+            {MAINTENANCE_MODE ? (
+              <Link
+                href="/request"
+                className="flex w-full items-center gap-2.5 bg-transparent hover:bg-transparent"
+              >
+                <ArrowUpRight className="h-4 w-4" />
+                <span className="text-xs font-medium">Request Paper</span>
+              </Link>
+            ) : (
+              <RequestModal />
+            )}
           </DropdownMenuItem>
 
           <DropdownMenuItem asChild className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer">
