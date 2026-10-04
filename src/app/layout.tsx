@@ -159,6 +159,29 @@ export default function RootLayout({
             gtag('js', new Date());
             gtag('config', 'G-J5CD036GJP');`}
         </Script>
+        {MAINTENANCE_MODE && (
+          <>
+            <link
+              rel="preload"
+              href="/assets/maintenance/poster.webp"
+              as="image"
+              type="image/webp"
+            />
+            <link
+              rel="preload"
+              href="/assets/maintenance/dotlottie-player.wasm"
+              as="fetch"
+              type="application/wasm"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preload"
+              href="/assets/maintenance/iGV0il5M4W.lottie"
+              as="fetch"
+              crossOrigin="anonymous"
+            />
+          </>
+        )}
       </head>
       <body>
         <ThemeProvider

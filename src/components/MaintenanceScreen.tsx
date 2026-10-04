@@ -5,26 +5,60 @@ import { DotLottieReact, setWasmUrl } from "@lottiefiles/dotlottie-react";
 
 export default function MaintenanceScreen() {
   const [isClient, setIsClient] = useState(false);
+  const [isLottieReady, setIsLottieReady] = useState(false);
 
   useEffect(() => {
     setWasmUrl("/assets/maintenance/dotlottie-player.wasm");
     setIsClient(true);
   }, []);
 
+  const handleDotLottieRef = (dotLottie: any) => {
+    if (!dotLottie) return;
+
+    const onReady = () => {
+      setIsLottieReady(true);
+    };
+
+    dotLottie.addEventListener("render", onReady);
+    dotLottie.addEventListener("play", onReady);
+
+    if (dotLottie.isLoaded || dotLottie.isReady || dotLottie.isPlaying) {
+      setIsLottieReady(true);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col items-center justify-center px-4 py-8 sm:py-16 text-center">
       <div className="w-full max-w-xl flex flex-col items-center">
-        {/* Lottie Maintenance Animation */}
-        <div className="w-full max-w-[340px] sm:max-w-[400px] md:max-w-[460px] aspect-[4/3] flex items-center justify-center mb-4 sm:mb-6 overflow-hidden">
-          {isClient ? (
-            <DotLottieReact
-              src="/assets/maintenance/iGV0il5M4W.lottie"
-              loop
-              autoplay
-              className="w-full h-full object-contain"
-            />
-          ) : (
-            <div className="w-full h-full" aria-hidden="true" />
+        {/* Lottie Maintenance Animation with Instant Static Poster Fallback */}
+        <div className="relative w-full max-w-[340px] sm:max-w-[400px] md:max-w-[460px] aspect-[4/3] flex items-center justify-center mb-4 sm:mb-6 overflow-hidden">
+          {/* Instant SSR & FCP Poster */}
+          <img
+            src="/assets/maintenance/poster.webp"
+            alt="PyqVitAp Under Maintenance"
+            width={460}
+            height={345}
+            fetchPriority="high"
+            className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-in-out z-0 ${
+              isLottieReady ? "opacity-0 pointer-events-none" : "opacity-100"
+            }`}
+          />
+
+          {/* Active Lottie Animation */}
+          {isClient && (
+            <div
+              className={`relative z-10 w-full h-full transition-opacity duration-500 ease-in-out ${
+                isLottieReady ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <DotLottieReact
+                src="/assets/maintenance/iGV0il5M4W.lottie"
+                loop
+                autoplay
+                dotLottieRefCallback={handleDotLottieRef}
+                className="w-full h-full object-contain"
+              />
+            </div>
           )}
         </div>
 
