@@ -95,7 +95,7 @@ export default function Footer() {
                 id="email"
                 type="email"
                 placeholder="Enter Your Email"
-                className="flex-1 text-sm text-black dark:text-white"
+                className="ph-no-capture flex-1 text-sm text-black dark:text-white"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -142,23 +142,17 @@ export default function Footer() {
         </p>
 
         {/* Independent Project / Legal Notice */}
-        <div className="mx-auto mt-6 max-w-3xl space-y-3 px-4 text-center font-play text-xs leading-relaxed text-gray-700 dark:text-gray-400">
+        <div className="mx-auto mt-5 max-w-2xl space-y-2 px-4 text-center font-play text-xs leading-relaxed text-gray-700 dark:text-gray-400">
           <p>
             This is an independent website built by a student. It is not affiliated with, endorsed by, or operated by VIT-AP University.
           </p>
           <p>
-            This website is created solely to help students by providing easy access to previous year question papers and related academic resources.
-          </p>
-          <p>
-            VIT-AP University, its faculty, and administration are not responsible for the content, accuracy, or availability of the material on this site.
-          </p>
-          <p>
-            Question papers and related content may originate from publicly accessible institutional resources, including VIT-AP DSpace. Rights to the underlying materials remain with their respective owners.
+            Rights to the underlying materials remain with their respective owners.
           </p>
         </div>
 
         {/* Dedicated Legal Page Link */}
-        <div className="mt-4 pb-2 text-center">
+        <div className="mt-3 pb-2 text-center">
           <Link
             href="/disclaimer"
             className="font-play text-xs font-semibold text-[#562EE7] underline underline-offset-4 transition-colors hover:text-[#4531b3] dark:text-[#A47DE5] dark:hover:text-[#FFC6E8]"

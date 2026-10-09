@@ -32,11 +32,19 @@
   "include": [
     ".eslintrc.cjs",
     "next-env.d.ts",
+    "worker-configuration.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.cjs",
-    "**/*.js",
+    "*.js",
+    "*.cjs",
+    "src/**/*.js",
+    "scripts/**/*.cjs",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    ".next",
+    ".open-next",
+    ".wrangler"
+  ]
 }

@@ -18,6 +18,7 @@ import JSZip from "jszip";
 import { toast } from "react-hot-toast";
 import { getSecureUrl, generateFileName } from "@/lib/utils/download";
 import { applyWatermarkAndDisclaimer } from "@/lib/utils/pdfWatermark";
+import { trackEvent } from "@/lib/telemetry";
 
 interface FilterState {
   selectedExams: string[];
@@ -316,6 +317,23 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       setSelectedSemesters(semester);
       setSelectedAnswerKeyIncluded(anskey);
       setCurrentPage(1);
+
+      const filterList: { type: string; values: string[] }[] = [];
+      if (exams.length > 0) filterList.push({ type: "exam", values: exams });
+      if (slots.length > 0) filterList.push({ type: "slot", values: slots });
+      if (years.length > 0) filterList.push({ type: "year", values: years });
+      if (campus.length > 0) filterList.push({ type: "campus", values: campus });
+      if (semester.length > 0) filterList.push({ type: "semester", values: semester });
+      if (anskey) filterList.push({ type: "answerkey", values: ["true"] });
+
+      for (const item of filterList) {
+        trackEvent("filter_applied", {
+          filter_type: item.type,
+          selected_values: item.values,
+          subject: subject ?? undefined,
+          resulting_count: filteredPapers.length,
+        });
+      }
     },
     [
       router,

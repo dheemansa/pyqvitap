@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import Fuse from "fuse.js";
 import { type ICourseWithCount } from "@/interface";
 import { rankCourses } from "@/lib/utils/search-ranking";
+import { trackEvent } from "@/lib/telemetry";
 
 function SearchBarChild({
   initialSubjects,
@@ -31,16 +32,20 @@ function SearchBarChild({
 
   useEffect(() => {
     if (initialSubjects && initialSubjects.length > 0) {
-      setFuzzy(
-        new Fuse(initialSubjects, {
-          keys: ["name"],
-          threshold: 0.3,
-          ignoreLocation: true,
-        }),
-      );
+      const newFuse = new Fuse(initialSubjects, {
+        keys: ["name"],
+        threshold: 0.3,
+        ignoreLocation: true,
+      });
+      setFuzzy(newFuse);
+
+      // Automatically re-evaluate suggestions if user typed before course data arrived
+      if (searchText.length > 1) {
+        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse).slice(0, 10);
+        setSuggestions(filteredSuggestions);
+      }
     }
-    console.log(initialSubjects);
-  }, [initialSubjects]);
+  }, [initialSubjects, searchText]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
@@ -49,12 +54,24 @@ function SearchBarChild({
     if (text.length > 1 && initialSubjects.length > 0) {
       const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy).slice(0, 10);
       setSuggestions(filteredSuggestions);
+      trackEvent("search_performed", {
+        query_length: text.trim().length,
+        results_count: filteredSuggestions.length,
+        source: "hero_search",
+      });
     } else {
       setSuggestions([]);
     }
   };
 
-  const handleSelectSuggestion = (suggestion: ICourseWithCount) => {
+  const handleSelectSuggestion = (suggestion: ICourseWithCount, rankIndex?: number) => {
+    const codeMatch = /\[([^\]]+)\]$/.exec(suggestion.name);
+    trackEvent("search_result_selected", {
+      course_name: suggestion.name,
+      course_code: codeMatch ? codeMatch[1] : undefined,
+      rank_index: rankIndex ?? (highlightedIndex >= 0 ? highlightedIndex : 0),
+      paper_count: suggestion.count,
+    });
     router.push(`/catalogue?subject=${encodeURIComponent(suggestion.name)}`);
     setSearchText("");
     setSuggestions([]);
@@ -84,6 +101,11 @@ function SearchBarChild({
         onSubmit={(e) => {
           e.preventDefault();
           if (searchText) {
+            trackEvent("search_performed", {
+              query_length: searchText.trim().length,
+              results_count: suggestions.length,
+              source: "hero_search_submit",
+            });
             router.push(`/catalogue?subject=${encodeURIComponent(searchText)}`);
             setSuggestions([]);
           }
@@ -114,7 +136,7 @@ function SearchBarChild({
                   highlightedIndex < suggestions.length &&
                   suggestions[highlightedIndex] !== undefined
                 ) {
-                  handleSelectSuggestion(suggestions[highlightedIndex]);
+                  handleSelectSuggestion(suggestions[highlightedIndex], highlightedIndex);
                 } else {
                   router.push(
                     `/catalogue?subject=${encodeURIComponent(searchText)}`,
@@ -158,7 +180,7 @@ function SearchBarChild({
               {suggestions.map((suggestion: ICourseWithCount, index) => (
                 <li
                   key={suggestion._id}
-                  onClick={() => handleSelectSuggestion(suggestion)}
+                  onClick={() => handleSelectSuggestion(suggestion, index)}
                   className={`flex cursor-pointer items-center rounded p-2 ${
                     index === highlightedIndex
                       ? "bg-gray-200 dark:bg-gray-800"

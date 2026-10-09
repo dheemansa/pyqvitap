@@ -8,7 +8,7 @@
 
 <h2>🚀 Demo</h2>
 
-[https://pyqvitap.vercel.app](https://pyqvitap.vercel.app)
+[https://pyqvitap.site](https://pyqvitap.site)
 
 <h2>Project Screenshots:</h2>
 

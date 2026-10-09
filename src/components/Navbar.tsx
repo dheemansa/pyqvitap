@@ -240,7 +240,7 @@ function Navbar() {
                     align="end"
                   >
                     <DropdownMenuItem
-                      asChild
+                      asChild={MAINTENANCE_MODE}
                       onSelect={(e) => {
                         if (MAINTENANCE_MODE) setDropdownOpen(false);
                         else e.preventDefault();
@@ -259,7 +259,7 @@ function Navbar() {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      asChild
+                      asChild={MAINTENANCE_MODE}
                       onSelect={(e) => {
                         if (MAINTENANCE_MODE) setDropdownOpen(false);
                         else e.preventDefault();

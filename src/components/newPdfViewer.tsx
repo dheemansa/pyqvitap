@@ -16,6 +16,8 @@
   import ShareButton from "./ShareButton";
   import ReportButton from "./ReportButton";
   import { useTheme } from "next-themes";
+  import { useOptionalPaper } from "@/context/PaperContext";
+  import { trackEvent, trackError } from "@/lib/telemetry";
 
   interface ControlProps {
     documentId: string;
@@ -481,6 +483,7 @@
     const { engine, isLoading } = usePdfiumEngine();
     const { isMobile, isSmall } = useBreakpoint();
     const { resolvedTheme } = useTheme();
+    const paperCtx = useOptionalPaper();
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isReadingMode, setIsReadingMode] = useState(false);
     const [showReadingCoachmark, setShowReadingCoachmark] = useState(false);
@@ -491,28 +494,83 @@
     const loaderTextColor =
       resolvedTheme === "light" ? "rgba(17,24,39,0.6)" : "rgba(255,255,255,0.5)";
 
+    const [preloadedBuffer, setPreloadedBuffer] = useState<ArrayBuffer | null>(null);
+    const [fetchFailed, setFetchFailed] = useState(false);
+
     useEffect(() => {
+      let isMounted = true;
+      setPreloadedBuffer(null);
+      setFetchFailed(false);
       pdfBufferRef.current = null;
+      const fetchStart = performance.now();
+
+      // Early parallel fetch for PDF bytes while pdfium.wasm compiles
+      fetch(url, { credentials: "same-origin" })
+        .then(async (res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const buf = await res.arrayBuffer();
+          if (isMounted) {
+            setPreloadedBuffer(buf);
+            pdfBufferRef.current = buf;
+            trackEvent("pdf_opened", {
+              paper_id: paperCtx?.paperId,
+              paper_name: name,
+              is_mobile: isMobile,
+              duration_ms: Math.round(performance.now() - fetchStart),
+            });
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            console.warn(
+              "[PDF Early Fetch] Could not early fetch buffer, falling back to engine URL load:",
+              err
+            );
+            setFetchFailed(true);
+            trackError("pdf_render_failed", {
+              paper_id: paperCtx?.paperId,
+              paper_name: name,
+              error_message: err instanceof Error ? err.message : String(err),
+            });
+          }
+        });
+
       return () => {
+        isMounted = false;
         pdfBufferRef.current = null;
       };
-    }, [url]);
+    }, [url, name, isMobile, paperCtx?.paperId]);
 
     const handleDownload = useCallback(
       async (preloadedBuffer?: ArrayBuffer) => {
         if (preloadedBuffer && preloadedBuffer.byteLength > 0) {
           pdfBufferRef.current = preloadedBuffer;
         }
+        // PRESERVE GTM dataLayer EVENT EXACTLY:
         window.dataLayer?.push({
           event: "pdf_download_start",
           paper_title: name,
           paper_url: url,
         });
+
+        const dlStart = performance.now();
         const bufferToUse =
           preloadedBuffer ?? pdfBufferRef.current ?? undefined;
-        await downloadFile(url, `${name}.pdf`, bufferToUse);
+        let watermarkSuccess = true;
+        try {
+          await downloadFile(url, `${name}.pdf`, bufferToUse);
+        } catch {
+          watermarkSuccess = false;
+        }
+
+        trackEvent("pdf_downloaded", {
+          paper_id: paperCtx?.paperId,
+          paper_name: name,
+          watermark_success: watermarkSuccess,
+          duration_ms: Math.round(performance.now() - dlStart),
+        });
       },
-      [url, name],
+      [url, name, paperCtx?.paperId],
     );
 
     const toggleFullscreen = useCallback(() => {
@@ -583,22 +641,27 @@
       return () => window.removeEventListener("keydown", handleKeydown);
     }, [isReadingMode, toggleReadingMode, onReadingModeChange]);
 
-    const plugins = useMemo(() => [
-      createPluginRegistration(DocumentManagerPluginPackage, {
-        initialDocuments: [{ url }],
-      }),
-      createPluginRegistration(ViewportPluginPackage),
-      createPluginRegistration(ScrollPluginPackage),
-      createPluginRegistration(RenderPluginPackage),
-      createPluginRegistration(ZoomPluginPackage, {
-        defaultZoomLevel: ZoomMode.FitPage,
-      }),
-      createPluginRegistration(ExportPluginPackage, {
-        defaultFileName: `${name}.pdf`,
-      }),
-    ], [url, name]);
+    const plugins = useMemo(() => {
+      const initialDocs = preloadedBuffer
+        ? [{ buffer: preloadedBuffer, name: `${name}.pdf` }]
+        : [{ url }];
+      return [
+        createPluginRegistration(DocumentManagerPluginPackage, {
+          initialDocuments: initialDocs,
+        }),
+        createPluginRegistration(ViewportPluginPackage),
+        createPluginRegistration(ScrollPluginPackage),
+        createPluginRegistration(RenderPluginPackage),
+        createPluginRegistration(ZoomPluginPackage, {
+          defaultZoomLevel: ZoomMode.FitPage,
+        }),
+        createPluginRegistration(ExportPluginPackage, {
+          defaultFileName: `${name}.pdf`,
+        }),
+      ];
+    }, [url, name, preloadedBuffer]);
 
-  if (isLoading || !engine) {
+  if (isLoading || !engine || (!preloadedBuffer && !fetchFailed)) {
     return (
   <Loader
     backgroundColor={effectiveBackgroundColor}

@@ -1,3 +1,8 @@
+if (process.env.NODE_ENV !== "production") {
+  const { initOpenNextCloudflareForDev } = await import("@opennextjs/cloudflare");
+  initOpenNextCloudflareForDev();
+}
+
 /**
  * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
  * for Docker builds.
@@ -91,7 +96,7 @@ const config = {
         ],
       },
       {
-        source: "/:path*\\.(css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)",
+        source: "/((?!api/).*\\.(?:css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2))",
         headers: [
           {
             key: "Cache-Control",
@@ -100,14 +105,6 @@ const config = {
         ],
       },
     ];
-  },
-  webpack: (config, options) => {
-    config.resolve.alias.canvas = false;
-    config.module.rules.push({
-      test: /\.node/,
-      use: "raw-loader",
-    });
-    return config;
   },
 };
 

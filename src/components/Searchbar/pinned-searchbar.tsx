@@ -7,6 +7,7 @@ import PinButton from "../PinButton";
 import Fuse from "fuse.js";
 import { type StoredSubjects, type ICourseWithCount, type IUpcomingPaper } from "@/interface";
 import { rankCourses } from "@/lib/utils/search-ranking";
+import { trackEvent } from "@/lib/telemetry";
 
 function PinnedSearchBar({
   initialSubjects,
@@ -30,9 +31,17 @@ function PinnedSearchBar({
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   useEffect(() => {
     if (initialSubjects && initialSubjects.length > 0) {
-      setFuzzy(new Fuse(initialSubjects, { keys: ["name"], threshold: 0.3 }));
+      const newFuse = new Fuse(initialSubjects, { keys: ["name"], threshold: 0.3 });
+      setFuzzy(newFuse);
+
+      if (searchText.length > 1) {
+        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse)
+          .map((item) => item.name)
+          .slice(0, 10);
+        setSuggestions(filteredSuggestions);
+      }
     }
-  }, [initialSubjects]);
+  }, [initialSubjects, searchText]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
@@ -44,12 +53,25 @@ function PinnedSearchBar({
         .slice(0, 10);
 
       setSuggestions(filteredSuggestions);
+      trackEvent("search_performed", {
+        query_length: text.trim().length,
+        results_count: filteredSuggestions.length,
+        source: "pinned_search",
+      });
     } else {
       setSuggestions([]);
     }
   };
 
   const handleSelectSuggestion = (suggestion: string) => {
+    const codeMatch = /\[([^\]]+)\]$/.exec(suggestion);
+    trackEvent("search_result_selected", {
+      course_name: suggestion,
+      course_code: codeMatch ? codeMatch[1] : undefined,
+      rank_index: 0,
+      paper_count: 0,
+    });
+
     setSearchText(suggestion);
 
     const currentPinnedSubjects = JSON.parse(

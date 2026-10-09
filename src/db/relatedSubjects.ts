@@ -1,6 +1,6 @@
-import mongoose, { Schema, type Model } from "mongoose";
+import { Schema, type Model } from "mongoose";
 import { type IRelatedSubject } from "@/interface";
-  
+import { getModel } from "@/lib/database/mongoose";
 
 const relatedSubjectSchema = new Schema<IRelatedSubject>({
   subject: { type: String, required: true },
@@ -8,7 +8,6 @@ const relatedSubjectSchema = new Schema<IRelatedSubject>({
 });
 
 const RelatedSubject: Model<IRelatedSubject> =
-  mongoose.models.RelatedSubject ??
-  mongoose.model<IRelatedSubject>("RelatedSubject", relatedSubjectSchema);
+  getModel<IRelatedSubject>("RelatedSubject", relatedSubjectSchema);
 
 export default RelatedSubject;

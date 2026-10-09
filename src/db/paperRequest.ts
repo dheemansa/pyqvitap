@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import { Schema, type Document, type Model } from "mongoose";
+import { getModel } from "@/lib/database/mongoose";
 
 export interface IPaperRequest extends Document {
   subject: string;
@@ -17,7 +18,6 @@ const paperRequestSchema = new Schema<IPaperRequest>({
 });
 
 const PaperRequest: Model<IPaperRequest> =
-  mongoose.models.PaperRequest ??
-  mongoose.model<IPaperRequest>("PaperRequest", paperRequestSchema);
+  getModel<IPaperRequest>("PaperRequest", paperRequestSchema);
 
 export default PaperRequest;
