@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { type ApiResponse } from '@/interface'
 import { formatSlotDisplay } from "@/lib/utils/string";
 import { semesters } from "@/components/select_options";
+import { trackEvent, trackApiFailure } from "@/lib/telemetry";
 
 type ReportResponse = ApiResponse<{ error?: string; message?: string }>;
 
@@ -233,19 +234,31 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
     reporterEmail: email ?? undefined,
   };
   setLoading(true);
+
+  trackEvent("tag_reported", {
+    paper_id: paperId,
+    reported_fields: reportedFields.map((f) => f.field),
+    has_comment: comment.trim().length > 0,
+    has_email: Boolean(email && email.trim().length > 0),
+  });
+
+  const reqStart = performance.now();
   await toast.promise(
     axios.post<ReportResponse>("/api/report-tag", payload),
     {
       loading: "Submitting your report...",
       success: "Reported successfully. Thank you, We will work on that",
       error: (err: unknown)=>{
+          const duration = performance.now() - reqStart;
           if (axios.isAxiosError<ReportResponse>(err)) {
+            trackApiFailure("/api/report-tag", "POST", err.response?.status ?? 0, duration);
             return ( 
               err.response?.data?.message ??
               err.message ??
               "Failed to submit report."
             );
         }
+        trackApiFailure("/api/report-tag", "POST", 0, duration);
         return err instanceof Error ? err.message : "Failed to submit report.";
       },
     }
@@ -402,6 +415,8 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
                   value={comment}
                   onChange={setComment}
                   placeholder="Describe the issue clearly (e.g., pages torn, print faded, incorrect paper, missing sections)"
+                  className="ph-no-capture"
+                  inputClassName="ph-no-capture"
                 />
 
                 <LabeledInput
@@ -410,6 +425,8 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
                   onChange={setEmail}
                   placeholder="you@example.com"
                   type="email"
+                  className="ph-no-capture"
+                  inputClassName="ph-no-capture"
                 />
                 {!canSubmit &&(<p className="text-xs text-gray-500 dark:text-red-400">
                       Submit button becomes active only if you update a tag or write a comment.

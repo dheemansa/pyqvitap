@@ -12,9 +12,11 @@ import { CoursesProvider } from "@/context/courseContext";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
+import { AuthProvider } from "@/components/AuthProvider";
+import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pyqvitap.vercel.app/"),
+  metadataBase: new URL("https://pyqvitap.site/"),
   title: MAINTENANCE_MODE
     ? "PyqVitAp — Under Maintenance"
     : "PyqVitAp | Explore VIT-AP Previous Year Question Papers",
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
         alt: "PyqVitAp - 5k+ VIT-AP Previous Year Papers",
       },
     ],
-    url: "https://pyqvitap.vercel.app/",
+    url: "https://pyqvitap.site/",
     type: "website",
     description: MAINTENANCE_MODE
       ? "PyqVitAp is temporarily offline while we work on important improvements to the platform."
@@ -143,7 +145,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
+    <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
       <meta
         name="google-site-verification"
         content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
@@ -184,29 +186,33 @@ export default function RootLayout({
         )}
       </head>
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster position="top-right" reverseOrder={false} />
-          <div className="flex min-h-screen flex-col justify-between bg-[#F3F5FF] dark:bg-[#070114]">
-            <CoursesProvider>
-              <Navbar />
-              {MAINTENANCE_MODE ? (
-                <MaintenanceGate>{children}</MaintenanceGate>
-              ) : (
-                <>
-                  <ChildrenWrapper>{children}</ChildrenWrapper>
-                  <GitHubStarPrompt />
-                </>
-              )}
-              <Footer />
-            </CoursesProvider>
-          </div>
-        </ThemeProvider>
-        <SpeedInsights />
+        <PostHogProviderWrapper>
+          <AuthProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <Toaster position="top-right" reverseOrder={false} />
+              <div className="flex min-h-screen flex-col justify-between bg-[#F3F5FF] dark:bg-[#070114]">
+                <CoursesProvider>
+                  <Navbar />
+                  {MAINTENANCE_MODE ? (
+                    <MaintenanceGate>{children}</MaintenanceGate>
+                  ) : (
+                    <>
+                      <ChildrenWrapper>{children}</ChildrenWrapper>
+                      <GitHubStarPrompt />
+                    </>
+                  )}
+                  <Footer />
+                </CoursesProvider>
+              </div>
+            </ThemeProvider>
+          </AuthProvider>
+          <SpeedInsights />
+        </PostHogProviderWrapper>
       </body>
     </html>
   );

@@ -39,20 +39,17 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     setError(null);
+    // 1. Fetch course-list independently
+    let rawCourses: ICourse[] = [];
     try {
       const res = await axios.get<ApiResponse<ICourse[]>>("/api/course-list");
-      const countRes = await axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count");
-      const countMap = new Map<string, number>(
-        (countRes.data.data ?? []).map((c) => [c.name, c.count]),
-      );
-
-      const mergedCourses: ICourseWithCount[] = (res.data.data ?? []).map((course) => ({
+      rawCourses = res.data.data ?? [];
+      const initialCourses: ICourseWithCount[] = rawCourses.map((course) => ({
         _id: course._id,
         name: course.name,
-        count: countMap.get(course.name) ?? 0,
+        count: 0,
       }));
-
-      setCourses(mergedCourses);
+      setCourses(initialCourses);
     } catch (err: unknown) {
       if (axios.isAxiosError<ApiResponse<never>>(err)) {
         setError(err.response?.data?.message ?? err.message);
@@ -61,6 +58,25 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
       } else {
         setError("An unknown error occurred");
       }
+      setLoading(false);
+      return;
+    }
+
+    // 2. Fetch /api/papers/count independently
+    try {
+      const countRes = await axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count");
+      const countMap = new Map<string, number>(
+        (countRes.data.data ?? []).map((c) => [c.name, c.count]),
+      );
+
+      setCourses((prevCourses) =>
+        prevCourses.map((course) => ({
+          ...course,
+          count: countMap.get(course.name) ?? course.count ?? 0,
+        }))
+      );
+    } catch (countErr: unknown) {
+      console.warn("Failed to fetch paper counts, retaining course list with default counts:", countErr);
     } finally {
       setLoading(false);
     }

@@ -19,6 +19,7 @@ import EmptyState from "./ui/EmptyState";
 import SelectionToolbar from "./SelectionToolbar";
 import SortComponent from "./ui/sorting";
 import { formatSlotDisplay } from "@/lib/utils/string";
+import { trackEvent, trackApiFailure } from "@/lib/telemetry";
 
 const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
   const [isMounted, setIsMounted] = useState(false);
@@ -148,6 +149,13 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
       : saved.filter((s) => s !== subject);
 
     localStorage.setItem("userSubjects", JSON.stringify(updated));
+
+    if (subject) {
+      trackEvent(current ? "paper_pinned" : "paper_unpinned", {
+        subject,
+        total_pinned_count: updated.length,
+      });
+    }
   };
 
   // Fetch papers ONLY when subject changes (not when filters change!)
@@ -162,6 +170,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
 
     const fetchPapers = async () => {
       setLoading(true);
+      const reqStart = performance.now();
       try {
         const papersResponse = await axios.get<ApiResponse<Filters>>(
           "/api/papers",
@@ -174,8 +183,16 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
         const papersData = data?.papers ?? [];
         setFilterOptions(data);
         setPapers(papersData);
+
+        trackEvent("course_selected", {
+          course_name: subject,
+          paper_count: papersData.length,
+        });
       } catch (error) {
         setPapers([]);
+        const duration = performance.now() - reqStart;
+        const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+        trackApiFailure("/api/papers", "GET", status, duration);
 
         setError(
           axios.isAxiosError<ApiResponse<never>>(error)
@@ -286,7 +303,7 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
       <div className="w-full">
         {papers.length > 0 && (
           <Sheet>
-            <SheetTrigger className="mx-8 mt-8 block md:hidden">
+            <SheetTrigger asChild className="mx-8 mt-8 block md:hidden">
               <Button
                 variant="outline"
                 className="flex gap-2 border-2 border-black font-sans font-semibold hover:bg-slate-800 hover:text-white dark:border-[#434dba] dark:hover:border-white dark:hover:bg-slate-900"

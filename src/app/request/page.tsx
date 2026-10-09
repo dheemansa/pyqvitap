@@ -20,6 +20,7 @@ import { Search } from "lucide-react";
 import SkeletonPaperCard from "@/components/SkeletonPaperCard";
 import { useCourses } from "@/context/courseContext";
 import { type ApiResponse } from '@/interface'
+import { trackEvent, trackApiFailure } from "@/lib/telemetry";
 
 export default function PaperRequest() {
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -103,6 +104,7 @@ export default function PaperRequest() {
       return;
     }
 
+    const reqStart = performance.now();
     try {
       await toast.promise(
         axios.post("/api/request", {
@@ -118,6 +120,14 @@ export default function PaperRequest() {
         },
       );
 
+      trackEvent("paper_requested", {
+        subject: selectedSubject,
+        exam: selectedExam,
+        slot: selectedSlot,
+        year: selectedYear,
+        status: "success",
+      });
+
       setSearchText("");
       setSelectedSubject(null);
       setSelectedExam(null);
@@ -125,6 +135,17 @@ export default function PaperRequest() {
       setSelectedYear(null);
     } catch (error) {
       console.error("Error submitting request:", error);
+      const duration = performance.now() - reqStart;
+      const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+      trackApiFailure("/api/request", "POST", status, duration);
+
+      trackEvent("paper_requested", {
+        subject: selectedSubject,
+        exam: selectedExam,
+        slot: selectedSlot,
+        year: selectedYear,
+        status: "failure",
+      });
     }
   };
 

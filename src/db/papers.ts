@@ -1,5 +1,6 @@
-import mongoose, { Schema, type Model } from "mongoose";
+import { Schema, type Model } from "mongoose";
 import { type IPaper, type IAdminPaper } from "@/interface";
+import { getModel } from "@/lib/database/mongoose";
 
 const adminSchema = new Schema<IAdminPaper>({
   file_url: { type: String, required: true },
@@ -113,8 +114,8 @@ const paperSchema = new Schema<IPaper>({
 });
 
 export const PaperAdmin: Model<IAdminPaper> =
-  mongoose.models.Admin ?? mongoose.model<IAdminPaper>("Admin", adminSchema, "admins");
+  getModel<IAdminPaper>("Admin", adminSchema, "admins");
 const Paper: Model<IPaper> =
-  mongoose.models.Paper ?? mongoose.model<IPaper>("Paper", paperSchema, "papers");
+  getModel<IPaper>("Paper", paperSchema, "papers");
 
 export default Paper;

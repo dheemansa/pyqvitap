@@ -3,7 +3,7 @@
 import React from "react";
 import { type IPaper } from "@/interface";
 import Image from "next/image";
-import { X, Eye, Download, Check } from "lucide-react";
+import { X, Eye, Download, Check, FileText } from "lucide-react";
 import {
   extractBracketContent,
   extractWithoutBracketContent,
@@ -11,6 +11,7 @@ import {
 } from "@/lib/utils/string";
 import {
   getSecureUrl,
+  getMediaGatewayUrl,
   generateFileName,
   downloadFile,
 } from "@/lib/utils/download";
@@ -18,6 +19,7 @@ import { Capsule } from "@/components/ui/capsule";
 import { cn } from "@/lib/utils";
 import PDFViewer from "@/components/newPdfViewer";
 import { PaperProvider } from "@/context/PaperContext";
+import { trackEvent, trackError } from "@/lib/telemetry";
 
 interface CardProps {
   paper: IPaper;
@@ -28,6 +30,28 @@ interface CardProps {
 
 const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
   const [previewOpen, setPreviewOpen] = React.useState(false);
+  const [imgError, setImgError] = React.useState(false);
+  const [retryCount, setRetryCount] = React.useState(0);
+
+  const handleImageError = React.useCallback(() => {
+    if (retryCount < 1) {
+      setRetryCount((prev) => prev + 1);
+    } else {
+      setImgError(true);
+      trackError("media_thumbnail_failed", {
+        paper_id: paper._id,
+        retry_count: retryCount + 1,
+      });
+    }
+  }, [retryCount, paper._id]);
+
+  const thumbnailSrc = React.useMemo(() => {
+    const base = getMediaGatewayUrl(paper.thumbnail_url);
+    if (retryCount === 1) {
+      return base.includes("?") ? `${base}&retry=1` : `${base}?retry=1`;
+    }
+    return base;
+  }, [paper.thumbnail_url, retryCount]);
 
   const paperContextValue = React.useMemo(
     () => ({
@@ -44,13 +68,21 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
   React.useEffect(() => {
     if (!previewOpen) return;
 
+    trackEvent("paper_preview_opened", {
+      paper_id: paper._id,
+      subject: paper.subject,
+      exam: paper.exam,
+      slot: paper.slot,
+      year: paper.year,
+    });
+
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
     return () => {
       document.body.style.overflow = originalOverflow;
     };
-  }, [previewOpen]);
+  }, [previewOpen, paper._id, paper.subject, paper.exam, paper.slot, paper.year]);
 
   const handleDownload = async (paper: IPaper) => {
     await downloadFile(getSecureUrl(paper.file_url), generateFileName(paper));
@@ -66,25 +98,52 @@ const Card = ({ paper, onSelect, isSelected, isShow=true }: CardProps) => {
     <>
       <div
         onClick={(e) => {
-  const target = e.target as HTMLElement;
+          const target = e.target as HTMLElement;
 
-  if (target.closest("button, input, svg")) return;
+          if (target.closest("button, input, svg")) return;
 
-  window.open(paperLink, "_blank");
-}}
+          trackEvent("paper_opened", {
+            paper_id: paper._id,
+            subject: paper.subject,
+            exam: paper.exam,
+            slot: paper.slot,
+            year: paper.year,
+            semester: paper.semester,
+            source: "catalogue_card",
+          });
+
+          window.open(paperLink, "_blank");
+        }}
         className={cn(
           "cursor-pointer overflow-hidden rounded-sm border-2 border-[#734DFF] bg-[#FFFFFF] font-play shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:bg-[#EFEAFF] hover:shadow-md dark:border-[#36266D] dark:bg-[#171720] dark:shadow-none hover:dark:bg-[#262635]",
           isSelected && "-translate-y-0.5 bg-[#EFEAFF] shadow-md ring-2 ring-[#7480FF]"
         )}
       >
-          <Image
-            src={paper.thumbnail_url}
-            alt={paper.subject}
-            width={320}
-            height={180}
-            className="w-full object-cover p-4 pb-3 md:h-[250px]"
-            unoptimized
-          />
+          {imgError ? (
+            <div
+              className="flex w-full flex-col items-center justify-center bg-[#EFEAFF] p-4 text-[#734DFF] dark:bg-[#1f1f2e] dark:text-[#a588ff] md:h-[250px]"
+              style={{ minHeight: "180px" }}
+              aria-label={`Preview unavailable for ${paper.subject}`}
+            >
+              <FileText className="h-12 w-12 stroke-[1.5] opacity-80" />
+              <span className="mt-2 font-play text-sm font-semibold tracking-wide">
+                {extractBracketContent(paper.subject) || "PYQ PREVIEW"}
+              </span>
+              <span className="mt-0.5 text-xs opacity-75">
+                {paper.exam} {paper.year}
+              </span>
+            </div>
+          ) : (
+            <Image
+              src={thumbnailSrc}
+              alt={paper.subject}
+              width={320}
+              height={180}
+              className="w-full object-cover p-4 pb-3 md:h-[250px]"
+              onError={handleImageError}
+              unoptimized
+            />
+          )}
           <div className="justify-center">
             <div className="flex flex-row items-center justify-between px-4 pb-2">
               <div className="text-md font-play font-medium">

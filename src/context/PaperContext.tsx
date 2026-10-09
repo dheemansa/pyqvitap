@@ -22,3 +22,7 @@ export const usePaper = () => {
   if (!context) throw new Error("usePaper must be used within PaperProvider");
   return context;
 };
+
+export const useOptionalPaper = () => {
+  return useContext(PaperContext);
+};

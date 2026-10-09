@@ -1,5 +1,6 @@
-import mongoose, { Schema, type Model, Types } from "mongoose";
+import { Schema, type Model, Types } from "mongoose";
 import { AUTHORITATIVE_SLOTS, type AuthoritativeSlot } from "@/lib/constants/slots";
+import { getModel } from "@/lib/database/mongoose";
 
 export interface ISlotContributionDoc {
   _id: Types.ObjectId;
@@ -44,8 +45,7 @@ slotContributionSchema.index({ paperId: 1, contributorId: 1 }, { unique: true })
 slotContributionSchema.index({ paperId: 1, slot: 1 });
 
 const SlotContribution: Model<ISlotContributionDoc> =
-  mongoose.models.SlotContribution ??
-  mongoose.model<ISlotContributionDoc>(
+  getModel<ISlotContributionDoc>(
     "SlotContribution",
     slotContributionSchema,
     "slot_contributions"

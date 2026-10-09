@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Document, type Model } from "mongoose";
+import { Schema, type Document, type Model } from "mongoose";
+import { getModel } from "@/lib/database/mongoose";
 
 export interface ITagReport extends Document {
   paperId: string;
@@ -34,7 +35,6 @@ const tagReportSchema = new Schema<ITagReport>({
 tagReportSchema.index({ paperId: 1, resolved: 1, createdAt: -1 });
 
 const TagReport: Model<ITagReport> =
-  mongoose.models.TagReport ??
-  mongoose.model<ITagReport>("TagReport", tagReportSchema);
+  getModel<ITagReport>("TagReport", tagReportSchema);
 
 export default TagReport;

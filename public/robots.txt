@@ -4,4 +4,4 @@ Allow: /
 Disallow: /api/
 
 # Sitemap location
-Sitemap: https://pyqvitap.vercel.app/sitemap.xml
+Sitemap: https://pyqvitap.site/sitemap.xml

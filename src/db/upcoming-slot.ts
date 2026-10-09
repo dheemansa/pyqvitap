@@ -1,5 +1,6 @@
 import { type IUpcomingSlot } from "@/interface";
-import mongoose, { Schema, type Model } from "mongoose";
+import { Schema, type Model } from "mongoose";
+import { getModel } from "@/lib/database/mongoose";
 
 const upcomingSlotSchema = new Schema<IUpcomingSlot>({
   slot: { type: String, required: true, unique: true },
@@ -12,6 +13,6 @@ const upcomingSlotSchema = new Schema<IUpcomingSlot>({
 });
 
 const UpcomingSlot: Model<IUpcomingSlot> =
-  mongoose.models.UpcomingSlot ?? mongoose.model<IUpcomingSlot>("UpcomingSlot", upcomingSlotSchema);
+  getModel<IUpcomingSlot>("UpcomingSlot", upcomingSlotSchema);
 
 export default UpcomingSlot;

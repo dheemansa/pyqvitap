@@ -32,7 +32,7 @@ function decodeBase64(base64: string): Uint8Array {
  * Applies the finalized visual branding design to downloaded question papers:
  * 1. A subtle diagonal watermark ("pyqvitap / Your PYQs, All in One Place.") across every page.
  * 2. On Page 1 ONLY: A modern, rounded card container with the PyqVitAp logo badge, branding,
- *    clickable website link (https://pyqvitap.vercel.app), separator line, and exact disclaimer.
+ *    clickable website link (https://pyqvitap.site), separator line, and exact disclaimer.
  * 3. On Page 2+: Diagonal watermark only (no footer, no disclaimer, no bottom website line).
  *
  * If an unexpected error occurs during transformation, it safely falls back to returning the original unmodified bytes.
@@ -163,7 +163,7 @@ export async function applyWatermarkAndDisclaimer(
           });
 
           // Right: Website Link with Vector Globe Icon
-          const webText = "pyqvitap.vercel.app";
+          const webText = "pyqvitap.site";
           const webSize = 9;
           const webWidth = fontBold.widthOfTextAtSize(webText, webSize);
           const globeRadius = 4.5;
@@ -223,7 +223,7 @@ export async function applyWatermarkAndDisclaimer(
               A: {
                 Type: "Action",
                 S: "URI",
-                URI: PDFString.of("https://pyqvitap.vercel.app"),
+                URI: PDFString.of("https://pyqvitap.site"),
               },
             });
             const linkRef = pdfDoc.context.register(linkAnnot);

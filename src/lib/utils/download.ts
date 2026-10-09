@@ -2,9 +2,13 @@ import { type IPaper } from "../../interface";
 import { extractBracketContent } from "./string";
 import axios from "axios";
 import { applyWatermarkAndDisclaimer } from "./pdfWatermark";
+import { getMediaGatewayUrl } from "./media";
+import { trackError } from "../telemetry";
+
+export { getMediaGatewayUrl };
 
 export const getSecureUrl = (url: string): string =>
-  url.startsWith("http://") ? url.replace("http://", "https://") : url;
+  getMediaGatewayUrl(url);
 
 export const generateFileName = (paper: IPaper): string => {
   const extension = paper.file_url.split(".").pop();
@@ -27,8 +31,8 @@ export const downloadFile = async (
       buffer = preloadedBuffer;
       blob = new Blob([buffer], { type: "application/pdf" });
     } else {
-      const response = await axios.get(url, { responseType: "blob" });
-      blob = new Blob([response.data]);
+      const response = await axios.get<Blob>(url, { responseType: "blob" });
+      blob = response.data;
       buffer = await response.data.arrayBuffer();
     }
 
@@ -55,5 +59,10 @@ export const downloadFile = async (
     window.URL.revokeObjectURL(link.href);
   } catch (error) {
     console.error("Download failed:", error);
+    trackError("pdf_download_failed", {
+      filename,
+      error_message: error instanceof Error ? error.message : "Download failed",
+    });
+    throw error;
   }
 };

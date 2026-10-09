@@ -12,6 +12,7 @@ interface LabeledInputProps {
   type?: string;
   maxLength?: number;
   className?: string;
+  inputClassName?: string;
 }
 
 const LabeledInput = ({
@@ -22,6 +23,7 @@ const LabeledInput = ({
   type = "text",
   maxLength,
   className = "",
+  inputClassName = "",
 }: LabeledInputProps) => {
   return (
     <Field label={label} className={className}>
@@ -31,6 +33,7 @@ const LabeledInput = ({
         placeholder={placeholder}
         type={type}
         maxLength={maxLength}
+        className={inputClassName}
       />
     </Field>
   );

@@ -5,6 +5,7 @@ import CourseCount, { Course } from "@/db/course";
 import examScheduleData from "@/data/exam_schedule_courses.json";
 import slotToSubjectsData from "@/data/slot_to_subjects.json";
 import { getTodayDateInIST, isAtOrAfterCutoffInIST } from "@/lib/utils/time";
+import { withDatabase } from "@/lib/database/mongoose";
 
 const slotToSubjectsMap = slotToSubjectsData as Record<string, string[]>;
 const examScheduleMap = examScheduleData as Record<
@@ -33,7 +34,8 @@ export async function checkAndSyncUpcomingSlots(): Promise<void> {
   const today = getTodayDateInIST();
   if (!today) return;
 
-  const currentSlotDoc = await UpcomingSlot.findOne();
+  return await withDatabase(async () => {
+    const currentSlotDoc = await UpcomingSlot.findOne();
 
   // Read syncMode ("CAT" or "FAT") set once on UpcomingSlot
   const syncMode = currentSlotDoc?.syncMode ?? "CAT";
@@ -223,4 +225,5 @@ export async function checkAndSyncUpcomingSlots(): Promise<void> {
       })),
     );
   }
+  });
 }

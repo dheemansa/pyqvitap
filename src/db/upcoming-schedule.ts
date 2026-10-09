@@ -1,4 +1,5 @@
-import mongoose, { Schema, type Model } from "mongoose";
+import { Schema, type Model } from "mongoose";
+import { getModel } from "@/lib/database/mongoose";
 
 export type IUpcomingSchedule = {
   date: string;
@@ -28,7 +29,6 @@ const upcomingScheduleSchema = new Schema<IUpcomingSchedule>(
 );
 
 const UpcomingSchedule: Model<IUpcomingSchedule> =
-  mongoose.models.UpcomingSchedule ??
-  mongoose.model<IUpcomingSchedule>("UpcomingSchedule", upcomingScheduleSchema);
+  getModel<IUpcomingSchedule>("UpcomingSchedule", upcomingScheduleSchema);
 
 export default UpcomingSchedule;

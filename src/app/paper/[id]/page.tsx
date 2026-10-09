@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { PaperProvider } from "@/context/PaperContext";
 import PDFViewer from "@/components/newPdfViewer";
 import SlotContributionBox from "@/components/SlotContributionBox";
+import { getMediaGatewayUrl } from "@/lib/utils/media";
 
 const getPaper = cache(async (id: string): Promise<PaperResponse | null> => {
   try {
@@ -28,7 +29,7 @@ export async function generateMetadata({
     if (paper) {
       const displaySlot = formatSlotDisplay(paper.slot);
       return {
-        metadataBase: new URL("https://pyqvitap.vercel.app/"),
+        metadataBase: new URL("https://pyqvitap.site/"),
         title: `PyqVitAp | ${paper.subject} | ${paper.exam} | ${displaySlot}`,
         description: `Discover ${paper.subject}'s question paper on PyqVitAp at VIT-AP. Made to help students excel.`,
         icons: [{ rel: "icon", url: "/assets/images/favicon.svg?v=4" }],
@@ -42,7 +43,7 @@ export async function generateMetadata({
               alt: `PyqVitAp | ${paper.subject} | ${paper.exam}`,
             },
           ],
-          url: "https://pyqvitap.vercel.app/",
+          url: `https://pyqvitap.site/paper/${params.id}`,
           type: "website",
           description: `Discover ${paper.subject}'s question paper on PyqVitAp at VIT-AP. Made to help students excel.`,
           siteName: "PyqVitAp",
@@ -164,8 +165,11 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
   if (!paper) {
     redirect("/");
   }
+  const pdfUrl = getMediaGatewayUrl(paper.file_url);
+
   return (
     <div>
+      <link rel="preload" href={pdfUrl} as="fetch" crossOrigin="anonymous" />
       <h1 className="my-6 flex justify-center gap-4 text-center font-play text-2xl font-semibold md:mb-6 md:text-3xl">
         <div>
           {paper.subject} {paper.exam} {formatSlotDisplay(paper.slot)} {paper.year}
@@ -191,12 +195,16 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
           }}
         >
           <PDFViewer
-            url={paper.file_url}
+            url={pdfUrl}
             name={`${extractBracketContent(paper.subject)}-${paper.exam}-${paper.slot}-${paper.year}`}
           />
         </PaperProvider>
       </center>
-      <RelatedPapers />
+      <RelatedPapers
+        initialSubject={paper.subject}
+        initialPaperId={params.id}
+        initialExam={paper.exam}
+      />
     </div>
   );
 };
