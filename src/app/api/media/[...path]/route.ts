@@ -128,6 +128,25 @@ function isSafeKey(segments: string[]): boolean {
   return true;
 }
 
+async function getR2Bucket(): Promise<R2Bucket | undefined> {
+  try {
+    const ctx = getCloudflareContext();
+    if (ctx?.env?.R2_MEDIA) return ctx.env.R2_MEDIA;
+  } catch {
+    // In Node.js development without pre-bound worker global, resolve asynchronously via wrangler
+  }
+
+  try {
+    if (!process.env.NEXT_RUNTIME && typeof window === "undefined") {
+      process.env.NEXT_RUNTIME = "nodejs";
+    }
+    const ctx = await getCloudflareContext({ async: true });
+    return ctx?.env?.R2_MEDIA;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function GET(
   req: Request,
   { params }: { params: { path: string[] } }
@@ -148,13 +167,7 @@ export async function GET(
   // 1. Try fetching from Cloudflare R2 bucket binding
   let r2Error: unknown = null;
   try {
-    let r2Bucket: R2Bucket | undefined;
-    try {
-      const ctx = getCloudflareContext();
-      r2Bucket = ctx?.env?.R2_MEDIA;
-    } catch {
-      // getCloudflareContext might throw in standard Node.js development without wrangler proxy
-    }
+    const r2Bucket = await getR2Bucket();
 
     if (r2Bucket) {
       const r2Object = await r2Bucket.get(key);
@@ -302,11 +315,7 @@ export async function HEAD(
   // 1. Try R2 HEAD
   let r2Error: unknown = null;
   try {
-    let r2Bucket: R2Bucket | undefined;
-    try {
-      const ctx = getCloudflareContext();
-      r2Bucket = ctx?.env?.R2_MEDIA;
-    } catch {}
+    const r2Bucket = await getR2Bucket();
 
     if (r2Bucket) {
       const head = await r2Bucket.head(key);

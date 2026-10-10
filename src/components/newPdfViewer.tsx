@@ -117,6 +117,22 @@
       [pageNo, effectiveTotalPages, scrollProv]
     );
 
+    const handleDownloadClick = useCallback(async () => {
+      let preloadedBuffer: ArrayBuffer | undefined;
+      if (exportProv) {
+        try {
+          const task = exportProv.saveAsCopy();
+          preloadedBuffer = await task.toPromise();
+        } catch (err) {
+          console.warn(
+            "Could not extract in-memory PDF buffer from viewer, falling back to network fetch:",
+            err,
+          );
+        }
+      }
+      await onDownload(preloadedBuffer);
+    }, [exportProv, onDownload]);
+
     if (!zoomProv || !scrollProv) return null;
 
     if (isReadingMode) {
@@ -139,22 +155,6 @@
     const zoomIn = () => zoomProv.zoomIn();
     const zoomOut = () => zoomProv.zoomOut();
     const { zoomLevel } = zoomState;
-
-    const handleDownloadClick = useCallback(async () => {
-      let preloadedBuffer: ArrayBuffer | undefined;
-      if (exportProv) {
-        try {
-          const task = exportProv.saveAsCopy();
-          preloadedBuffer = await task.toPromise();
-        } catch (err) {
-          console.warn(
-            "Could not extract in-memory PDF buffer from viewer, falling back to network fetch:",
-            err,
-          );
-        }
-      }
-      await onDownload(preloadedBuffer);
-    }, [exportProv, onDownload]);
 
     const fullScreenStyle = {
       bottom: 20,
@@ -480,7 +480,7 @@
     isolateFromTheme = true,
     onReadingModeChange,
   }: PdfViewerProps) {
-    const { engine, isLoading } = usePdfiumEngine();
+    const { engine, isLoading, error: engineError } = usePdfiumEngine();
     const { isMobile, isSmall } = useBreakpoint();
     const { resolvedTheme } = useTheme();
     const paperCtx = useOptionalPaper();
@@ -661,6 +661,39 @@
       ];
     }, [url, name, preloadedBuffer]);
 
+  if (engineError) {
+    return (
+      <div
+        className="flex h-dvh w-full flex-col items-center justify-center gap-4 p-4 text-center font-play"
+        style={{ backgroundColor: effectiveBackgroundColor }}
+      >
+        <div className="rounded-full bg-red-500/10 p-3 text-red-400">
+          <X className="h-8 w-8" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-lg font-semibold text-white">PDF Engine Failed to Initialize</h3>
+          <p className="text-sm text-gray-400">Please refresh the page or try downloading the document directly.</p>
+        </div>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => window.location.reload()}
+            className="border-purple-600/30 text-xs"
+          >
+            Retry
+          </Button>
+          <Button
+            onClick={() => void handleDownload()}
+            className="bg-purple-600 text-xs text-white hover:bg-purple-700"
+          >
+            <Download className="mr-1.5 h-3.5 w-3.5" />
+            Download PDF
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading || !engine || (!preloadedBuffer && !fetchFailed)) {
     return (
   <Loader
@@ -745,22 +778,53 @@
                   dismissReadingCoachmark={dismissReadingCoachmark}
                 />}
                 <DocumentContent documentId={activeDocumentId}>
-                  {({ isLoaded }) => (
+                  {({ isLoaded, isError }) => (
                     <>
-                      <div
-                        className="absolute inset-0 z-50 flex items-center justify-center bg-[#070114]"
-                        style={{
-                        opacity: isLoaded ? 0 : 1,
-                        pointerEvents: isLoaded ? "none" : "auto",
-                        transition: "opacity 0.3s",
-                        backgroundColor: effectiveBackgroundColor,
-                        }}
-                      >
-                        <Loader
-                          backgroundColor={effectiveBackgroundColor}
-                          textColor={loaderTextColor}
-                        />
-                      </div>
+                      {isError ? (
+                        <div
+                          className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 p-4 text-center font-play"
+                          style={{ backgroundColor: effectiveBackgroundColor }}
+                        >
+                          <div className="rounded-full bg-red-500/10 p-3 text-red-400">
+                            <X className="h-8 w-8" />
+                          </div>
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-semibold text-white">Unable to load document preview</h3>
+                            <p className="text-sm text-gray-400">There was an issue preparing this PDF preview.</p>
+                          </div>
+                          <div className="flex gap-3">
+                            <Button
+                              variant="outline"
+                              onClick={() => window.location.reload()}
+                              className="border-purple-600/30 text-xs"
+                            >
+                              Retry
+                            </Button>
+                            <Button
+                              onClick={() => void handleDownload()}
+                              className="bg-purple-600 text-xs text-white hover:bg-purple-700"
+                            >
+                              <Download className="mr-1.5 h-3.5 w-3.5" />
+                              Download PDF
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          className="absolute inset-0 z-50 flex items-center justify-center bg-[#070114]"
+                          style={{
+                            opacity: isLoaded ? 0 : 1,
+                            pointerEvents: isLoaded ? "none" : "auto",
+                            transition: "opacity 0.3s",
+                            backgroundColor: effectiveBackgroundColor,
+                          }}
+                        >
+                          <Loader
+                            backgroundColor={effectiveBackgroundColor}
+                            textColor={loaderTextColor}
+                          />
+                        </div>
+                      )}
                       <Viewport
                         documentId={activeDocumentId}
                         style={{

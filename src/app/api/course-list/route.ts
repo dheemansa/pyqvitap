@@ -1,16 +1,13 @@
 import { getCourseList } from "@/lib/services/subject";
-import { success, failure } from "@/lib/utils/response";
+import { cachedJsonEndpoint } from "@/lib/utils/edge-cache";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  try {
-    const courses = await getCourseList();
-    return success(courses, "OK", 200, {
-      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
-    });
-  } catch (error) {
-    console.error(error);
-    return failure("Failed to fetch courses", 500);
-  }
+export async function GET(request: Request) {
+  return cachedJsonEndpoint({
+    request,
+    cacheKeyPrefix: "api_course_list",
+    ttlSeconds: 300, // 5 minutes
+    producer: () => getCourseList(),
+  });
 }

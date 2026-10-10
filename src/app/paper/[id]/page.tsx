@@ -6,7 +6,7 @@ import { extractBracketContent, formatSlotDisplay } from "@/lib/utils/string";
 import { type Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PaperProvider } from "@/context/PaperContext";
-import PDFViewer from "@/components/newPdfViewer";
+import PdfViewerClientWrapper from "@/components/PdfViewerClientWrapper";
 import SlotContributionBox from "@/components/SlotContributionBox";
 import { getMediaGatewayUrl } from "@/lib/utils/media";
 
@@ -194,7 +194,7 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
             semester: paper.semester,
           }}
         >
-          <PDFViewer
+          <PdfViewerClientWrapper
             url={pdfUrl}
             name={`${extractBracketContent(paper.subject)}-${paper.exam}-${paper.slot}-${paper.year}`}
           />

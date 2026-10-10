@@ -56,7 +56,15 @@ interface FlagshipBinding {
 export async function isAuthEnabled(): Promise<boolean> {
   // 1. Try Cloudflare Workers Flagship Binding
   try {
-    const ctx = getCloudflareContext();
+    let ctx: ReturnType<typeof getCloudflareContext> | undefined;
+    try {
+      ctx = getCloudflareContext();
+    } catch {
+      if (!process.env.NEXT_RUNTIME && typeof window === "undefined") {
+        process.env.NEXT_RUNTIME = "nodejs";
+      }
+      ctx = await getCloudflareContext({ async: true });
+    }
     const env = ctx?.env as { FLAGS?: FlagshipBinding } | undefined;
     const flags = env?.FLAGS;
     if (flags && typeof flags.getBooleanValue === "function") {

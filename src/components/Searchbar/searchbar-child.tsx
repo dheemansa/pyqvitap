@@ -191,7 +191,7 @@ function SearchBarChild({
                     id="paper_count"
                     className="mr-4 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#171720] text-xs font-semibold text-white"
                   >
-                    {suggestion.count}
+                    {suggestion.count > 0 ? suggestion.count : "—"}
                   </div>
 
                   <span
