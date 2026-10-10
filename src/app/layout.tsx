@@ -9,7 +9,6 @@ import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
 import GitHubStarPrompt from "@/components/GitHubStarPrompt";
 import { CoursesProvider } from "@/context/courseContext";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -211,7 +210,6 @@ export default function RootLayout({
               </div>
             </ThemeProvider>
           </AuthProvider>
-          <SpeedInsights />
         </PostHogProviderWrapper>
       </body>
     </html>

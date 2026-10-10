@@ -42,7 +42,6 @@
     "@ungap/with-resolvers": "^0.1.0",
     "@upstash/ratelimit": "^2.0.5",
     "@upstash/redis": "^1.33.0",
-    "@vercel/speed-insights": "^2.0.0",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.11.0",
