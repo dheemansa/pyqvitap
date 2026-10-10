@@ -3,6 +3,7 @@ import { compressPDF } from "@/lib/storage/pdf";
 import { getStorageService } from "@/lib/storage";
 import { analyzePDFMetadata } from "@/lib/services/analyzer";
 import { withDatabase } from "@/lib/database/mongoose";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
 const MAX_COMPRESSED_PDF_SIZE = 5 * 1024 * 1024; // 5MB compressed
 const COMPRESS_THRESHOLD = 5 * 1024 * 1024; // 5MB
@@ -75,7 +76,7 @@ export async function uploadPaper({
 
   // Asynchronously analyze PDF with Gemini AI and enrich metadata in the background
   const base64Pdf = buffer.toString("base64");
-  void analyzePDFMetadata(base64Pdf)
+  const backgroundTask = analyzePDFMetadata(base64Pdf)
     .then(async (analyzed) => {
       await withDatabase(async () => {
         const subjectFormatted = analyzed.course_name && analyzed.subject !== "UNKNOWN"
@@ -97,6 +98,20 @@ export async function uploadPaper({
     .catch((err) => {
       console.error(`[AI Analyzer] Background analysis failed for paper ${paper._id}:`, err);
     });
+
+  let cfCtx: ReturnType<typeof getCloudflareContext> | undefined;
+  try {
+    cfCtx = getCloudflareContext();
+  } catch {
+    // In local development or contexts where Cloudflare global state is not initialized
+  }
+
+  const executionCtx = cfCtx?.ctx as { waitUntil?: (promise: Promise<unknown>) => void } | undefined;
+  if (typeof executionCtx?.waitUntil === "function") {
+    executionCtx.waitUntil(backgroundTask);
+  } else {
+    console.warn(`[AI Analyzer] Cloudflare execution context unavailable; background task running detached for paper ${paper._id}`);
+  }
 
   return { success: true, file_url, thumbnail_url };
 }
