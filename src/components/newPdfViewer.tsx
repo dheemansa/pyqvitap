@@ -52,7 +52,9 @@
   }
 
   function useBreakpoint() {
-    const [width, setWidth] = useState<number | null>(null);
+    const [width, setWidth] = useState<number | null>(() =>
+      typeof window !== "undefined" ? window.innerWidth : null,
+    );
 
     useEffect(() => {
       setWidth(window.innerWidth);
@@ -103,7 +105,7 @@
     const effectiveTotalPages =
       totalPages > 0 ? totalPages : (scrollState?.totalPages ?? 0);
     
-  const pageChange = useCallback(
+    const pageChange = useCallback(
       (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key !== "Enter") return;
         const page = parseInt(pageNo, 10);
@@ -160,34 +162,35 @@
       bottom: 20,
       left: "50%",
       transform: "translateX(-50%)",
-    }
+    };
 
-    const pageInput = (
+    const desktopPageInput = (
       <div className={(!isFullscreen && !isMobile) ? "flex flex-col items-center gap-2" : "flex flex-row items-center gap-2"}>
-          <input
-            type="text"
-            value={pageNo}
-            onChange={(e) => {
-              editingRef.current = true;
-              setPageNo(e.target.value.replace(/[^0-9]/g, ""));
-            }}
-            onKeyDown={pageChange}
-            onFocus={(e) => {
-              editingRef.current = true;
-              e.target.select();
-            }}
-            onBlur={() => {
-              editingRef.current = false;
-              setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
-            }}
-            inputMode="numeric"
-            className="h-9 w-14 rounded border bg-[#e7e9ff] p-1 text-center text-sm [appearance:textfield] dark:bg-[#1f1f2a] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-          />
-          <span className="text-xs font-medium text-white">of {totalPages ?? 1}</span>
+        <input
+          type="text"
+          value={pageNo}
+          onChange={(e) => {
+            editingRef.current = true;
+            setPageNo(e.target.value.replace(/[^0-9]/g, ""));
+          }}
+          onKeyDown={pageChange}
+          onFocus={(e) => {
+            editingRef.current = true;
+            e.target.select();
+          }}
+          onBlur={() => {
+            editingRef.current = false;
+            setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
+          }}
+          inputMode="numeric"
+          aria-label="Current page"
+          className="h-9 w-14 rounded border bg-[#e7e9ff] p-1 text-center text-sm [appearance:textfield] dark:bg-[#1f1f2a] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+        />
+        <span className="text-xs font-medium text-white">of {effectiveTotalPages || 1}</span>
       </div>
-    )
+    );
     
-    const toolSet = (
+    const desktopToolSet = (
       <>
         <div className="relative">
           {showReadingCoachmark && (
@@ -219,11 +222,11 @@
         </div>
 
         <Button
-        onClick={toggleFullscreen}
-        className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
-        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          onClick={toggleFullscreen}
+          className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+          title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
-        {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+          {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
         </Button>
 
         <Button
@@ -257,25 +260,148 @@
         >
           <ZoomIn size={24} />
         </Button>
-
-        {isSmall && <ReportButton/>}
-
       </>
-    )
+    );
+
+    const mobileControls = (
+      <div
+        className="z-10 my-2 mx-auto flex w-fit max-w-[calc(100vw-24px)] flex-col items-center gap-2 rounded-xl bg-[#262635] p-2 sm:p-2.5 shadow-lg backdrop-blur-md"
+        style={{ boxSizing: "border-box" }}
+      >
+        {/* Row 1: Page Navigation and Zoom */}
+        <div className="flex items-center justify-center gap-3 sm:gap-4 w-full">
+          <div className="flex items-center gap-1.5 text-xs text-white">
+            <input
+              type="text"
+              value={pageNo}
+              onChange={(e) => {
+                editingRef.current = true;
+                setPageNo(e.target.value.replace(/[^0-9]/g, ""));
+              }}
+              onKeyDown={pageChange}
+              onFocus={(e) => {
+                editingRef.current = true;
+                e.target.select();
+              }}
+              onBlur={() => {
+                editingRef.current = false;
+                setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
+              }}
+              inputMode="numeric"
+              aria-label="Current page"
+              className="h-8 w-11 rounded border border-[#3A3745] bg-[#1f1f2a] p-1 text-center text-xs font-semibold text-white [appearance:textfield] focus:outline-none focus:border-[#6536c1] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            />
+            <span className="text-xs font-medium text-white/90 whitespace-nowrap">
+              of {effectiveTotalPages || 1}
+            </span>
+          </div>
+
+          <div className="h-4 w-px bg-white/20" aria-hidden="true" />
+
+          <div className="flex items-center gap-1">
+            <Button
+              onClick={zoomOut}
+              disabled={typeof zoomLevel === "number" && zoomLevel <= 0.25}
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
+              title="Zoom out"
+              aria-label="Zoom out"
+            >
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <span className="min-w-[40px] px-1 py-1 text-center text-xs font-medium text-white">
+              {typeof zoomLevel === "number" ? `${Math.round(zoomLevel * 100)}%` : "100%"}
+            </span>
+            <Button
+              onClick={zoomIn}
+              disabled={typeof zoomLevel === "number" && zoomLevel >= 3}
+              className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
+              title="Zoom in"
+              aria-label="Zoom in"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Row 2: Action Buttons */}
+        <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+          <div className="relative">
+            {showReadingCoachmark && (
+              <div className="absolute bottom-full left-0 z-20 mb-2 w-48 sm:w-52 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                <div className="rounded-lg bg-[#6536c1] px-3 py-2 text-[11px] leading-snug text-white shadow-xl">
+                  <span className="font-semibold">Reading Mode:</span> Hides everything but the paper.
+                  <button
+                    onClick={dismissReadingCoachmark}
+                    className="mt-1 block text-[10px] font-semibold underline underline-offset-2"
+                  >
+                    Got it
+                  </button>
+                </div>
+                <div className="ml-3 h-2 w-2 -translate-y-1 rotate-45 bg-[#6536c1]" />
+              </div>
+            )}
+            {showReadingCoachmark && (
+              <span className="absolute inset-0 animate-ping rounded bg-[#6536c1] opacity-40" />
+            )}
+            <Button
+              onClick={toggleReadingMode}
+              className="relative h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+              title="Reading Mode (R): show just the paper"
+              aria-label="Reading Mode"
+            >
+              <BookOpenText className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          </div>
+
+          <Button
+            onClick={toggleFullscreen}
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+            ) : (
+              <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+            )}
+          </Button>
+
+          <Button
+            onClick={handleDownloadClick}
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+            title="Download PDF"
+            aria-label="Download PDF"
+          >
+            <Download className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
+
+          <ShareButton
+            isFullscreen={isFullscreen}
+            viewerRef={viewerRef}
+            className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] flex items-center justify-center"
+          />
+
+          <ReportButton
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white transition hover:bg-red-600 bg-red-500 flex items-center justify-center"
+          />
+        </div>
+      </div>
+    );
 
     if (!forceMobile) {
-      return (
-        <>
-        {!isSmall ? 
+      if (!isSmall) {
+        return (
           <div
             style={{
               position: "absolute",
-              ...(isFullscreen ? {...fullScreenStyle, flexDirection: "row"} : {
-                top: "40%",
-                right: 20,
-                transform: "translateY(-50%)",
-                flexDirection: "column" as const,
-              }),
+              ...(isFullscreen
+                ? { ...fullScreenStyle, flexDirection: "row" as const }
+                : {
+                    top: "40%",
+                    right: 20,
+                    transform: "translateY(-50%)",
+                    flexDirection: "column" as const,
+                  }),
               zIndex: 1,
               padding: "10px 8px",
               display: "flex",
@@ -288,82 +414,45 @@
               backdropFilter: "blur(6px)",
             }}
           >
-            {toolSet}
-            {pageInput}
-            {!isSmall && <ReportButton />}
-          </div> : 
-          <div
-            style={{
-              position: "absolute",
-              ...(isFullscreen ? fullScreenStyle : {
-                top: "40%",
-                right: 20,
-                transform: "translateY(-50%)",
-              }),
-              flexDirection: "column" as const,
-              zIndex: 1,
-              padding: "20px 12px",
-              display: "flex",
-              gap: 16,
-              alignItems: "center",
-              alignSelf: "center",
-              width: isFullscreen ? "auto" : "96px",
-              background: "#262635",
-              borderRadius: 8,
-              backdropFilter: "blur(6px)",
-            }}
-          >       
-            {pageInput}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: isFullscreen ? "row" as const : "column" as const,
-                gap: 16,
-                alignItems: "center",
-              }}
-            >
-              {toolSet}
-            </div>
-            
-          </div>}
-        </>
-        
+            {desktopToolSet}
+            {desktopPageInput}
+            <ReportButton />
+          </div>
+        );
+      }
+
+      // Mobile fullscreen
+      return (
+        <div
+          style={{
+            position: "absolute",
+            ...fullScreenStyle,
+            zIndex: 1,
+          }}
+        >
+          {mobileControls}
+        </div>
       );
     }
 
-    return(
+    // forceMobile = true
+    if (isSmall) {
+      return mobileControls;
+    }
+
+    // Tablet width (640px <= width < 768px)
+    return (
       <div
+        className="z-10 my-2 mx-auto flex w-fit max-w-[calc(100vw-24px)] flex-row items-center gap-4 rounded-xl bg-[#262635] p-2.5 shadow-lg backdrop-blur-md"
         style={{
-          top: "40%",
-          flexDirection: isSmall ? "column" : "row",
-          zIndex: 1,
-          padding: "10px 12px",
-          display: "flex",
-          gap: 16,
-          alignItems: "center",
-          alignSelf: "center",
-          width: "auto",
-          background: "#262635",
-          borderRadius: 12,
-          backdropFilter: "blur(6px)",
+          boxSizing: "border-box",
         }}
-      > 
-        {isSmall ? (
-          <>
-            {pageInput}
-            <div style={{ display: "flex", flexDirection: "row", gap: 16, alignItems: "center" }}>
-              {toolSet}
-            </div>
-          </>
-        ) : (
-          <>
-            {toolSet}
-            {pageInput}
-            <ReportButton />
-          </>
-        )}
+      >
+        {desktopToolSet}
+        {desktopPageInput}
+        <ReportButton />
       </div>
-    )
+    );
   });
 
   function WheelZoom({ documentId, viewerRef }: WheelZoomProps) {
@@ -743,6 +832,7 @@
           style={{
             height: isReadingMode ? "100dvh" : height,
             width: "100%",
+            maxWidth: "100%",
             position: isReadingMode ? "fixed" : "relative",
             top: isReadingMode ? 0 : undefined,
             left: isReadingMode ? 0 : undefined,
@@ -752,6 +842,7 @@
             backgroundColor: effectiveBackgroundColor,
             display: "flex",
             flexDirection: "column",
+            alignItems: "center",
             colorScheme: isolateFromTheme ? "light" : undefined,
             forcedColorAdjust: isolateFromTheme ? "none" : undefined,
             transition: "height 0.2s ease",
@@ -830,6 +921,10 @@
                         style={{
                           backgroundColor: effectiveBackgroundColor,
                           visibility: isLoaded ? "visible" : "hidden",
+                          width: "100%",
+                          maxWidth: "100%",
+                          flex: 1,
+                          minHeight: 0,
                         }}
                       >
                         <Scroller

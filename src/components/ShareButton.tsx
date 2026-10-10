@@ -19,9 +19,10 @@ import { usePathname } from "next/navigation";
 interface ShareButtonProps {
   isFullscreen: boolean;
   viewerRef: React.RefObject<HTMLDivElement>;
+  className?: string;
 }
 
-export default function ShareButton({ isFullscreen, viewerRef }: ShareButtonProps) {
+export default function ShareButton({ isFullscreen, viewerRef, className }: ShareButtonProps) {
   const [origin, setOrigin] = useState("");
   const pathname = usePathname();
 
@@ -34,7 +35,10 @@ export default function ShareButton({ isFullscreen, viewerRef }: ShareButtonProp
     <Dialog>
       <DialogTrigger asChild>
         <Button
-          className="aspect-square h-10 w-10 p-0 rounded text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+          className={
+            className ??
+            "aspect-square h-10 w-10 p-0 rounded text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+          }
           title="Share this paper"
         >
           <FaShare />

@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GeistSans } from "geist/font/sans";
 import Script from "next/script";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChildrenWrapper from "@/components/ChildrenWrapper";
@@ -13,6 +13,12 @@ import { MAINTENANCE_MODE } from "@/config/maintenance";
 import MaintenanceGate from "@/components/MaintenanceGate";
 import { AuthProvider } from "@/components/AuthProvider";
 import PostHogProviderWrapper from "@/components/analytics/PostHogProvider";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://pyqvitap.site/"),

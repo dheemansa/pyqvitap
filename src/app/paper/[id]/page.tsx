@@ -168,14 +168,14 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
   const pdfUrl = getMediaGatewayUrl(paper.file_url);
 
   return (
-    <div>
+    <div className="w-full max-w-full overflow-x-hidden">
       <link rel="preload" href={pdfUrl} as="fetch" crossOrigin="anonymous" />
-      <h1 className="my-6 flex justify-center gap-4 text-center font-play text-2xl font-semibold md:mb-6 md:text-3xl">
-        <div>
+      <h1 className="my-4 px-3 sm:px-6 text-center font-play text-lg sm:text-2xl md:text-3xl font-semibold break-words max-w-4xl mx-auto leading-snug">
+        <span>
           {paper.subject} {paper.exam} {formatSlotDisplay(paper.slot)} {paper.year}
-        </div>
+        </span>
       </h1>
-      <div className="px-4">
+      <div className="px-2 sm:px-4">
         <SlotContributionBox
           paperId={params.id}
           initialSlot={paper.slot}
@@ -183,7 +183,7 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
           slotContributionCount={paper.slotContributionCount}
         />
       </div>
-      <center>
+      <div className="w-full max-w-full flex flex-col items-center">
         <PaperProvider
           value={{
             paperId: params.id,
@@ -199,7 +199,7 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
             name={`${extractBracketContent(paper.subject)}-${paper.exam}-${paper.slot}-${paper.year}`}
           />
         </PaperProvider>
-      </center>
+      </div>
       <RelatedPapers
         initialSubject={paper.subject}
         initialPaperId={params.id}
