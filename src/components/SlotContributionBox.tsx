@@ -49,6 +49,11 @@ export default function SlotContributionBox({
       return;
     }
 
+    // Optimization: If user already contributed or skipped locally, avoid redundant server poll
+    if (contributed || skipped) {
+      return;
+    }
+
     // Fetch fresh status from the server
     const contributorId = getOrCreateContributorId();
     fetch(`/api/slot-contribution?paperId=${encodeURIComponent(paperId)}&contributorId=${encodeURIComponent(contributorId)}`)
