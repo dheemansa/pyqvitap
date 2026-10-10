@@ -8,6 +8,14 @@ export async function POST(req: Request) {
   try {
     const subjects = (await req.json()) as StoredSubjects;
 
+    if (Array.isArray(subjects) && subjects.length === 0) {
+      return success([]);
+    }
+
+    if (!Array.isArray(subjects)) {
+      return failure("Invalid request body. Expected an array of subjects.", 400);
+    }
+
     const transformedPapers = await getPapersBySubjects(subjects)
 
     return success(transformedPapers);
