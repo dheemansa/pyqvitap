@@ -23,10 +23,17 @@ export async function getPapersBySubject(subject: string) {
 		const escapedSubject = escapeRegExp(subject);
 		console.log("[getPapersBySubject] querying for subject:", subject);
 		console.log("[getPapersBySubject] escaped subject:", escapedSubject);
-		const papers: IPaper[] = await Paper.find({
-			subject: { $regex: new RegExp(`^${escapedSubject}$`, "i") },
+		// 1. Fast indexed exact match probe (O(1) B-tree lookup without regex engine overhead)
+		let papers: IPaper[] = await Paper.find({
+			subject: subject,
 		}).lean<IPaper[]>();
-		console.log("[getPapersBySubject] exact regex match count:", papers.length);
+
+		// 2. Exact match with case-insensitive boundary regex fallback
+		if (papers.length === 0) {
+			papers = await Paper.find({
+				subject: { $regex: new RegExp(`^${escapedSubject}$`, "i") },
+			}).lean<IPaper[]>();
+		}
 
 		let finalPapers = papers;
 		if (papers.length === 0) {
@@ -34,7 +41,6 @@ export async function getPapersBySubject(subject: string) {
 			finalPapers = await Paper.find({
 				subject: { $regex: new RegExp(`${escapedSubject}`, "i") },
 			}).lean<IPaper[]>();
-			console.log("[getPapersBySubject] loose regex match count:", finalPapers.length);
 		}
 		if (finalPapers.length === 0) {
 			// Fallback to code search if subject is like 'NAME [CODE]'
@@ -43,7 +49,6 @@ export async function getPapersBySubject(subject: string) {
 				finalPapers = await Paper.find({
 					subject: { $regex: new RegExp(`\\[${codeMatch[1]}\\]`, "i") },
 				}).lean<IPaper[]>();
-				console.log(`[getPapersBySubject] code fallback [${codeMatch[1]}] match count:`, finalPapers.length);
 			}
 		}
 
