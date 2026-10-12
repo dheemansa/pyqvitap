@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     : "Prepare and ace your CAT and FAT exams with PyqVitAp. Search 5k+ question papers across all branches, slots, and years in seconds.",
   icons: [
     { rel: "icon", url: "/assets/images/favicon.svg?v=4" },
-    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=4" },
+    { rel: "apple-touch-icon", url: "/assets/images/apple-touch-icon.png?v=5" },
   ],
   openGraph: {
     title: MAINTENANCE_MODE

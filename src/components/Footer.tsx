@@ -82,11 +82,11 @@ export default function Footer() {
             Contact & Updates
           </h3>
           <Link
-            href="mailto:pyqvitap@gmail.com"
+            href="mailto:support@pyqvitap.site"
             className="flex items-center gap-2 font-jost text-base font-semibold text-black transition-colors hover:text-[#562EE7] dark:text-white dark:hover:text-[#FFC6E8]"
           >
             <Mail size={18} fontWeight="Bold" />
-            <span>pyqvitap@gmail.com</span>
+            <span>support@pyqvitap.site</span>
           </Link>
 
           <div className="mt-1 w-full max-w-sm">
