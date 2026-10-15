@@ -6,30 +6,47 @@ on:
   push:
     branches: [ "staging", "prod", "main" ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/prod' }}
+
+permissions:
+  contents: read
+
 jobs:
-  build-and-typecheck:
+  ci:
+    name: CI Validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Enable corepack
+      - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup Node.js
+      - name: Setup Node.js & cache pnpm dependencies
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: corepack pnpm run typecheck
 
-      - name: Build
-        run: pnpm run build
+      - name: Regression tests
+        run: corepack pnpm run test
+
+      - name: Lint (advisory / non-blocking)
+        run: corepack pnpm run lint
+        continue-on-error: true
+
+      - name: OpenNext Cloudflare worker build
+        run: corepack pnpm run build:worker
         env:
           SKIP_ENV_VALIDATION: "1"
           NODE_ENV: "production"
