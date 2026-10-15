@@ -121,34 +121,40 @@ function SideBar() {
         </SidebarButton>
       </div>
 
-      <div className="flex w-full items-center justify-between border-b-2 border-[#36266d] px-[10px] py-4">
-        <SidebarButton
-          selected={selectedAnswerKeyIncluded}
-          onClick={() =>
-            handleApplyFilters(
-              selectedExams,
-              selectedSlots,
-              selectedYears,
-              selectedCampuses,
-              selectedSemesters,
-              !selectedAnswerKeyIncluded,
-            )
-          }
-        >
-          Answer Key Available
-        </SidebarButton>
-      </div>
+      {/* Temporarily hidden from visible UI: none of the ~5,000 papers currently has an answer key */}
+      {false && (
+        <div className="flex w-full items-center justify-between border-b-2 border-[#36266d] px-[10px] py-4">
+          <SidebarButton
+            selected={selectedAnswerKeyIncluded}
+            onClick={() =>
+              handleApplyFilters(
+                selectedExams,
+                selectedSlots,
+                selectedYears,
+                selectedCampuses,
+                selectedSemesters,
+                !selectedAnswerKeyIncluded,
+              )
+            }
+          >
+            Answer Key Available
+          </SidebarButton>
+        </div>
+      )}
 
-      {filtersForSidebar.map((section) => (
-        <SidebarSection
-          key={section.label}
-          label={section.label}
-          data={section.data}
-          selected={section.selected}
-          updater={section.updater}
-          note={section.note}
-        />
-      ))}
+      {/* Temporarily exclude "Slots" section: >90% of papers lack slot information */}
+      {filtersForSidebar
+        .filter((section) => section.label !== "Slots")
+        .map((section) => (
+          <SidebarSection
+            key={section.label}
+            label={section.label}
+            data={section.data}
+            selected={section.selected}
+            updater={section.updater}
+            note={section.note}
+          />
+        ))}
     </div>
   );
 }

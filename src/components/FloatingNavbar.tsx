@@ -2,8 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
-import { ChevronDown, UploadIcon, Github, Pin, ArrowUpRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronDown, UploadIcon, Github, Pin, ArrowUpRight, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import ModeToggle from "./toggle-theme";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 
@@ -20,20 +21,52 @@ interface Props {
   onNavigate: () => void;
 }
 
+function MobileThemeToggle() {
+  const { theme, resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted ? (resolvedTheme || theme) === "dark" : true;
+
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-lg transition-transform duration-200 hover:scale-105 hover:bg-slate-50 active:scale-95 motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F] pointer-events-auto after:absolute after:-inset-1 after:content-['']"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      {isDark ? (
+        <Sun className="h-4 w-4 transition-transform duration-200 motion-reduce:transition-none" />
+      ) : (
+        <Moon className="h-4 w-4 transition-transform duration-200 motion-reduce:transition-none" />
+      )}
+    </button>
+  );
+}
+
 export default function FloatingNavbar({ onNavigate }: Props) {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <div className="flex flex-col items-end h-full space-y-4 pointer-events-none">
+    <div className="flex items-center gap-2 pointer-events-none shrink-0">
+      <MobileThemeToggle />
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <button
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 hover:bg-slate-50 dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 pointer-events-auto"
+            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 hover:bg-slate-50 dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 pointer-events-auto motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F] after:absolute after:-inset-1 after:content-['']"
             aria-label="Toggle dropdown"
           >
             <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+              className={`h-4 w-4 transition-transform duration-200 motion-reduce:transition-none ${dropdownOpen ? "rotate-180" : ""}`}
             />
           </button>
         </DropdownMenuTrigger>
