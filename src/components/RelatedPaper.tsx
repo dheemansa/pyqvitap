@@ -56,7 +56,7 @@ const RelatedPapers = ({
             observer?.disconnect();
           }
         },
-        { rootMargin: "300px" }
+        { rootMargin: "300px" },
       );
       observer.observe(containerRef.current);
     }
@@ -67,7 +67,10 @@ const RelatedPapers = ({
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
       idleId = (
         window as unknown as {
-          requestIdleCallback: (cb: () => void, opts: { timeout: number }) => number;
+          requestIdleCallback: (
+            cb: () => void,
+            opts: { timeout: number },
+          ) => number;
         }
       ).requestIdleCallback(startLoading, { timeout: 3500 });
     } else {
@@ -102,7 +105,9 @@ const RelatedPapers = ({
         let currentExam = exam;
 
         if (!currentSubject && id) {
-          const getpaper = await axios.get<ApiResponse<IPaper>>(`/api/paper-by-id/${id}`);
+          const getpaper = await axios.get<ApiResponse<IPaper>>(
+            `/api/paper-by-id/${id}`,
+          );
           if (getpaper.data.data) {
             currentSubject = getpaper.data.data.subject;
             currentExam = getpaper.data.data.exam;
@@ -130,8 +135,7 @@ const RelatedPapers = ({
         const sameExam = all
           .filter(
             (p) =>
-              p._id !== id &&
-              (currentExam ? p.exam === currentExam : true),
+              p._id !== id && (currentExam ? p.exam === currentExam : true),
           )
           .slice(0, 4);
 
@@ -175,11 +179,15 @@ const RelatedPapers = ({
       {loading ? (
         <Loader />
       ) : relatedPapers.length === 0 ? (
-        hasStarted ? null : <div className="h-10" />
+        hasStarted ? null : (
+          <div className="h-10" />
+        )
       ) : (
         <>
           <div className="flex items-center justify-between">
-            <h2 className="my-6 font-play text-3xl font-semibold">Explore More</h2>
+            <h2 className="my-6 font-play text-3xl font-semibold">
+              Explore More
+            </h2>
 
             {subject && (
               <Link
@@ -195,7 +203,7 @@ const RelatedPapers = ({
               </Link>
             )}
           </div>
-          <div className="cursor-pointer grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid cursor-pointer grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {relatedPapers.map((paper) => (
               <div
                 key={paper._id}

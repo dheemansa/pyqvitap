@@ -79,7 +79,9 @@ const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
               : "Download Selected"}
         </span>
         <span className="sm:hidden">
-          {isDownloading ? "Zipping…" : `Download${hasSelection ? ` (${selectedCount})` : ""}`}
+          {isDownloading
+            ? "Zipping…"
+            : `Download${hasSelection ? ` (${selectedCount})` : ""}`}
         </span>
       </button>
     </div>

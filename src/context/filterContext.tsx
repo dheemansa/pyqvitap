@@ -181,7 +181,9 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       const zip = new JSZip();
       const uniquePapers = Array.from(
         new Set(selectedPapers.map((paper) => paper._id)),
-      ).map((id) => selectedPapers.find((paper) => paper._id === id)) as IPaper[];
+      ).map((id) =>
+        selectedPapers.find((paper) => paper._id === id),
+      ) as IPaper[];
 
       // Deduplicate filenames within this ZIP archive:
       // Keep the first occurrence unchanged, and append (1), (2), ... for subsequent collisions.
@@ -197,7 +199,9 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
 
         const lastDotIndex = baseFilename.lastIndexOf(".");
         const name =
-          lastDotIndex !== -1 ? baseFilename.slice(0, lastDotIndex) : baseFilename;
+          lastDotIndex !== -1
+            ? baseFilename.slice(0, lastDotIndex)
+            : baseFilename;
         const ext = lastDotIndex !== -1 ? baseFilename.slice(lastDotIndex) : "";
 
         return {
@@ -244,10 +248,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
                   type: "application/pdf",
                 });
               } catch (wmErr) {
-                console.error(
-                  `Failed to watermark paper ${filename}:`,
-                  wmErr,
-                );
+                console.error(`Failed to watermark paper ${filename}:`, wmErr);
               }
 
               zip.file(filename, finalBlob);
@@ -343,8 +344,10 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({
       if (exams.length > 0) filterList.push({ type: "exam", values: exams });
       if (slots.length > 0) filterList.push({ type: "slot", values: slots });
       if (years.length > 0) filterList.push({ type: "year", values: years });
-      if (campus.length > 0) filterList.push({ type: "campus", values: campus });
-      if (semester.length > 0) filterList.push({ type: "semester", values: semester });
+      if (campus.length > 0)
+        filterList.push({ type: "campus", values: campus });
+      if (semester.length > 0)
+        filterList.push({ type: "semester", values: semester });
       if (anskey) filterList.push({ type: "answerkey", values: ["true"] });
 
       for (const item of filterList) {

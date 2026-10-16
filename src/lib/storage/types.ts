@@ -14,8 +14,14 @@ export interface StorageObjectResult {
 
 export interface StorageService {
   readonly providerName: string;
-  uploadPDF(folderOrKey: string, buffer: Buffer | Uint8Array): Promise<StorageUploadResult>;
-  uploadThumbnail(buffer: Buffer | Uint8Array, keyOrFolder?: string): Promise<StorageUploadResult>;
+  uploadPDF(
+    folderOrKey: string,
+    buffer: Buffer | Uint8Array,
+  ): Promise<StorageUploadResult>;
+  uploadThumbnail(
+    buffer: Buffer | Uint8Array,
+    keyOrFolder?: string,
+  ): Promise<StorageUploadResult>;
   getObject(key: string): Promise<StorageObjectResult | null>;
   hasObject(key: string): Promise<boolean>;
 }

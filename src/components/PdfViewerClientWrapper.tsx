@@ -32,7 +32,9 @@ function ViewerLoadingFallback({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setIndex((prev) => (prev < LOADING_MESSAGES.length - 1 ? prev + 1 : prev));
+      setIndex((prev) =>
+        prev < LOADING_MESSAGES.length - 1 ? prev + 1 : prev,
+      );
     }, 2500);
     return () => clearInterval(interval);
   }, []);
@@ -58,6 +60,8 @@ const PDFViewer = dynamic(() => import("@/components/newPdfViewer"), {
   loading: () => <ViewerLoadingFallback />,
 });
 
-export default function PdfViewerClientWrapper(props: PdfViewerClientWrapperProps) {
+export default function PdfViewerClientWrapper(
+  props: PdfViewerClientWrapperProps,
+) {
   return <PDFViewer {...props} />;
 }

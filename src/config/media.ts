@@ -3,8 +3,16 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 export const DEFAULT_CLOUDINARY_FALLBACK_ENABLED = false;
 
 interface FlagshipBinding {
-  getBooleanValue(name: string, defaultValue?: boolean, context?: Record<string, unknown>): Promise<boolean>;
-  getValue?(name: string, defaultValue?: unknown, context?: Record<string, unknown>): Promise<unknown>;
+  getBooleanValue(
+    name: string,
+    defaultValue?: boolean,
+    context?: Record<string, unknown>,
+  ): Promise<boolean>;
+  getValue?(
+    name: string,
+    defaultValue?: unknown,
+    context?: Record<string, unknown>,
+  ): Promise<unknown>;
 }
 
 /**
@@ -35,7 +43,10 @@ export async function isCloudinaryFallbackEnabled(): Promise<boolean> {
     const env = ctx?.env as { FLAGS?: FlagshipBinding } | undefined;
     const flags = env?.FLAGS;
     if (flags && typeof flags.getBooleanValue === "function") {
-      const val = await flags.getBooleanValue("CLOUDINARY_FALLBACK_ENABLED", false);
+      const val = await flags.getBooleanValue(
+        "CLOUDINARY_FALLBACK_ENABLED",
+        false,
+      );
       if (typeof val === "boolean") {
         return val;
       }
@@ -49,7 +60,10 @@ export async function isCloudinaryFallbackEnabled(): Promise<boolean> {
   try {
     if (typeof process !== "undefined" && process.env) {
       const envVal = process.env.CLOUDINARY_FALLBACK_ENABLED;
-      if (typeof envVal === "string" && envVal.trim().toLowerCase() === "true") {
+      if (
+        typeof envVal === "string" &&
+        envVal.trim().toLowerCase() === "true"
+      ) {
         return true;
       }
     }

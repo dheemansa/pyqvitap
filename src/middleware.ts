@@ -1,4 +1,8 @@
-import { type NextRequest, type NextFetchEvent, NextResponse } from "next/server";
+import {
+  type NextRequest,
+  type NextFetchEvent,
+  NextResponse,
+} from "next/server";
 import {
   aiUploadRatelimit,
   paperRequestRatelimit,
@@ -953,7 +957,10 @@ const MAINTENANCE_HTML = `<!DOCTYPE html>
 </body>
 </html>`;
 
-export default async function middleware(request: NextRequest, event: NextFetchEvent) {
+export default async function middleware(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
   const { pathname } = request.nextUrl;
 
   if (MAINTENANCE_MODE) {
@@ -995,7 +1002,7 @@ export default async function middleware(request: NextRequest, event: NextFetchE
             "Retry-After": "86400",
             "Cache-Control": "no-store, max-age=0",
           },
-        }
+        },
       );
     }
 
@@ -1027,7 +1034,7 @@ export default async function middleware(request: NextRequest, event: NextFetchE
       return handler(request, event);
     } else {
       console.warn(
-        "[Middleware] AUTH_ENABLED is true but NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not configured. Failing safe."
+        "[Middleware] AUTH_ENABLED is true but NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY is not configured. Failing safe.",
       );
     }
   }
@@ -1046,14 +1053,20 @@ async function handleNormalOperations(request: NextRequest) {
   if (pathname === "/api/upload") {
     const { success } = await aiUploadRatelimit.limit(ip);
     if (!success) {
-      return failure("You can upload a maximum of 5 papers every 15 minutes", 429);
+      return failure(
+        "You can upload a maximum of 5 papers every 15 minutes",
+        429,
+      );
     }
   }
 
   if (pathname === "/api/request") {
     const { success } = await paperRequestRatelimit.limit(ip);
     if (!success) {
-      return failure("You can submit a maximum of 5 requests every 15 minutes", 429);
+      return failure(
+        "You can submit a maximum of 5 requests every 15 minutes",
+        429,
+      );
     }
   }
 
@@ -1074,7 +1087,10 @@ interface SessionClaimsWithEmail {
   primary_email_address?: string;
 }
 
-type ClerkMiddlewareReturn = (req: NextRequest, event: NextFetchEvent) => Promise<NextResponse>;
+type ClerkMiddlewareReturn = (
+  req: NextRequest,
+  event: NextFetchEvent,
+) => Promise<NextResponse>;
 let lazyClerkHandler: ClerkMiddlewareReturn | null = null;
 
 function getClerkHandler(): ClerkMiddlewareReturn {
@@ -1104,7 +1120,7 @@ function getClerkHandler(): ClerkMiddlewareReturn {
               "Content-Type": "application/json",
               "Cache-Control": "no-store, max-age=0",
             },
-          }
+          },
         );
       }
 
@@ -1115,7 +1131,9 @@ function getClerkHandler(): ClerkMiddlewareReturn {
     }
 
     // 3. User is authenticated: check email authorization
-    const claims = session.sessionClaims as (SessionClaimsWithEmail & Record<string, unknown>) | null;
+    const claims = session.sessionClaims as
+      | (SessionClaimsWithEmail & Record<string, unknown>)
+      | null;
     let email =
       claims?.email ??
       claims?.primaryEmail ??
@@ -1125,13 +1143,20 @@ function getClerkHandler(): ClerkMiddlewareReturn {
 
     if (!email && process.env.CLERK_SECRET_KEY) {
       try {
-        const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+        const clerk = createClerkClient({
+          secretKey: process.env.CLERK_SECRET_KEY,
+        });
         const user = await clerk.users.getUser(session.userId);
         const primaryEmailId = user.primaryEmailAddressId;
-        const primaryObj = user.emailAddresses.find((e) => e.id === primaryEmailId);
+        const primaryObj = user.emailAddresses.find(
+          (e) => e.id === primaryEmailId,
+        );
         email = primaryObj?.emailAddress ?? "";
       } catch (lookupErr) {
-        console.error("[Middleware Auth] Failed to fetch user primary email:", lookupErr);
+        console.error(
+          "[Middleware Auth] Failed to fetch user primary email:",
+          lookupErr,
+        );
       }
     }
 
@@ -1141,7 +1166,8 @@ function getClerkHandler(): ClerkMiddlewareReturn {
         return new NextResponse(
           JSON.stringify({
             error: "Forbidden",
-            message: "Access restricted to @vitapstudent.ac.in verified accounts",
+            message:
+              "Access restricted to @vitapstudent.ac.in verified accounts",
           }),
           {
             status: 403,
@@ -1149,7 +1175,7 @@ function getClerkHandler(): ClerkMiddlewareReturn {
               "Content-Type": "application/json",
               "Cache-Control": "no-store, max-age=0",
             },
-          }
+          },
         );
       }
 

@@ -33,7 +33,8 @@ function Navbar() {
   const pathname: string = usePathname() ?? "/";
 
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-  const [isTopBannerDismissed, setIsTopBannerDismissed] = useState<boolean>(false);
+  const [isTopBannerDismissed, setIsTopBannerDismissed] =
+    useState<boolean>(false);
   const { courses } = useCourses();
 
   useEffect(() => {
@@ -135,9 +136,7 @@ function Navbar() {
               width={48}
               className="h-9 w-9 rounded-xl shadow-md transition-transform hover:scale-105 md:h-12 md:w-12"
             />
-            <span
-              className="bg-gradient-to-r from-[#562EE7] to-[rgba(116,128,255,0.8)] bg-clip-text font-jost text-3xl min-[360px]:text-4xl font-bold tracking-wide text-transparent dark:from-[#562EE7] dark:to-[#FFC6E8] md:text-6xl"
-            >
+            <span className="min-[360px]:text-4xl bg-gradient-to-r from-[#562EE7] to-[rgba(116,128,255,0.8)] bg-clip-text font-jost text-3xl font-bold tracking-wide text-transparent dark:from-[#562EE7] dark:to-[#FFC6E8] md:text-6xl">
               PyqVitAp
             </span>
           </Link>
@@ -317,7 +316,7 @@ function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View PyqVitAp on GitHub"
-            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-sm transition hover:scale-105 hover:bg-slate-50 hover:text-black active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] dark:bg-black dark:text-white dark:hover:bg-[#1A1823] dark:hover:text-white dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F] after:absolute after:-inset-1"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-sm transition after:absolute after:-inset-1 hover:scale-105 hover:bg-slate-50 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] active:scale-95 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] dark:hover:text-white dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F]"
           >
             <Github className="h-5 w-5 shrink-0 text-gray-700 dark:text-white" />
           </a>
@@ -327,11 +326,23 @@ function Navbar() {
           <div className="hidden max-w-[200px] md:block">
             <PWAInstallButton />
           </div>
-          <Link href={MAINTENANCE_MODE ? "/upload" : (pathname === "/upload" ? "/" : "/upload")}>
+          <Link
+            href={
+              MAINTENANCE_MODE
+                ? "/upload"
+                : pathname === "/upload"
+                  ? "/"
+                  : "/upload"
+            }
+          >
             <div className="flex h-8 items-center gap-1 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-9 sm:gap-1.5 sm:px-3.5 sm:py-1.5 sm:text-sm md:h-10 md:gap-2 md:px-4 md:py-2 md:text-base">
               <ArrowDownLeftIcon className="h-3.5 w-3.5 rotate-90 sm:h-4 sm:w-4" />
               <span className="truncate">
-                {MAINTENANCE_MODE ? "Upload Papers" : (pathname === "/upload" ? "Search Papers" : "Upload Papers")}
+                {MAINTENANCE_MODE
+                  ? "Upload Papers"
+                  : pathname === "/upload"
+                    ? "Search Papers"
+                    : "Upload Papers"}
               </span>
             </div>
           </Link>

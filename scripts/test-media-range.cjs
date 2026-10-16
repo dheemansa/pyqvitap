@@ -192,7 +192,9 @@ function createMockR2(fileSize, etag = '"abc123etag"') {
 
       // Handle onlyIf (conditional headers)
       if (options.onlyIf) {
-        const ifNoneMatch = options.onlyIf.get ? options.onlyIf.get("if-none-match") : null;
+        const ifNoneMatch = options.onlyIf.get
+          ? options.onlyIf.get("if-none-match")
+          : null;
         if (ifNoneMatch && ifNoneMatch === etag) {
           // Precondition failed: return R2Object with no body
           return {
@@ -282,7 +284,10 @@ async function simulateRouteGet(mockR2, reqHeaders) {
     if (r2Object.httpEtag) headers.set("ETag", r2Object.httpEtag);
 
     if (r2Object.range) {
-      const { start, end, length } = parseR2ObjectRange(r2Object.range, r2Object.size);
+      const { start, end, length } = parseR2ObjectRange(
+        r2Object.range,
+        r2Object.size,
+      );
       headers.set("Content-Range", `bytes ${start}-${end}/${r2Object.size}`);
       headers.set("Content-Length", length.toString());
       return { status: 206, headers, body: r2Object.body };
@@ -296,7 +301,10 @@ async function simulateRouteGet(mockR2, reqHeaders) {
   if (!r2Object && hasRange) {
     const head = await r2Bucket.head(key);
     if (head) {
-      const parsedRange = parseByteRange(reqHeaders.get("range") || "", head.size);
+      const parsedRange = parseByteRange(
+        reqHeaders.get("range") || "",
+        head.size,
+      );
       if (parsedRange.type === "unsatisfiable") {
         const headers = new Headers();
         headers.set("Content-Type", "application/pdf");
@@ -337,7 +345,11 @@ async function simulateRouteHead(mockR2, reqHeaders) {
     if (head.httpEtag) headers.set("ETag", head.httpEtag);
 
     const ifNoneMatch = reqHeaders.get("if-none-match");
-    if (ifNoneMatch && head.httpEtag && (ifNoneMatch === head.httpEtag || ifNoneMatch === "*")) {
+    if (
+      ifNoneMatch &&
+      head.httpEtag &&
+      (ifNoneMatch === head.httpEtag || ifNoneMatch === "*")
+    ) {
       return { status: 304, headers, body: null };
     }
     return { status: 200, headers, body: null };
@@ -371,7 +383,9 @@ async function simulateRouteHead(mockR2, reqHeaders) {
     assert.strictEqual(res.headers.get("Content-Length"), "1024");
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     assert.strictEqual(res.body.length, 1024);
-    console.log("  PASSED: 206 Partial Content with Content-Range bytes 0-1023/10000");
+    console.log(
+      "  PASSED: 206 Partial Content with Content-Range bytes 0-1023/10000",
+    );
   }
 
   console.log("Test 13: Unsatisfiable byte-range GET request (bytes=50000-)");
@@ -382,7 +396,9 @@ async function simulateRouteHead(mockR2, reqHeaders) {
     assert.strictEqual(res.headers.get("Accept-Ranges"), "bytes");
     assert.strictEqual(res.headers.get("Content-Range"), "bytes */10000");
     assert.strictEqual(res.body, null);
-    console.log("  PASSED: 416 Range Not Satisfiable with Content-Range bytes */10000");
+    console.log(
+      "  PASSED: 416 Range Not Satisfiable with Content-Range bytes */10000",
+    );
   }
 
   console.log("Test 14: Malformed byte-range GET request (bytes=garbage)");
@@ -393,7 +409,9 @@ async function simulateRouteHead(mockR2, reqHeaders) {
     assert.strictEqual(res.headers.get("Accept-Ranges"), "bytes");
     assert.strictEqual(res.headers.get("Content-Length"), "10000");
     assert.strictEqual(res.body.length, 10000);
-    console.log("  PASSED: RFC-compliant safe fallback to 200 OK on malformed range");
+    console.log(
+      "  PASSED: RFC-compliant safe fallback to 200 OK on malformed range",
+    );
   }
 
   console.log("Test 15: Conditional GET with matching If-None-Match");
@@ -415,7 +433,9 @@ async function simulateRouteHead(mockR2, reqHeaders) {
     assert.strictEqual(res.headers.get("Accept-Ranges"), "bytes");
     assert.strictEqual(res.headers.get("Content-Length"), "10000");
     assert.strictEqual(res.body, null);
-    console.log("  PASSED: HEAD returns 200 with Content-Length: 10000, Accept-Ranges: bytes, no body");
+    console.log(
+      "  PASSED: HEAD returns 200 with Content-Length: 10000, Accept-Ranges: bytes, no body",
+    );
   }
 
   console.log("Test 17: HEAD request with matching If-None-Match");

@@ -6,7 +6,10 @@ import { type IPaper } from "@/interface";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } },
+) {
   const { id } = params;
 
   if (!id || !Types.ObjectId.isValid(id)) {
@@ -33,10 +36,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     },
     validate: (data): data is IPaper => {
       return Boolean(
-        data &&
-          typeof data === "object" &&
-          "_id" in data &&
-          "subject" in data
+        data && typeof data === "object" && "_id" in data && "subject" in data,
       );
     },
   });

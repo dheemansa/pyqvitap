@@ -22,7 +22,11 @@ interface ShareButtonProps {
   className?: string;
 }
 
-export default function ShareButton({ isFullscreen, viewerRef, className }: ShareButtonProps) {
+export default function ShareButton({
+  isFullscreen,
+  viewerRef,
+  className,
+}: ShareButtonProps) {
   const [origin, setOrigin] = useState("");
   const pathname = usePathname();
 
@@ -37,7 +41,7 @@ export default function ShareButton({ isFullscreen, viewerRef, className }: Shar
         <Button
           className={
             className ??
-            "aspect-square h-10 w-10 p-0 rounded text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+            "aspect-square h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7]"
           }
           title="Share this paper"
         >

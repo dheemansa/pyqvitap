@@ -150,14 +150,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${GeistSans.variable}`}
+      suppressHydrationWarning
+    >
       <meta
         name="google-site-verification"
         content="7eR_r20eSByy6ReESw2g-EcMaBRmh_Zpz3q8SbvCH64"
       />
       <head>
         <Script
-           async
+          async
           src="https://www.googletagmanager.com/gtag/js?id=G-J5CD036GJP"
         ></Script>
         <Script id="google-analytics">

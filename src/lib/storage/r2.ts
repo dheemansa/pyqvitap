@@ -1,5 +1,9 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { StorageService, StorageUploadResult, StorageObjectResult } from "./types";
+import type {
+  StorageService,
+  StorageUploadResult,
+  StorageObjectResult,
+} from "./types";
 
 export class R2Storage implements StorageService {
   readonly providerName = "r2";
@@ -23,15 +27,21 @@ export class R2Storage implements StorageService {
     }
   }
 
-  async uploadPDF(folderOrKey: string, buffer: Buffer | Uint8Array): Promise<StorageUploadResult> {
+  async uploadPDF(
+    folderOrKey: string,
+    buffer: Buffer | Uint8Array,
+  ): Promise<StorageUploadResult> {
     const bucket = await this.getBucket();
     if (!bucket) {
-      throw new Error("R2_MEDIA bucket binding is not available in the current context");
+      throw new Error(
+        "R2_MEDIA bucket binding is not available in the current context",
+      );
     }
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}.pdf`;
-    const key = folderOrKey.includes("/") && folderOrKey.endsWith(".pdf")
-      ? folderOrKey
-      : `papers/${folderOrKey}/${filename}`;
+    const key =
+      folderOrKey.includes("/") && folderOrKey.endsWith(".pdf")
+        ? folderOrKey
+        : `papers/${folderOrKey}/${filename}`;
 
     await bucket.put(key, buffer, {
       httpMetadata: {
@@ -46,10 +56,15 @@ export class R2Storage implements StorageService {
     };
   }
 
-  async uploadThumbnail(buffer: Buffer | Uint8Array, keyOrFolder?: string): Promise<StorageUploadResult> {
+  async uploadThumbnail(
+    buffer: Buffer | Uint8Array,
+    keyOrFolder?: string,
+  ): Promise<StorageUploadResult> {
     const bucket = await this.getBucket();
     if (!bucket) {
-      throw new Error("R2_MEDIA bucket binding is not available in the current context");
+      throw new Error(
+        "R2_MEDIA bucket binding is not available in the current context",
+      );
     }
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}_thumb.webp`;
     const key = keyOrFolder?.endsWith(".webp")
@@ -77,7 +92,9 @@ export class R2Storage implements StorageService {
 
     return {
       body: obj.body,
-      contentType: obj.httpMetadata?.contentType ?? (key.endsWith(".pdf") ? "application/pdf" : "image/webp"),
+      contentType:
+        obj.httpMetadata?.contentType ??
+        (key.endsWith(".pdf") ? "application/pdf" : "image/webp"),
       contentLength: obj.size,
       etag: obj.httpEtag,
       lastModified: obj.uploaded,

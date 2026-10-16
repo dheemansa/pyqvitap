@@ -14,7 +14,7 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { chunkArray } from "@/lib/utils/array";
 import SkeletonPaperCard from "@/components/SkeletonPaperCard";
-import { type ApiResponse } from "@/interface"
+import { type ApiResponse } from "@/interface";
 
 function PapersCarousel() {
   const [displayPapers, setDisplayPapers] = useState<IUpcomingPaper[]>([]);
@@ -41,7 +41,9 @@ function PapersCarousel() {
     const fetchPapers = async () => {
       try {
         setIsLoading(true);
-        const response = await axios.get<ApiResponse<IUpcomingPaper[]>>("/api/upcoming-papers");
+        const response = await axios.get<ApiResponse<IUpcomingPaper[]>>(
+          "/api/upcoming-papers",
+        );
         setDisplayPapers(response.data.data ?? []);
       } catch (error) {
         console.error("Failed to fetch papers:", error);

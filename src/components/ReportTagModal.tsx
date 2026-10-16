@@ -15,8 +15,8 @@ import { MultiSelect } from "@/components/multi-select";
 import LabeledInput from "@/components/ui/LabeledInput";
 import LabeledSelect from "@/components/ui/LabeledSelect";
 import axios from "axios";
-import toast from "react-hot-toast";  
-import { type ApiResponse } from '@/interface'
+import toast from "react-hot-toast";
+import { type ApiResponse } from "@/interface";
 import { formatSlotDisplay } from "@/lib/utils/string";
 import { semesters } from "@/components/select_options";
 import { trackEvent, trackApiFailure } from "@/lib/telemetry";
@@ -84,7 +84,7 @@ const ReportTagModal = ({
 
     return false;
   }, [selectedCategories, categoryValues, originalCategoryValues]);
-     const canSubmit = isDirty || comment.trim().length > 0;
+  const canSubmit = isDirty || comment.trim().length > 0;
 
   useEffect(() => {
     for (const c of selectedCategories) {
@@ -138,142 +138,149 @@ const ReportTagModal = ({
   }, [open, subject, exam, semester, slot, year]);
 
   const handleSubmit = async () => {
-  if (!paperId) {
-    toast.error("Missing paper id.");
-    return;
-  }
+    if (!paperId) {
+      toast.error("Missing paper id.");
+      return;
+    }
 
-  if (selectedCategories.includes("subject")) {
-  const sub = (categoryValues.subject ?? "").trim();
-  if (!sub) {
-    toast.error("Subject name cannot be empty.");
-    return;
-  }
-}
+    if (selectedCategories.includes("subject")) {
+      const sub = (categoryValues.subject ?? "").trim();
+      if (!sub) {
+        toast.error("Subject name cannot be empty.");
+        return;
+      }
+    }
 
-  if (selectedCategories.includes("semester")) {
-    const s = (categoryValues.semester ?? "").trim();
-    if (!s) {
-      toast.error("Please select a semester.");
-      return;
+    if (selectedCategories.includes("semester")) {
+      const s = (categoryValues.semester ?? "").trim();
+      if (!s) {
+        toast.error("Please select a semester.");
+        return;
+      }
     }
-  }
 
-  if (selectedCategories.includes("slot")) {
-    const v = (categoryValues.slot ?? "").trim();
-    const slotRegex = /^[A-G][1-2]$/;
-    if (!slotRegex.test(v)) {
-      toast.error("Slot must be from A1 to G2 (e.g., D1, B2).");
-      return;
+    if (selectedCategories.includes("slot")) {
+      const v = (categoryValues.slot ?? "").trim();
+      const slotRegex = /^[A-G][1-2]$/;
+      if (!slotRegex.test(v)) {
+        toast.error("Slot must be from A1 to G2 (e.g., D1, B2).");
+        return;
+      }
     }
-  }
-  if (selectedCategories.includes("year")) {
-    const y = (categoryValues.year ?? "").trim();
-    const yearRegex = /^\d{4}(-\d{4})?$/;
-    if (!yearRegex.test(y)) {
-      toast.error("Year must be a valid format (e.g., 2024 or 2024-2025).");
-      return;
+    if (selectedCategories.includes("year")) {
+      const y = (categoryValues.year ?? "").trim();
+      const yearRegex = /^\d{4}(-\d{4})?$/;
+      if (!yearRegex.test(y)) {
+        toast.error("Year must be a valid format (e.g., 2024 or 2024-2025).");
+        return;
+      }
+      if (y.includes("-")) {
+        const parts = y.split("-");
+        const start = Number(parts[0]);
+        const end = Number(parts[1]);
+
+        if (isNaN(start) || isNaN(end)) {
+          toast.error("Invalid year format.");
+          return;
+        }
+        if (end - start !== 1) {
+          toast.error(
+            "Year range difference must be exactly 1 (e.g., 2024-2025).",
+          );
+          return;
+        }
+      }
     }
-    if (y.includes("-")) {
-    const parts = y.split("-");
-    const start = Number(parts[0]);
-    const end = Number(parts[1]);
-    
-    if (isNaN(start) || isNaN(end)) {
-      toast.error("Invalid year format.");
-      return;
-    }
-    if (end - start !== 1) {
-      toast.error("Year range difference must be exactly 1 (e.g., 2024-2025).");
-      return;
-    }
-  }
-  }
     if (email.trim() && !email.includes("@gmail.com")) {
-    toast.error("Email must be a valid Gmail address (@gmail.com).");
-    return;
-  }
-
-  const reportedFields: { field: string; value?: string }[] = [];
-
-  for (const c of selectedCategories) {
-    if (c === "subject") {
-      const newSub = (categoryValues.subject ?? "").trim();
-      const oldSub = (originalCategoryValues.subject ?? "").trim();
-
-      if (newSub !== oldSub) {
-        reportedFields.push({ field: "subject", value: newSub });
-      }
-
-      const newCode = (categoryValues.courseCode ?? "").trim();
-      const oldCode = (originalCategoryValues.courseCode ?? "").trim();
-
-      if (newCode !== oldCode) {
-        reportedFields.push({ field: "courseCode", value: newCode });
-      }
-
-      continue;
+      toast.error("Email must be a valid Gmail address (@gmail.com).");
+      return;
     }
 
-    const newVal = (categoryValues[c] ?? "").trim();
-    const oldVal = (originalCategoryValues[c] ?? "").trim();
+    const reportedFields: { field: string; value?: string }[] = [];
 
-    if (newVal !== oldVal) {
-      reportedFields.push({ field: c, value: newVal });
+    for (const c of selectedCategories) {
+      if (c === "subject") {
+        const newSub = (categoryValues.subject ?? "").trim();
+        const oldSub = (originalCategoryValues.subject ?? "").trim();
+
+        if (newSub !== oldSub) {
+          reportedFields.push({ field: "subject", value: newSub });
+        }
+
+        const newCode = (categoryValues.courseCode ?? "").trim();
+        const oldCode = (originalCategoryValues.courseCode ?? "").trim();
+
+        if (newCode !== oldCode) {
+          reportedFields.push({ field: "courseCode", value: newCode });
+        }
+
+        continue;
+      }
+
+      const newVal = (categoryValues[c] ?? "").trim();
+      const oldVal = (originalCategoryValues[c] ?? "").trim();
+
+      if (newVal !== oldVal) {
+        reportedFields.push({ field: c, value: newVal });
+      }
     }
-  }
 
-if (reportedFields.length === 0 && comment.trim().length === 0) {
-  toast.error("Please change a tag or write a comment.");
-  return;
-}
-  const payload = {
-    paperId,
-    reportedFields,
-    comment,
-    reporterEmail: email ?? undefined,
-  };
-  setLoading(true);
+    if (reportedFields.length === 0 && comment.trim().length === 0) {
+      toast.error("Please change a tag or write a comment.");
+      return;
+    }
+    const payload = {
+      paperId,
+      reportedFields,
+      comment,
+      reporterEmail: email ?? undefined,
+    };
+    setLoading(true);
 
-  trackEvent("tag_reported", {
-    paper_id: paperId,
-    reported_fields: reportedFields.map((f) => f.field),
-    has_comment: comment.trim().length > 0,
-    has_email: Boolean(email && email.trim().length > 0),
-  });
+    trackEvent("tag_reported", {
+      paper_id: paperId,
+      reported_fields: reportedFields.map((f) => f.field),
+      has_comment: comment.trim().length > 0,
+      has_email: Boolean(email && email.trim().length > 0),
+    });
 
-  const reqStart = performance.now();
-  await toast.promise(
-    axios.post<ReportResponse>("/api/report-tag", payload),
-    {
-      loading: "Submitting your report...",
-      success: "Reported successfully. Thank you, We will work on that",
-      error: (err: unknown)=>{
+    const reqStart = performance.now();
+    await toast
+      .promise(axios.post<ReportResponse>("/api/report-tag", payload), {
+        loading: "Submitting your report...",
+        success: "Reported successfully. Thank you, We will work on that",
+        error: (err: unknown) => {
           const duration = performance.now() - reqStart;
           if (axios.isAxiosError<ReportResponse>(err)) {
-            trackApiFailure("/api/report-tag", "POST", err.response?.status ?? 0, duration);
-            return ( 
+            trackApiFailure(
+              "/api/report-tag",
+              "POST",
+              err.response?.status ?? 0,
+              duration,
+            );
+            return (
               err.response?.data?.message ??
               err.message ??
               "Failed to submit report."
             );
-        }
-        trackApiFailure("/api/report-tag", "POST", 0, duration);
-        return err instanceof Error ? err.message : "Failed to submit report.";
-      },
-    }
-  )
-  .then(() => {
-      modalSetOpen(false);
-      setComment("");
-      setEmail("");
-      setSelectedCategories([]);
-      setCategoryValues({});
-    })
-  .finally(() => {
-      setLoading(false);
-    });
-};
+          }
+          trackApiFailure("/api/report-tag", "POST", 0, duration);
+          return err instanceof Error
+            ? err.message
+            : "Failed to submit report.";
+        },
+      })
+      .then(() => {
+        modalSetOpen(false);
+        setComment("");
+        setEmail("");
+        setSelectedCategories([]);
+        setCategoryValues({});
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   return (
     <Dialog open={modalOpen} onOpenChange={modalSetOpen}>
@@ -287,7 +294,7 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
 
       <DialogContent className={contentClass}>
         <DialogHeader>
-         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <DialogTitle>Report Wrong Tags</DialogTitle>
             <FaFlag className="text-lg" aria-hidden="true" />
           </div>
@@ -310,137 +317,150 @@ if (reportedFields.length === 0 && comment.trim().length === 0) {
                 { label: "Slot", value: "slot" },
                 { label: "Year", value: "year" },
               ]}
-              onValueChange={(vals:string[]) => setSelectedCategories(vals)}
+              onValueChange={(vals: string[]) => setSelectedCategories(vals)}
               defaultValue={[]}
               placeholder="Select fields"
             />
           </div>
 
           {selectedCategories.length > 0 && (
-                          <div>
-                <label className="mb-2 block text-sm font-medium">Correct values</label>
+            <div>
+              <label className="mb-2 block text-sm font-medium">
+                Correct values
+              </label>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {selectedCategories.map((c) => {
-              if (c === "subject") {
-                return (
-                  <div key={c} className="w-full space-y-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {selectedCategories.map((c) => {
+                  if (c === "subject") {
+                    return (
+                      <div key={c} className="w-full space-y-2">
+                        <LabeledInput
+                          label="Subject name"
+                          value={categoryValues.subject ?? ""}
+                          onChange={(v) =>
+                            setCategoryValues((s) => ({ ...s, subject: v }))
+                          }
+                          placeholder="Subject name"
+                        />
+                        <LabeledInput
+                          label="Course code"
+                          value={categoryValues.courseCode ?? ""}
+                          onChange={(v) =>
+                            setCategoryValues((s) => ({ ...s, courseCode: v }))
+                          }
+                          placeholder="e.g. BMAT205L"
+                        />
+                      </div>
+                    );
+                  }
+
+                  if (c === "exam") {
+                    return (
+                      <LabeledSelect
+                        key={c}
+                        label="Exam"
+                        value={categoryValues.exam ?? ""}
+                        onChange={(v) =>
+                          setCategoryValues((s) => ({ ...s, exam: v }))
+                        }
+                        options={["CAT-1", "CAT-2", "FAT"]}
+                        placeholder="Select exam"
+                      />
+                    );
+                  }
+
+                  if (c === "semester") {
+                    return (
+                      <LabeledSelect
+                        key={c}
+                        label="Semester"
+                        value={categoryValues.semester ?? ""}
+                        onChange={(v) =>
+                          setCategoryValues((s) => ({ ...s, semester: v }))
+                        }
+                        options={semesters}
+                        placeholder="Select semester"
+                      />
+                    );
+                  }
+
+                  if (c === "slot") {
+                    return (
+                      <LabeledInput
+                        key={c}
+                        label="Slot"
+                        value={categoryValues.slot ?? ""}
+                        onChange={(v) =>
+                          setCategoryValues((s) => ({
+                            ...s,
+                            slot: v.toUpperCase().replace(/[^A-Z0-9]/g, ""),
+                          }))
+                        }
+                        placeholder="e.g. D1"
+                        maxLength={2}
+                      />
+                    );
+                  }
+
+                  if (c === "year") {
+                    return (
+                      <LabeledInput
+                        key={c}
+                        label="Year"
+                        value={categoryValues.year ?? ""}
+                        onChange={(v) =>
+                          setCategoryValues((s) => ({ ...s, year: v }))
+                        }
+                        placeholder="e.g. 2024-2025"
+                      />
+                    );
+                  }
+
+                  return (
                     <LabeledInput
-                      label="Subject name"
-                      value={categoryValues.subject ?? ""}
-                      onChange={(v) => setCategoryValues((s) => ({ ...s, subject: v }))}
-                      placeholder="Subject name"
+                      key={c}
+                      label={c}
+                      value={categoryValues[c] ?? ""}
+                      onChange={(v) =>
+                        setCategoryValues((s) => ({ ...s, [c]: v }))
+                      }
                     />
-                    <LabeledInput
-                      label="Course code"
-                      value={categoryValues.courseCode ?? ""}
-                      onChange={(v) => setCategoryValues((s) => ({ ...s, courseCode: v }))}
-                      placeholder="e.g. BMAT205L"
-                    />
-                  </div>
-                );
-              }
-
-              if (c === "exam") {
-                return (
-                  <LabeledSelect
-                    key={c}
-                    label="Exam"
-                    value={categoryValues.exam ?? ""}
-                    onChange={(v) => setCategoryValues((s) => ({ ...s, exam: v }))}
-                    options={["CAT-1", "CAT-2", "FAT"]}
-                    placeholder="Select exam"
-                  />
-                );
-              }
-
-              if (c === "semester") {
-                return (
-                  <LabeledSelect
-                    key={c}
-                    label="Semester"
-                    value={categoryValues.semester ?? ""}
-                    onChange={(v) => setCategoryValues((s) => ({ ...s, semester: v }))}
-                    options={semesters}
-                    placeholder="Select semester"
-                  />
-                );
-              }
-
-              if (c === "slot") {
-                return (
-                  <LabeledInput
-                    key={c}
-                    label="Slot"
-                    value={categoryValues.slot ?? ""}
-                    onChange={(v) =>
-                      setCategoryValues((s) => ({
-                        ...s,
-                        slot: v.toUpperCase().replace(/[^A-Z0-9]/g, ""),
-                      }))
-                    }
-                    placeholder="e.g. D1"
-                    maxLength={2}
-                  />
-                );
-              }
-
-              if (c === "year") {
-                return (
-                  <LabeledInput
-                    key={c}
-                    label="Year"
-                    value={categoryValues.year ?? ""}
-                    onChange={(v) => setCategoryValues((s) => ({ ...s, year: v }))}
-                    placeholder="e.g. 2024-2025"
-                  />
-                );
-              }
-
-              return (
-                <LabeledInput
-                  key={c}
-                  label={c}
-                  value={categoryValues[c] ?? ""}
-                  onChange={(v) => setCategoryValues((s) => ({ ...s, [c]: v }))}
-                />
-              );
-            })}
-                </div>
+                  );
+                })}
               </div>
-            )}
+            </div>
+          )}
 
-                <LabeledInput
-                  label="Comment (optional)"
-                  value={comment}
-                  onChange={setComment}
-                  placeholder="Describe the issue clearly (e.g., pages torn, print faded, incorrect paper, missing sections)"
-                  className="ph-no-capture"
-                  inputClassName="ph-no-capture"
-                />
+          <LabeledInput
+            label="Comment (optional)"
+            value={comment}
+            onChange={setComment}
+            placeholder="Describe the issue clearly (e.g., pages torn, print faded, incorrect paper, missing sections)"
+            className="ph-no-capture"
+            inputClassName="ph-no-capture"
+          />
 
-                <LabeledInput
-                  label="Your email (optional)"
-                  value={email}
-                  onChange={setEmail}
-                  placeholder="you@example.com"
-                  type="email"
-                  className="ph-no-capture"
-                  inputClassName="ph-no-capture"
-                />
-                {!canSubmit &&(<p className="text-xs text-gray-500 dark:text-red-400">
-                      Submit button becomes active only if you update a tag or write a comment.
-                </p>)}
+          <LabeledInput
+            label="Your email (optional)"
+            value={email}
+            onChange={setEmail}
+            placeholder="you@example.com"
+            type="email"
+            className="ph-no-capture"
+            inputClassName="ph-no-capture"
+          />
+          {!canSubmit && (
+            <p className="text-xs text-gray-500 dark:text-red-400">
+              Submit button becomes active only if you update a tag or write a
+              comment.
+            </p>
+          )}
 
-                <div className="flex justify-end">
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!canSubmit || loading}
-                  >
-                    Submit
-                  </Button>
-                </div>
-
+          <div className="flex justify-end">
+            <Button onClick={handleSubmit} disabled={!canSubmit || loading}>
+              Submit
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

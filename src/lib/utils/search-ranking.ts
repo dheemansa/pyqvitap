@@ -9,17 +9,18 @@ import type Fuse from "fuse.js";
  */
 export function normalizeSearchText(text: string): string {
   if (!text) return "";
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, " ");
+  return text.toLowerCase().trim().replace(/\s+/g, " ");
 }
 
 /**
  * Parses a course name into its display title, course code, and full name.
  * Typical format: "Calculus for Engineers [MAT1001]"
  */
-export function parseCourse(name: string): { title: string; code: string; fullName: string } {
+export function parseCourse(name: string): {
+  title: string;
+  code: string;
+  fullName: string;
+} {
   if (!name) return { title: "", code: "", fullName: "" };
   const trimmed = name.trim();
   const codeMatch = /\[([^\]]+)\]\s*$/.exec(trimmed);
@@ -44,7 +45,7 @@ export function parseCourse(name: string): { title: string; code: string; fullNa
 export function getCourseRelevanceTier(
   course: ICourseWithCount,
   normQuery: string,
-  fuseScore?: number
+  fuseScore?: number,
 ): number {
   if (!normQuery) return 999;
 
@@ -73,7 +74,9 @@ export function getCourseRelevanceTier(
   const escapedQuery = normQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const wordBoundaryRegex = new RegExp(`(^|\\s)${escapedQuery}`, "i");
 
-  const wordStartsWithQuery = titleWords.some((word) => word.startsWith(normQuery));
+  const wordStartsWithQuery = titleWords.some((word) =>
+    word.startsWith(normQuery),
+  );
   const phraseMatchesWordBoundary = wordBoundaryRegex.test(normTitle);
 
   // Multi-word token prefix match: e.g. "fundamentals of el"
@@ -82,7 +85,9 @@ export function getCourseRelevanceTier(
     let titleIdx = 0;
     let allFound = true;
     for (const qWord of queryWords) {
-      const matchIdx = titleWords.slice(titleIdx).findIndex((w) => w.startsWith(qWord));
+      const matchIdx = titleWords
+        .slice(titleIdx)
+        .findIndex((w) => w.startsWith(qWord));
       if (matchIdx === -1) {
         allFound = false;
         break;
@@ -92,7 +97,11 @@ export function getCourseRelevanceTier(
     multiWordPrefixMatch = allFound;
   }
 
-  if (wordStartsWithQuery || phraseMatchesWordBoundary || multiWordPrefixMatch) {
+  if (
+    wordStartsWithQuery ||
+    phraseMatchesWordBoundary ||
+    multiWordPrefixMatch
+  ) {
     return 3;
   }
 
@@ -136,7 +145,7 @@ export function getCourseRelevanceTier(
 export function rankCourses(
   courses: ICourseWithCount[],
   query: string,
-  fuseInstance?: Fuse<ICourseWithCount>
+  fuseInstance?: Fuse<ICourseWithCount>,
 ): ICourseWithCount[] {
   const normQuery = normalizeSearchText(query);
   if (!normQuery || normQuery.length <= 1 || courses.length === 0) {

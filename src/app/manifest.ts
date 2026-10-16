@@ -19,38 +19,79 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     background_color: "#10011a",
     theme_color: "#10011a",
-    categories: [
-      "education",
-      "reference",
-      "productivity",
-      "technology"
-    ],
+    categories: ["education", "reference", "productivity", "technology"],
     shortcuts: [
       {
-        "name": "Upload",
-        "short_name": "Upload",
-        "description": "Upload a paper",
-        "url": "/upload",
-        "icons": [
+        name: "Upload",
+        short_name: "Upload",
+        description: "Upload a paper",
+        url: "/upload",
+        icons: [
           {
-            "src": "/assets/icons/icon-192x192-v5.webp",
-            "sizes": "192x192",
-            "type": "image/webp"
-          }
-        ]
+            src: "/assets/icons/icon-192x192-v5.webp",
+            sizes: "192x192",
+            type: "image/webp",
+          },
+        ],
       },
     ],
     icons: [
-      { src: "/assets/icons/icon-192x192-v5.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/assets/icons/icon-192x192-v5.png", sizes: "192x192", type: "image/png", purpose: "maskable" },
-      { src: "/assets/icons/icon-512x512-v5.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/assets/icons/icon-512x512-v5.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
-      { src: "/assets/icons/icon-192x192-v5.webp", sizes: "192x192", type: "image/webp", purpose: "any" },
-      { src: "/assets/icons/icon-196x196-v5.webp", sizes: "196x196", type: "image/webp" },
-      { src: "/assets/icons/icon-228x228-v5.webp", sizes: "228x228", type: "image/webp" },
-      { src: "/assets/icons/icon-256x256-v5.webp", sizes: "256x256", type: "image/webp" },
-      { src: "/assets/icons/icon-384x384-v5.webp", sizes: "384x384", type: "image/webp" },
-      { src: "/assets/icons/icon-512x512-v5.webp", sizes: "512x512", type: "image/webp", purpose: "any" },
+      {
+        src: "/assets/icons/icon-192x192-v5.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/assets/icons/icon-192x192-v5.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/assets/icons/icon-512x512-v5.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "/assets/icons/icon-512x512-v5.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
+      },
+      {
+        src: "/assets/icons/icon-192x192-v5.webp",
+        sizes: "192x192",
+        type: "image/webp",
+        purpose: "any",
+      },
+      {
+        src: "/assets/icons/icon-196x196-v5.webp",
+        sizes: "196x196",
+        type: "image/webp",
+      },
+      {
+        src: "/assets/icons/icon-228x228-v5.webp",
+        sizes: "228x228",
+        type: "image/webp",
+      },
+      {
+        src: "/assets/icons/icon-256x256-v5.webp",
+        sizes: "256x256",
+        type: "image/webp",
+      },
+      {
+        src: "/assets/icons/icon-384x384-v5.webp",
+        sizes: "384x384",
+        type: "image/webp",
+      },
+      {
+        src: "/assets/icons/icon-512x512-v5.webp",
+        sizes: "512x512",
+        type: "image/webp",
+        purpose: "any",
+      },
     ],
     screenshots: [
       {

@@ -19,7 +19,7 @@ import toast from "react-hot-toast";
 import { Search } from "lucide-react";
 import SkeletonPaperCard from "@/components/SkeletonPaperCard";
 import { useCourses } from "@/context/courseContext";
-import { type ApiResponse } from '@/interface'
+import { type ApiResponse } from "@/interface";
 import { trackEvent, trackApiFailure } from "@/lib/telemetry";
 
 export default function PaperRequest() {
@@ -43,7 +43,9 @@ export default function PaperRequest() {
     async function fetchPapers() {
       try {
         setIsLoading(true);
-        const response = await axios.get<ApiResponse<IUpcomingPaper[]>>("/api/upcoming-papers");
+        const response = await axios.get<ApiResponse<IUpcomingPaper[]>>(
+          "/api/upcoming-papers",
+        );
 
         setDisplayPapers(response.data.data ?? []);
       } catch (error) {
@@ -136,7 +138,9 @@ export default function PaperRequest() {
     } catch (error) {
       console.error("Error submitting request:", error);
       const duration = performance.now() - reqStart;
-      const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+      const status = axios.isAxiosError(error)
+        ? (error.response?.status ?? 0)
+        : 0;
       trackApiFailure("/api/request", "POST", status, duration);
 
       trackEvent("paper_requested", {

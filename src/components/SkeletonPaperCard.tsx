@@ -4,7 +4,9 @@ interface SkeletonPaperCardProps {
   length?: number;
 }
 
-export default function SkeletonPaperCard({ length = 4 }: SkeletonPaperCardProps) {
+export default function SkeletonPaperCard({
+  length = 4,
+}: SkeletonPaperCardProps) {
   return (
     <>
       {Array.from({ length }).map((_, idx) => (

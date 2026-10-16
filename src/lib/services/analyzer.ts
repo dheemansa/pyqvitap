@@ -11,7 +11,9 @@ export interface AnalyzedPaper {
   ambiguous_tags: string[];
 }
 
-export async function analyzePDFMetadata(base64Pdf: string): Promise<AnalyzedPaper> {
+export async function analyzePDFMetadata(
+  base64Pdf: string,
+): Promise<AnalyzedPaper> {
   const prompt = `
   You are an AI assistant analyzing university exam papers for VIT-AP.
   Extract the following metadata from the provided PDF:
@@ -41,16 +43,19 @@ export async function analyzePDFMetadata(base64Pdf: string): Promise<AnalyzedPap
           role: "user",
           parts: [
             { inlineData: { data: base64Pdf, mimeType: "application/pdf" } },
-            { text: prompt }
-          ]
-        }
-      ]
+            { text: prompt },
+          ],
+        },
+      ],
     });
 
     let text = response.text || "{}";
     // Clean up markdown code blocks if any
-    text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-    
+    text = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
+
     const data = JSON.parse(text);
     return {
       subject: data.subject?.toUpperCase() || "UNKNOWN",

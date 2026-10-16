@@ -14,10 +14,12 @@ const paperRequestSchema = new Schema<IPaperRequest>({
   exam: { type: String, required: true },
   slot: { type: String, required: true },
   year: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
 });
 
-const PaperRequest: Model<IPaperRequest> =
-  getModel<IPaperRequest>("PaperRequest", paperRequestSchema);
+const PaperRequest: Model<IPaperRequest> = getModel<IPaperRequest>(
+  "PaperRequest",
+  paperRequestSchema,
+);
 
 export default PaperRequest;

@@ -15,7 +15,7 @@ export default function PinButton({
     <button
       type="submit"
       onClick={onToggle}
-      className={`cursor-pointer flex items-center gap-2 rounded-full border border-[#3A3745] px-3 py-3 sm:px-4 sm:py-2 text-sm font-medium transition ${
+      className={`flex cursor-pointer items-center gap-2 rounded-full border border-[#3A3745] px-3 py-3 text-sm font-medium transition sm:px-4 sm:py-2 ${
         isPinned
           ? "bg-purple-700 text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500"
           : "bg-[#e8e9ff] text-gray-700 hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823]"

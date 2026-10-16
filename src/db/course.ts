@@ -11,8 +11,16 @@ const courseCountSchema = new Schema<ICourseCount>({
   count: { type: Number, required: true, default: 0 },
 });
 
-export const Course: Model<ICourses> = getModel<ICourses>("Course", courseSchema, "courses");
+export const Course: Model<ICourses> = getModel<ICourses>(
+  "Course",
+  courseSchema,
+  "courses",
+);
 
-const CourseCount: Model<ICourseCount> = getModel<ICourseCount>("CourseCount", courseCountSchema, "coursecounts");
+const CourseCount: Model<ICourseCount> = getModel<ICourseCount>(
+  "CourseCount",
+  courseCountSchema,
+  "coursecounts",
+);
 
 export default CourseCount;

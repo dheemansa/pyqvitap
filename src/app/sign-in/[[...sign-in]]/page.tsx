@@ -12,7 +12,10 @@ export default function SignInPage() {
       </div>
 
       <div className="relative z-10 mb-6 flex flex-col items-center">
-        <Link href="/" className="flex items-center gap-2.5 transition hover:opacity-90">
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 transition hover:opacity-90"
+        >
           <Image
             src="/assets/images/navbar_logo.png?v=5"
             alt="PyqVitAp Logo"
@@ -20,12 +23,16 @@ export default function SignInPage() {
             height={36}
             className="rounded-lg shadow-md"
           />
-          <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-2xl font-extrabold tracking-tight text-transparent">
             PyqVitAp
           </span>
         </Link>
         <p className="mt-2 text-xs font-medium text-zinc-400">
-          Sign in with your <span className="text-purple-300 font-semibold">@vitapstudent.ac.in</span> account
+          Sign in with your{" "}
+          <span className="font-semibold text-purple-300">
+            @vitapstudent.ac.in
+          </span>{" "}
+          account
         </p>
       </div>
 
@@ -39,9 +46,15 @@ export default function SignInPage() {
           />
         ) : (
           <div className="rounded-2xl border border-purple-500/20 bg-[#0f0926]/90 p-8 text-center text-zinc-300 shadow-2xl backdrop-blur-xl">
-            <h2 className="text-lg font-bold text-white mb-2">Clerk Setup Pending</h2>
-            <p className="text-xs text-zinc-400 mb-6">
-              Authentication is configured in code and ready. Please configure <code className="text-purple-300">NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</code> in your environment to display the live Clerk sign-in form.
+            <h2 className="mb-2 text-lg font-bold text-white">
+              Clerk Setup Pending
+            </h2>
+            <p className="mb-6 text-xs text-zinc-400">
+              Authentication is configured in code and ready. Please configure{" "}
+              <code className="text-purple-300">
+                NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+              </code>{" "}
+              in your environment to display the live Clerk sign-in form.
             </p>
             <Link
               href="/"

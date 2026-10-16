@@ -2,9 +2,9 @@ name: CI Checks
 
 on:
   pull_request:
-    branches: [ "staging", "prod", "main" ]
+    branches: ["staging", "prod", "main"]
   push:
-    branches: [ "staging", "prod", "main" ]
+    branches: ["staging", "prod", "main"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install dependencies
         run: corepack pnpm install --frozen-lockfile

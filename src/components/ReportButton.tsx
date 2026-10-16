@@ -14,12 +14,12 @@ export default function ReportButton({ className }: ReportButtonProps = {}) {
   const { paperId, subject, exam, slot, year, semester } = usePaper();
   const [open, setOpen] = useState(false);
   return (
-    <> 
+    <>
       <Button
         onClick={() => setOpen(true)}
         className={
           className ??
-          "h-10 w-10 rounded p-0 text-white transition hover:bg-red-600 bg-red-500"
+          "h-10 w-10 rounded bg-red-500 p-0 text-white transition hover:bg-red-600"
         }
         title="Report this paper"
       >

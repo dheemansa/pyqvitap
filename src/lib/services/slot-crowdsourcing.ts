@@ -42,7 +42,7 @@ export interface SubmitContributionResult {
  * 5. Otherwise, keep collecting.
  */
 export function evaluateConsensus(
-  countsBySlot: Record<string, number>
+  countsBySlot: Record<string, number>,
 ): ConsensusEvaluation {
   let totalContributions = 0;
   let winningSlot: AuthoritativeSlot | null = null;
@@ -57,12 +57,17 @@ export function evaluateConsensus(
     }
   }
 
-  if (totalContributions < MIN_SLOT_CONTRIBUTIONS || !winningSlot || totalContributions === 0) {
+  if (
+    totalContributions < MIN_SLOT_CONTRIBUTIONS ||
+    !winningSlot ||
+    totalContributions === 0
+  ) {
     return {
       isConsensusReached: false,
       totalContributions,
       winningSlot: null,
-      winningPercentage: totalContributions > 0 ? winningVotes / totalContributions : 0,
+      winningPercentage:
+        totalContributions > 0 ? winningVotes / totalContributions : 0,
       winningVotes,
       countsBySlot,
     };
@@ -86,7 +91,7 @@ export function evaluateConsensus(
  */
 export async function getSlotCrowdsourceStatus(
   paperId: string,
-  contributorId?: string
+  contributorId?: string,
 ): Promise<SlotCrowdsourceStatus> {
   if (!paperId || !Types.ObjectId.isValid(paperId)) {
     throw new CustomError("Invalid paper ID.", 400);
@@ -108,7 +113,9 @@ export async function getSlotCrowdsourceStatus(
         isConfirmed: true,
         currentSlot: paper.slot ?? "",
         slotSource: paper.slotSource ?? "dspace",
-        slotConfirmedAt: paper.slotConfirmedAt ? new Date(paper.slotConfirmedAt).toISOString() : null,
+        slotConfirmedAt: paper.slotConfirmedAt
+          ? new Date(paper.slotConfirmedAt).toISOString()
+          : null,
         totalContributions: paper.slotContributionCount ?? 0,
         userContributed: false,
         userSlot: null,
@@ -166,7 +173,7 @@ export async function submitSlotContribution(input: {
   if (!isValidSlot(slot)) {
     throw new CustomError(
       `Invalid slot "${slot}". Allowed values are: ${AUTHORITATIVE_SLOTS.join(", ")}`,
-      400
+      400,
     );
   }
 
@@ -184,10 +191,13 @@ export async function submitSlotContribution(input: {
       throw new CustomError("Paper not found.", 404);
     }
 
-    if ((paper.slot && paper.slot.trim() !== "") || paper.slotSource === "crowdsourced") {
+    if (
+      (paper.slot && paper.slot.trim() !== "") ||
+      paper.slotSource === "crowdsourced"
+    ) {
       throw new CustomError(
         "This paper already has an authoritative or confirmed slot. Slot contributions are no longer accepted.",
-        400
+        400,
       );
     }
 
@@ -199,14 +209,25 @@ export async function submitSlotContribution(input: {
         contributorId: cleanContributorId,
       });
     } catch (err: unknown) {
-      if (typeof err === "object" && err !== null && "code" in err && (err as { code: number }).code === 11000) {
-        throw new CustomError("You have already submitted a slot contribution for this paper.", 409);
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        (err as { code: number }).code === 11000
+      ) {
+        throw new CustomError(
+          "You have already submitted a slot contribution for this paper.",
+          409,
+        );
       }
       throw err;
     }
 
     // 3. Aggregate vote counts for this paper
-    const aggregation = await SlotContribution.aggregate<{ _id: string; count: number }>([
+    const aggregation = await SlotContribution.aggregate<{
+      _id: string;
+      count: number;
+    }>([
       { $match: { paperId: new Types.ObjectId(paperId) } },
       { $group: { _id: "$slot", count: { $sum: 1 } } },
     ]);
@@ -235,14 +256,16 @@ export async function submitSlotContribution(input: {
             slotContributionCount: consensus.totalContributions,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       return {
         success: true,
         status: "confirmed",
         isConfirmed: true,
-        confirmedSlot: updated?.slot ? (updated.slot as AuthoritativeSlot) : consensus.winningSlot,
+        confirmedSlot: updated?.slot
+          ? (updated.slot as AuthoritativeSlot)
+          : consensus.winningSlot,
         totalContributions: consensus.totalContributions,
         userSlot: normalizedSlot,
         message: `Consensus reached! Slot confirmed as ${consensus.winningSlot}.`,
@@ -257,7 +280,7 @@ export async function submitSlotContribution(input: {
       },
       {
         $set: { slotContributionCount: consensus.totalContributions },
-      }
+      },
     );
 
     return {

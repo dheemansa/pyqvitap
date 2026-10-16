@@ -23,7 +23,9 @@ export const fetchPaperID = async (id: string): Promise<PaperResponse> => {
     school: paper.school,
     pdf_sha256: paper.pdf_sha256,
     slotSource: paper.slotSource,
-    slotConfirmedAt: paper.slotConfirmedAt ? new Date(paper.slotConfirmedAt).toISOString() : undefined,
+    slotConfirmedAt: paper.slotConfirmedAt
+      ? new Date(paper.slotConfirmedAt).toISOString()
+      : undefined,
     slotContributionCount: paper.slotContributionCount ?? 0,
   };
 };

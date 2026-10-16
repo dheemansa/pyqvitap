@@ -1,212 +1,395 @@
-  "use client"
-  import { createPluginRegistration } from '@embedpdf/core';
-  import { EmbedPDF }                 from '@embedpdf/core/react';
-  import { usePdfiumEngine }          from '@embedpdf/engines/react';
-  import { Viewport, ViewportPluginPackage }               from '@embedpdf/plugin-viewport/react';
-  import { useScroll, useScrollCapability, Scroller, ScrollPluginPackage } from '@embedpdf/plugin-scroll/react';
-  import { DocumentContent, DocumentManagerPluginPackage } from '@embedpdf/plugin-document-manager/react';
-  import { useZoom, ZoomPluginPackage, ZoomMode }          from '@embedpdf/plugin-zoom/react';
-  import { RenderLayer, RenderPluginPackage }              from '@embedpdf/plugin-render/react';
-  import { ExportPluginPackage, useExport }                from '@embedpdf/plugin-export/react';
+"use client";
+import { createPluginRegistration } from "@embedpdf/core";
+import { EmbedPDF } from "@embedpdf/core/react";
+import { usePdfiumEngine } from "@embedpdf/engines/react";
+import {
+  Viewport,
+  ViewportPluginPackage,
+} from "@embedpdf/plugin-viewport/react";
+import {
+  useScroll,
+  useScrollCapability,
+  Scroller,
+  ScrollPluginPackage,
+} from "@embedpdf/plugin-scroll/react";
+import {
+  DocumentContent,
+  DocumentManagerPluginPackage,
+} from "@embedpdf/plugin-document-manager/react";
+import {
+  useZoom,
+  ZoomPluginPackage,
+  ZoomMode,
+} from "@embedpdf/plugin-zoom/react";
+import {
+  RenderLayer,
+  RenderPluginPackage,
+} from "@embedpdf/plugin-render/react";
+import { ExportPluginPackage, useExport } from "@embedpdf/plugin-export/react";
 
-  import { Download, ZoomIn, ZoomOut, Maximize2, Minimize2, BookOpenText, X } from "lucide-react";
-  import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-  import { downloadFile } from "../lib/utils/download";
-  import { Button } from "./ui/button";
-  import ShareButton from "./ShareButton";
-  import ReportButton from "./ReportButton";
-  import { useTheme } from "next-themes";
-  import { useOptionalPaper } from "@/context/PaperContext";
-  import { trackEvent, trackError } from "@/lib/telemetry";
+import {
+  Download,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Minimize2,
+  BookOpenText,
+  X,
+} from "lucide-react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { downloadFile } from "../lib/utils/download";
+import { Button } from "./ui/button";
+import ShareButton from "./ShareButton";
+import ReportButton from "./ReportButton";
+import { useTheme } from "next-themes";
+import { useOptionalPaper } from "@/context/PaperContext";
+import { trackEvent, trackError } from "@/lib/telemetry";
 
-  interface ControlProps {
-    documentId: string;
-    toggleFullscreen: () => void;
-    isFullscreen: boolean;
-    onDownload: (preloadedBuffer?: ArrayBuffer) => Promise<void>;
-    forceMobile?: boolean;
-    isMobile: boolean;
-    isSmall: boolean;
-    viewerRef: React.RefObject<HTMLDivElement>;
-    isReadingMode: boolean;
-    toggleReadingMode: () => void;
-    showReadingCoachmark: boolean;
-    dismissReadingCoachmark: () => void;
-  }
+interface ControlProps {
+  documentId: string;
+  toggleFullscreen: () => void;
+  isFullscreen: boolean;
+  onDownload: (preloadedBuffer?: ArrayBuffer) => Promise<void>;
+  forceMobile?: boolean;
+  isMobile: boolean;
+  isSmall: boolean;
+  viewerRef: React.RefObject<HTMLDivElement>;
+  isReadingMode: boolean;
+  toggleReadingMode: () => void;
+  showReadingCoachmark: boolean;
+  dismissReadingCoachmark: () => void;
+}
 
-  interface PdfViewerProps {
-    url: string;
-    name: string;
-    className?: string;
-    height?: string;
-    hideControls?: boolean;
-    backgroundColor?: string;
-    hideScrollbar?: boolean;
-    isolateFromTheme?: boolean;
-    onReadingModeChange?: (isReadingMode: boolean) => void;
-  }
+interface PdfViewerProps {
+  url: string;
+  name: string;
+  className?: string;
+  height?: string;
+  hideControls?: boolean;
+  backgroundColor?: string;
+  hideScrollbar?: boolean;
+  isolateFromTheme?: boolean;
+  onReadingModeChange?: (isReadingMode: boolean) => void;
+}
 
-  interface WheelZoomProps {
-    documentId: string;
-    viewerRef: React.RefObject<HTMLDivElement>;
-  }
+interface WheelZoomProps {
+  documentId: string;
+  viewerRef: React.RefObject<HTMLDivElement>;
+}
 
-  function useBreakpoint() {
-    const [width, setWidth] = useState<number | null>(() =>
-      typeof window !== "undefined" ? window.innerWidth : null,
-    );
+function useBreakpoint() {
+  const [width, setWidth] = useState<number | null>(() =>
+    typeof window !== "undefined" ? window.innerWidth : null,
+  );
 
-    useEffect(() => {
-      setWidth(window.innerWidth);
-      const handler = () => setWidth(window.innerWidth);
-      window.addEventListener("resize", handler);
-      return () => window.removeEventListener("resize", handler);
-    }, []);
-    
-    return {isMobile: width !== null && width < 768, isSmall: width !== null && width < 640};
-  }
+  useEffect(() => {
+    setWidth(window.innerWidth);
+    const handler = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, []);
 
-  const Controls = memo(function Controls({documentId, toggleFullscreen, isFullscreen, onDownload,
-    forceMobile, isMobile, isSmall, viewerRef, isReadingMode, toggleReadingMode,
-    showReadingCoachmark, dismissReadingCoachmark}: ControlProps) {
+  return {
+    isMobile: width !== null && width < 768,
+    isSmall: width !== null && width < 640,
+  };
+}
 
-    const { provides: zoomProv, state: zoomState } = useZoom(documentId);
-    const { provides: scrollProv, state: scrollState } = useScroll(documentId);
-    const { provides: exportProv } = useExport(documentId);
-    const { provides: scrollCapability } = useScrollCapability();
-    const [pageNo, setPageNo] = useState("1");
-    const [totalPages, setTotalPages] = useState(0);
-    const editingRef = useRef(false);
+const Controls = memo(function Controls({
+  documentId,
+  toggleFullscreen,
+  isFullscreen,
+  onDownload,
+  forceMobile,
+  isMobile,
+  isSmall,
+  viewerRef,
+  isReadingMode,
+  toggleReadingMode,
+  showReadingCoachmark,
+  dismissReadingCoachmark,
+}: ControlProps) {
+  const { provides: zoomProv, state: zoomState } = useZoom(documentId);
+  const { provides: scrollProv, state: scrollState } = useScroll(documentId);
+  const { provides: exportProv } = useExport(documentId);
+  const { provides: scrollCapability } = useScrollCapability();
+  const [pageNo, setPageNo] = useState("1");
+  const [totalPages, setTotalPages] = useState(0);
+  const editingRef = useRef(false);
 
-    useEffect(() => {
-      if (!scrollCapability) return;
-      const unsub = scrollCapability.onLayoutReady((event) => {
-        if (event.documentId === documentId) {
-          setTotalPages(event.totalPages);
-        }
-      });
-      return () => {
-        unsub();
-        setTotalPages(0);
-      };
-    }, [scrollCapability, documentId]);
-
-    useEffect(() => {
-      if (!scrollProv) return;
-      const unsub = scrollProv.onPageChange((event) => {
+  useEffect(() => {
+    if (!scrollCapability) return;
+    const unsub = scrollCapability.onLayoutReady((event) => {
+      if (event.documentId === documentId) {
         setTotalPages(event.totalPages);
-        if (!editingRef.current) {
-          setPageNo(String(event.pageNumber));
-        }
-      });
-      return () => unsub();
-    }, [scrollProv]);
-    
-    const effectiveTotalPages =
-      totalPages > 0 ? totalPages : (scrollState?.totalPages ?? 0);
-    
-    const pageChange = useCallback(
-      (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key !== "Enter") return;
-        const page = parseInt(pageNo, 10);
-        if (isNaN(page)) return;
-        if (page >= 1 && page <= effectiveTotalPages) {
-          scrollProv?.scrollToPage({ pageNumber: page, behavior: "smooth" });
-        } else {
-          setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
-        }
-      },
-      [pageNo, effectiveTotalPages, scrollProv]
-    );
-
-    const handleDownloadClick = useCallback(async () => {
-      let preloadedBuffer: ArrayBuffer | undefined;
-      if (exportProv) {
-        try {
-          const task = exportProv.saveAsCopy();
-          preloadedBuffer = await task.toPromise();
-        } catch (err) {
-          console.warn(
-            "Could not extract in-memory PDF buffer from viewer, falling back to network fetch:",
-            err,
-          );
-        }
       }
-      await onDownload(preloadedBuffer);
-    }, [exportProv, onDownload]);
-
-    if (!zoomProv || !scrollProv) return null;
-
-    if (isReadingMode) {
-      return (
-        <button
-          onClick={toggleReadingMode}
-          title="Exit Reading Mode (R)"
-          className="group fixed bottom-5 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#262635]/70 py-1.5 pl-3.5 pr-2 text-xs font-medium text-white/70 shadow-lg backdrop-blur transition-all hover:bg-[#262635] hover:text-white hover:opacity-100"
-          style={{ opacity: 0.55 }}
-        >
-          <BookOpenText size={13} />
-          Reading Mode
-          <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 group-hover:bg-[#6536c1]">
-            <X size={11} />
-          </span>
-        </button>
-      );
-    }
-
-    const zoomIn = () => zoomProv.zoomIn();
-    const zoomOut = () => zoomProv.zoomOut();
-    const { zoomLevel } = zoomState;
-
-    const fullScreenStyle = {
-      bottom: 20,
-      left: "50%",
-      transform: "translateX(-50%)",
+    });
+    return () => {
+      unsub();
+      setTotalPages(0);
     };
+  }, [scrollCapability, documentId]);
 
-    const desktopPageInput = (
-      <div className={(!isFullscreen && !isMobile) ? "flex flex-col items-center gap-2" : "flex flex-row items-center gap-2"}>
-        <input
-          type="text"
-          value={pageNo}
-          onChange={(e) => {
-            editingRef.current = true;
-            setPageNo(e.target.value.replace(/[^0-9]/g, ""));
-          }}
-          onKeyDown={pageChange}
-          onFocus={(e) => {
-            editingRef.current = true;
-            e.target.select();
-          }}
-          onBlur={() => {
-            editingRef.current = false;
-            setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
-          }}
-          inputMode="numeric"
-          aria-label="Current page"
-          className="h-9 w-14 rounded border bg-[#e7e9ff] p-1 text-center text-sm [appearance:textfield] dark:bg-[#1f1f2a] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-        />
-        <span className="text-xs font-medium text-white">of {effectiveTotalPages || 1}</span>
-      </div>
+  useEffect(() => {
+    if (!scrollProv) return;
+    const unsub = scrollProv.onPageChange((event) => {
+      setTotalPages(event.totalPages);
+      if (!editingRef.current) {
+        setPageNo(String(event.pageNumber));
+      }
+    });
+    return () => unsub();
+  }, [scrollProv]);
+
+  const effectiveTotalPages =
+    totalPages > 0 ? totalPages : (scrollState?.totalPages ?? 0);
+
+  const pageChange = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key !== "Enter") return;
+      const page = parseInt(pageNo, 10);
+      if (isNaN(page)) return;
+      if (page >= 1 && page <= effectiveTotalPages) {
+        scrollProv?.scrollToPage({ pageNumber: page, behavior: "smooth" });
+      } else {
+        setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
+      }
+    },
+    [pageNo, effectiveTotalPages, scrollProv],
+  );
+
+  const handleDownloadClick = useCallback(async () => {
+    let preloadedBuffer: ArrayBuffer | undefined;
+    if (exportProv) {
+      try {
+        const task = exportProv.saveAsCopy();
+        preloadedBuffer = await task.toPromise();
+      } catch (err) {
+        console.warn(
+          "Could not extract in-memory PDF buffer from viewer, falling back to network fetch:",
+          err,
+        );
+      }
+    }
+    await onDownload(preloadedBuffer);
+  }, [exportProv, onDownload]);
+
+  if (!zoomProv || !scrollProv) return null;
+
+  if (isReadingMode) {
+    return (
+      <button
+        onClick={toggleReadingMode}
+        title="Exit Reading Mode (R)"
+        className="group fixed bottom-5 left-1/2 z-[2] flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#262635]/70 py-1.5 pl-3.5 pr-2 text-xs font-medium text-white/70 shadow-lg backdrop-blur transition-all hover:bg-[#262635] hover:text-white hover:opacity-100"
+        style={{ opacity: 0.55 }}
+      >
+        <BookOpenText size={13} />
+        Reading Mode
+        <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 group-hover:bg-[#6536c1]">
+          <X size={11} />
+        </span>
+      </button>
     );
-    
-    const desktopToolSet = (
-      <>
+  }
+
+  const zoomIn = () => zoomProv.zoomIn();
+  const zoomOut = () => zoomProv.zoomOut();
+  const { zoomLevel } = zoomState;
+
+  const fullScreenStyle = {
+    bottom: 20,
+    left: "50%",
+    transform: "translateX(-50%)",
+  };
+
+  const desktopPageInput = (
+    <div
+      className={
+        !isFullscreen && !isMobile
+          ? "flex flex-col items-center gap-2"
+          : "flex flex-row items-center gap-2"
+      }
+    >
+      <input
+        type="text"
+        value={pageNo}
+        onChange={(e) => {
+          editingRef.current = true;
+          setPageNo(e.target.value.replace(/[^0-9]/g, ""));
+        }}
+        onKeyDown={pageChange}
+        onFocus={(e) => {
+          editingRef.current = true;
+          e.target.select();
+        }}
+        onBlur={() => {
+          editingRef.current = false;
+          setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
+        }}
+        inputMode="numeric"
+        aria-label="Current page"
+        className="h-9 w-14 rounded border bg-[#e7e9ff] p-1 text-center text-sm [appearance:textfield] dark:bg-[#1f1f2a] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+      />
+      <span className="text-xs font-medium text-white">
+        of {effectiveTotalPages || 1}
+      </span>
+    </div>
+  );
+
+  const desktopToolSet = (
+    <>
+      <div className="relative">
+        {showReadingCoachmark && (
+          <div className="absolute bottom-full right-0 z-[2] mb-3 w-52 duration-300 animate-in fade-in slide-in-from-bottom-1">
+            <div className="rounded-lg bg-[#6536c1] px-3 py-2.5 text-[11px] leading-snug text-white shadow-xl">
+              <span className="font-semibold">New: Reading Mode.</span> Hides
+              everything but the paper — lighter than Fullscreen, your tabs stay
+              put.
+              <button
+                onClick={dismissReadingCoachmark}
+                className="mt-1.5 block text-[10px] font-semibold underline underline-offset-2"
+              >
+                Got it
+              </button>
+            </div>
+            <div className="ml-auto mr-3.5 h-2 w-2 -translate-y-1 rotate-45 bg-[#6536c1]" />
+          </div>
+        )}
+        {showReadingCoachmark && (
+          <span className="absolute inset-0 animate-ping rounded bg-[#6536c1] opacity-40" />
+        )}
+        <Button
+          onClick={toggleReadingMode}
+          className="relative h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7]"
+          title="Reading Mode (R): show just the paper"
+        >
+          <BookOpenText size={24} />
+        </Button>
+      </div>
+
+      <Button
+        onClick={toggleFullscreen}
+        className="h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7]"
+        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+      >
+        {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+      </Button>
+
+      <Button
+        onClick={handleDownloadClick}
+        className="h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7]"
+        title="Download PDF"
+      >
+        <Download size={24} />
+      </Button>
+
+      <ShareButton isFullscreen={isFullscreen} viewerRef={viewerRef} />
+
+      <Button
+        onClick={zoomOut}
+        disabled={typeof zoomLevel === "number" && zoomLevel <= 0.25}
+        className="h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
+        title="Zoom out"
+      >
+        <ZoomOut size={24} />
+      </Button>
+
+      <span className="font-small rounded bg-[#262635] px-1 py-2 text-[16.5px] text-xs text-white">
+        {typeof zoomLevel === "number"
+          ? `${Math.round(zoomLevel * 100)}%`
+          : "100%"}
+      </span>
+
+      <Button
+        onClick={zoomIn}
+        disabled={typeof zoomLevel === "number" && zoomLevel >= 3}
+        className="h-10 w-10 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
+        title="Zoom in"
+      >
+        <ZoomIn size={24} />
+      </Button>
+    </>
+  );
+
+  const mobileControls = (
+    <div
+      className="z-10 mx-auto my-2 flex w-fit max-w-[calc(100vw-24px)] flex-col items-center gap-2 rounded-xl bg-[#262635] p-2 shadow-lg backdrop-blur-md sm:p-2.5"
+      style={{ boxSizing: "border-box" }}
+    >
+      {/* Row 1: Page Navigation and Zoom */}
+      <div className="flex w-full items-center justify-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-1.5 text-xs text-white">
+          <input
+            type="text"
+            value={pageNo}
+            onChange={(e) => {
+              editingRef.current = true;
+              setPageNo(e.target.value.replace(/[^0-9]/g, ""));
+            }}
+            onKeyDown={pageChange}
+            onFocus={(e) => {
+              editingRef.current = true;
+              e.target.select();
+            }}
+            onBlur={() => {
+              editingRef.current = false;
+              setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
+            }}
+            inputMode="numeric"
+            aria-label="Current page"
+            className="h-8 w-11 rounded border border-[#3A3745] bg-[#1f1f2a] p-1 text-center text-xs font-semibold text-white [appearance:textfield] focus:border-[#6536c1] focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          />
+          <span className="whitespace-nowrap text-xs font-medium text-white/90">
+            of {effectiveTotalPages || 1}
+          </span>
+        </div>
+
+        <div className="h-4 w-px bg-white/20" aria-hidden="true" />
+
+        <div className="flex items-center gap-1">
+          <Button
+            onClick={zoomOut}
+            disabled={typeof zoomLevel === "number" && zoomLevel <= 0.25}
+            className="h-8 w-8 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] disabled:bg-gray-400 sm:h-9 sm:w-9"
+            title="Zoom out"
+            aria-label="Zoom out"
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="min-w-[40px] px-1 py-1 text-center text-xs font-medium text-white">
+            {typeof zoomLevel === "number"
+              ? `${Math.round(zoomLevel * 100)}%`
+              : "100%"}
+          </span>
+          <Button
+            onClick={zoomIn}
+            disabled={typeof zoomLevel === "number" && zoomLevel >= 3}
+            className="h-8 w-8 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] disabled:bg-gray-400 sm:h-9 sm:w-9"
+            title="Zoom in"
+            aria-label="Zoom in"
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Row 2: Action Buttons */}
+      <div className="flex items-center justify-center gap-2 sm:gap-2.5">
         <div className="relative">
           {showReadingCoachmark && (
-            <div className="absolute bottom-full right-0 z-[2] mb-3 w-52 animate-in fade-in slide-in-from-bottom-1 duration-300">
-              <div className="rounded-lg bg-[#6536c1] px-3 py-2.5 text-[11px] leading-snug text-white shadow-xl">
-                <span className="font-semibold">New: Reading Mode.</span> Hides
-                everything but the paper — lighter than Fullscreen, your tabs
-                stay put.
+            <div className="absolute bottom-full left-0 z-20 mb-2 w-48 duration-300 animate-in fade-in slide-in-from-bottom-1 sm:w-52">
+              <div className="rounded-lg bg-[#6536c1] px-3 py-2 text-[11px] leading-snug text-white shadow-xl">
+                <span className="font-semibold">Reading Mode:</span> Hides
+                everything but the paper.
                 <button
                   onClick={dismissReadingCoachmark}
-                  className="mt-1.5 block text-[10px] font-semibold underline underline-offset-2"
+                  className="mt-1 block text-[10px] font-semibold underline underline-offset-2"
                 >
                   Got it
                 </button>
               </div>
-              <div className="ml-auto mr-3.5 h-2 w-2 -translate-y-1 rotate-45 bg-[#6536c1]" />
+              <div className="ml-3 h-2 w-2 -translate-y-1 rotate-45 bg-[#6536c1]" />
             </div>
           )}
           {showReadingCoachmark && (
@@ -214,541 +397,413 @@
           )}
           <Button
             onClick={toggleReadingMode}
-            className="relative h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+            className="relative h-8 w-8 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] sm:h-9 sm:w-9"
             title="Reading Mode (R): show just the paper"
+            aria-label="Reading Mode"
           >
-            <BookOpenText size={24} />
+            <BookOpenText className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
         </div>
 
         <Button
           onClick={toggleFullscreen}
-          className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+          className="h-8 w-8 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] sm:h-9 sm:w-9"
           title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
         >
-          {isFullscreen ? <Minimize2 size={24} /> : <Maximize2 size={24} />}
+          {isFullscreen ? (
+            <Minimize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : (
+            <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
+          )}
         </Button>
 
         <Button
           onClick={handleDownloadClick}
-          className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
+          className="h-8 w-8 rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] sm:h-9 sm:w-9"
           title="Download PDF"
+          aria-label="Download PDF"
         >
-          <Download size={24} />
+          <Download className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
-        <ShareButton isFullscreen={isFullscreen} viewerRef={viewerRef} />
+        <ShareButton
+          isFullscreen={isFullscreen}
+          viewerRef={viewerRef}
+          className="flex h-8 w-8 items-center justify-center rounded bg-[#6536c1] p-0 text-white transition hover:bg-[#7d4fc7] sm:h-9 sm:w-9"
+        />
 
-        <Button
-          onClick={zoomOut}
-          disabled={typeof zoomLevel === "number" && zoomLevel <= 0.25}
-          className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
-          title="Zoom out"
-        >
-          <ZoomOut size={24} />
-        </Button>
-
-        <span className="text-xs text-[16.5px] py-2 text-white font-small bg-[#262635] rounded px-1">
-          {typeof zoomLevel === "number" ? `${Math.round(zoomLevel * 100)}%` : "100%"}
-        </span>
-
-        <Button
-          onClick={zoomIn}
-          disabled={typeof zoomLevel === "number" && zoomLevel >= 3}
-          className="h-10 w-10 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
-          title="Zoom in"
-        >
-          <ZoomIn size={24} />
-        </Button>
-      </>
-    );
-
-    const mobileControls = (
-      <div
-        className="z-10 my-2 mx-auto flex w-fit max-w-[calc(100vw-24px)] flex-col items-center gap-2 rounded-xl bg-[#262635] p-2 sm:p-2.5 shadow-lg backdrop-blur-md"
-        style={{ boxSizing: "border-box" }}
-      >
-        {/* Row 1: Page Navigation and Zoom */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 w-full">
-          <div className="flex items-center gap-1.5 text-xs text-white">
-            <input
-              type="text"
-              value={pageNo}
-              onChange={(e) => {
-                editingRef.current = true;
-                setPageNo(e.target.value.replace(/[^0-9]/g, ""));
-              }}
-              onKeyDown={pageChange}
-              onFocus={(e) => {
-                editingRef.current = true;
-                e.target.select();
-              }}
-              onBlur={() => {
-                editingRef.current = false;
-                setPageNo(String(scrollProv?.getCurrentPage() ?? 1));
-              }}
-              inputMode="numeric"
-              aria-label="Current page"
-              className="h-8 w-11 rounded border border-[#3A3745] bg-[#1f1f2a] p-1 text-center text-xs font-semibold text-white [appearance:textfield] focus:outline-none focus:border-[#6536c1] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            />
-            <span className="text-xs font-medium text-white/90 whitespace-nowrap">
-              of {effectiveTotalPages || 1}
-            </span>
-          </div>
-
-          <div className="h-4 w-px bg-white/20" aria-hidden="true" />
-
-          <div className="flex items-center gap-1">
-            <Button
-              onClick={zoomOut}
-              disabled={typeof zoomLevel === "number" && zoomLevel <= 0.25}
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
-              title="Zoom out"
-              aria-label="Zoom out"
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-            <span className="min-w-[40px] px-1 py-1 text-center text-xs font-medium text-white">
-              {typeof zoomLevel === "number" ? `${Math.round(zoomLevel * 100)}%` : "100%"}
-            </span>
-            <Button
-              onClick={zoomIn}
-              disabled={typeof zoomLevel === "number" && zoomLevel >= 3}
-              className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] disabled:bg-gray-400"
-              title="Zoom in"
-              aria-label="Zoom in"
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Row 2: Action Buttons */}
-        <div className="flex items-center justify-center gap-2 sm:gap-2.5">
-          <div className="relative">
-            {showReadingCoachmark && (
-              <div className="absolute bottom-full left-0 z-20 mb-2 w-48 sm:w-52 animate-in fade-in slide-in-from-bottom-1 duration-300">
-                <div className="rounded-lg bg-[#6536c1] px-3 py-2 text-[11px] leading-snug text-white shadow-xl">
-                  <span className="font-semibold">Reading Mode:</span> Hides everything but the paper.
-                  <button
-                    onClick={dismissReadingCoachmark}
-                    className="mt-1 block text-[10px] font-semibold underline underline-offset-2"
-                  >
-                    Got it
-                  </button>
-                </div>
-                <div className="ml-3 h-2 w-2 -translate-y-1 rotate-45 bg-[#6536c1]" />
-              </div>
-            )}
-            {showReadingCoachmark && (
-              <span className="absolute inset-0 animate-ping rounded bg-[#6536c1] opacity-40" />
-            )}
-            <Button
-              onClick={toggleReadingMode}
-              className="relative h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
-              title="Reading Mode (R): show just the paper"
-              aria-label="Reading Mode"
-            >
-              <BookOpenText className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          </div>
-
-          <Button
-            onClick={toggleFullscreen}
-            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
-            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-          >
-            {isFullscreen ? (
-              <Minimize2 className="h-4 w-4 sm:h-5 sm:w-5" />
-            ) : (
-              <Maximize2 className="h-4 w-4 sm:h-5 sm:w-5" />
-            )}
-          </Button>
-
-          <Button
-            onClick={handleDownloadClick}
-            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white bg-[#6536c1] transition hover:bg-[#7d4fc7]"
-            title="Download PDF"
-            aria-label="Download PDF"
-          >
-            <Download className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-
-          <ShareButton
-            isFullscreen={isFullscreen}
-            viewerRef={viewerRef}
-            className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded text-white bg-[#6536c1] transition hover:bg-[#7d4fc7] flex items-center justify-center"
-          />
-
-          <ReportButton
-            className="h-8 w-8 sm:h-9 sm:w-9 rounded p-0 text-white transition hover:bg-red-600 bg-red-500 flex items-center justify-center"
-          />
-        </div>
+        <ReportButton className="flex h-8 w-8 items-center justify-center rounded bg-red-500 p-0 text-white transition hover:bg-red-600 sm:h-9 sm:w-9" />
       </div>
-    );
+    </div>
+  );
 
-    if (!forceMobile) {
-      if (!isSmall) {
-        return (
-          <div
-            style={{
-              position: "absolute",
-              ...(isFullscreen
-                ? { ...fullScreenStyle, flexDirection: "row" as const }
-                : {
-                    top: "40%",
-                    right: 20,
-                    transform: "translateY(-50%)",
-                    flexDirection: "column" as const,
-                  }),
-              zIndex: 1,
-              padding: "10px 8px",
-              display: "flex",
-              gap: 16,
-              alignItems: "center",
-              alignSelf: "center",
-              width: isFullscreen ? "auto" : "96px",
-              background: "#262635",
-              borderRadius: 8,
-              backdropFilter: "blur(6px)",
-            }}
-          >
-            {desktopToolSet}
-            {desktopPageInput}
-            <ReportButton />
-          </div>
-        );
-      }
-
-      // Mobile fullscreen
+  if (!forceMobile) {
+    if (!isSmall) {
       return (
         <div
           style={{
             position: "absolute",
-            ...fullScreenStyle,
+            ...(isFullscreen
+              ? { ...fullScreenStyle, flexDirection: "row" as const }
+              : {
+                  top: "40%",
+                  right: 20,
+                  transform: "translateY(-50%)",
+                  flexDirection: "column" as const,
+                }),
             zIndex: 1,
+            padding: "10px 8px",
+            display: "flex",
+            gap: 16,
+            alignItems: "center",
+            alignSelf: "center",
+            width: isFullscreen ? "auto" : "96px",
+            background: "#262635",
+            borderRadius: 8,
+            backdropFilter: "blur(6px)",
           }}
         >
-          {mobileControls}
+          {desktopToolSet}
+          {desktopPageInput}
+          <ReportButton />
         </div>
       );
     }
 
-    // forceMobile = true
-    if (isSmall) {
-      return mobileControls;
-    }
-
-    // Tablet width (640px <= width < 768px)
+    // Mobile fullscreen
     return (
       <div
-        className="z-10 my-2 mx-auto flex w-fit max-w-[calc(100vw-24px)] flex-row items-center gap-4 rounded-xl bg-[#262635] p-2.5 shadow-lg backdrop-blur-md"
         style={{
-          boxSizing: "border-box",
+          position: "absolute",
+          ...fullScreenStyle,
+          zIndex: 1,
         }}
       >
-        {desktopToolSet}
-        {desktopPageInput}
-        <ReportButton />
+        {mobileControls}
       </div>
     );
-  });
+  }
 
-  function WheelZoom({ documentId, viewerRef }: WheelZoomProps) {
-    const { provides: zoomProv } = useZoom(documentId);
-    const accumulatedDelta = useRef(0);
-    const rafId = useRef<number | null>(null);
-    const curZoom = useRef(1);
+  // forceMobile = true
+  if (isSmall) {
+    return mobileControls;
+  }
 
-    useEffect(() => {
-      if (!zoomProv) return;
-      curZoom.current = zoomProv.getState().currentZoomLevel;
-      const unsub = zoomProv.onZoomChange((e) => {
-        curZoom.current = e.newZoom;
+  // Tablet width (640px <= width < 768px)
+  return (
+    <div
+      className="z-10 mx-auto my-2 flex w-fit max-w-[calc(100vw-24px)] flex-row items-center gap-4 rounded-xl bg-[#262635] p-2.5 shadow-lg backdrop-blur-md"
+      style={{
+        boxSizing: "border-box",
+      }}
+    >
+      {desktopToolSet}
+      {desktopPageInput}
+      <ReportButton />
+    </div>
+  );
+});
+
+function WheelZoom({ documentId, viewerRef }: WheelZoomProps) {
+  const { provides: zoomProv } = useZoom(documentId);
+  const accumulatedDelta = useRef(0);
+  const rafId = useRef<number | null>(null);
+  const curZoom = useRef(1);
+
+  useEffect(() => {
+    if (!zoomProv) return;
+    curZoom.current = zoomProv.getState().currentZoomLevel;
+    const unsub = zoomProv.onZoomChange((e) => {
+      curZoom.current = e.newZoom;
+    });
+    return unsub;
+  }, [zoomProv]);
+
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      if (!e.ctrlKey || !zoomProv) return;
+      e.preventDefault();
+
+      const isTrackpad = Math.abs(e.deltaY) < 50;
+      const scaleFactor = isTrackpad ? 0.008 : 0.08;
+      accumulatedDelta.current += -e.deltaY * scaleFactor;
+
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+      rafId.current = requestAnimationFrame(() => {
+        const clamped = Math.max(
+          -0.15,
+          Math.min(accumulatedDelta.current, 0.15),
+        );
+
+        if (isTrackpad) {
+          const target = Math.max(0.25, Math.min(curZoom.current + clamped, 4));
+          zoomProv.requestZoom(target);
+          curZoom.current = target;
+        } else {
+          zoomProv.requestZoomBy(clamped);
+        }
+
+        accumulatedDelta.current = 0;
+        rafId.current = null;
       });
-      return unsub;
-    }, [zoomProv]);
+    },
+    [zoomProv],
+  );
 
-    const handleWheel = useCallback(
-      (e: WheelEvent) => {
-        if (!e.ctrlKey || !zoomProv) return;
-        e.preventDefault();
+  useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    viewer.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      viewer.removeEventListener("wheel", handleWheel);
+      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+    };
+  }, [handleWheel, viewerRef]);
 
-        const isTrackpad = Math.abs(e.deltaY) < 50;
-        const scaleFactor = isTrackpad ? 0.008 : 0.08;
-        accumulatedDelta.current += -e.deltaY * scaleFactor;
+  return null;
+}
 
-        if (rafId.current !== null) cancelAnimationFrame(rafId.current);
-        rafId.current = requestAnimationFrame(() => {
-          const clamped = Math.max(-0.15, Math.min(accumulatedDelta.current, 0.15));
+function useLoadingMessage(messages: string[], interval = 2200) {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
 
-          if (isTrackpad) {
-            const target = Math.max(0.25, Math.min(curZoom.current + clamped, 4));
-            zoomProv.requestZoom(target)
-            curZoom.current = target;
-          } else {
-            zoomProv.requestZoomBy(clamped);
-          }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % messages.length);
+        setVisible(true);
+      }, 400);
+    }, interval);
+    return () => clearInterval(timer);
+  }, [messages, interval]);
 
-          accumulatedDelta.current = 0;
-          rafId.current = null;
-        });
-      },
-      [zoomProv]
-    );
+  return { message: messages[index], visible };
+}
 
-    useEffect(() => {
-      const viewer = viewerRef.current;
-      if (!viewer) return;
-      viewer.addEventListener("wheel", handleWheel, { passive: false });
-      return () => {
-        viewer.removeEventListener("wheel", handleWheel);
-        if (rafId.current !== null) cancelAnimationFrame(rafId.current);
-      };
-    }, [handleWheel, viewerRef]);
+const LOADING_MESSAGES = [
+  "Loading document",
+  "Preparing pages",
+  "Almost there",
+];
 
-    return null;
-  }
-
-  function useLoadingMessage(messages: string[], interval = 2200) {
-    const [index, setIndex] = useState(0);
-    const [visible, setVisible] = useState(true);
-
-    useEffect(() => {
-      const timer = setInterval(() => {
-        setVisible(false);
-        setTimeout(() => {
-          setIndex(i => (i + 1) % messages.length);
-          setVisible(true);
-        }, 400);
-      }, interval);
-      return () => clearInterval(timer);
-    }, [messages, interval]);
-
-    return { message: messages[index], visible };
-  }
-
-  const LOADING_MESSAGES = [
-    "Loading document",
-    "Preparing pages",
-    "Almost there",
-  ];
-
-  export function Loader({
-    backgroundColor = "#070114",
-    textColor = "rgba(255,255,255,0.5)",
-  }: {
-    backgroundColor?: string;
-    textColor?: string;
-  }) {
-    const { message, visible } = useLoadingMessage(LOADING_MESSAGES);
-    return (
-      <div
-        className="flex h-dvh w-full flex-col items-center justify-center gap-3"
-        style={{ backgroundColor }}
+export function Loader({
+  backgroundColor = "#070114",
+  textColor = "rgba(255,255,255,0.5)",
+}: {
+  backgroundColor?: string;
+  textColor?: string;
+}) {
+  const { message, visible } = useLoadingMessage(LOADING_MESSAGES);
+  return (
+    <div
+      className="flex h-dvh w-full flex-col items-center justify-center gap-3"
+      style={{ backgroundColor }}
+    >
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-white" />
+      <span
+        className="duration-400 text-sm tracking-wide transition-opacity"
+        style={{ opacity: visible ? 1 : 0, color: textColor }}
       >
-        <div className="w-7 h-7 rounded-full border-2 border-white/10 border-t-white animate-spin" />
-        <span
-          className="text-sm tracking-wide transition-opacity duration-400"
-          style={{ opacity: visible ? 1 : 0, color: textColor }}
-        >
-          {message}
-        </span>
-      </div>
-    );
-  }
-  export default function PDFViewer({
-    url,
-    name,
-    className,
-    height = "100dvh",
-    hideControls = false,
-    backgroundColor,
-    hideScrollbar = false,
-    isolateFromTheme = true,
-    onReadingModeChange,
-  }: PdfViewerProps) {
-    const { engine, isLoading, error: engineError } = usePdfiumEngine();
-    const { isMobile, isSmall } = useBreakpoint();
-    const { resolvedTheme } = useTheme();
-    const paperCtx = useOptionalPaper();
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const [isReadingMode, setIsReadingMode] = useState(false);
-    const [showReadingCoachmark, setShowReadingCoachmark] = useState(false);
-    const viewerRef = useRef<HTMLDivElement>(null);
-    const pdfBufferRef = useRef<ArrayBuffer | null>(null);
-    const effectiveBackgroundColor =
-      backgroundColor ?? (resolvedTheme === "light" ? "#F3F5FF" : "#070114");
-    const loaderTextColor =
-      resolvedTheme === "light" ? "rgba(17,24,39,0.6)" : "rgba(255,255,255,0.5)";
+        {message}
+      </span>
+    </div>
+  );
+}
+export default function PDFViewer({
+  url,
+  name,
+  className,
+  height = "100dvh",
+  hideControls = false,
+  backgroundColor,
+  hideScrollbar = false,
+  isolateFromTheme = true,
+  onReadingModeChange,
+}: PdfViewerProps) {
+  const { engine, isLoading, error: engineError } = usePdfiumEngine();
+  const { isMobile, isSmall } = useBreakpoint();
+  const { resolvedTheme } = useTheme();
+  const paperCtx = useOptionalPaper();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isReadingMode, setIsReadingMode] = useState(false);
+  const [showReadingCoachmark, setShowReadingCoachmark] = useState(false);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const pdfBufferRef = useRef<ArrayBuffer | null>(null);
+  const effectiveBackgroundColor =
+    backgroundColor ?? (resolvedTheme === "light" ? "#F3F5FF" : "#070114");
+  const loaderTextColor =
+    resolvedTheme === "light" ? "rgba(17,24,39,0.6)" : "rgba(255,255,255,0.5)";
 
-    const [preloadedBuffer, setPreloadedBuffer] = useState<ArrayBuffer | null>(null);
-    const [fetchFailed, setFetchFailed] = useState(false);
+  const [preloadedBuffer, setPreloadedBuffer] = useState<ArrayBuffer | null>(
+    null,
+  );
+  const [fetchFailed, setFetchFailed] = useState(false);
 
-    useEffect(() => {
-      let isMounted = true;
-      setPreloadedBuffer(null);
-      setFetchFailed(false);
-      pdfBufferRef.current = null;
-      const fetchStart = performance.now();
+  useEffect(() => {
+    let isMounted = true;
+    setPreloadedBuffer(null);
+    setFetchFailed(false);
+    pdfBufferRef.current = null;
+    const fetchStart = performance.now();
 
-      // Early parallel fetch for PDF bytes while pdfium.wasm compiles
-      fetch(url, { credentials: "same-origin" })
-        .then(async (res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const buf = await res.arrayBuffer();
-          if (isMounted) {
-            setPreloadedBuffer(buf);
-            pdfBufferRef.current = buf;
-            trackEvent("pdf_opened", {
-              paper_id: paperCtx?.paperId,
-              paper_name: name,
-              is_mobile: isMobile,
-              duration_ms: Math.round(performance.now() - fetchStart),
-            });
-          }
-        })
-        .catch((err) => {
-          if (isMounted) {
-            console.warn(
-              "[PDF Early Fetch] Could not early fetch buffer, falling back to engine URL load:",
-              err
-            );
-            setFetchFailed(true);
-            trackError("pdf_render_failed", {
-              paper_id: paperCtx?.paperId,
-              paper_name: name,
-              error_message: err instanceof Error ? err.message : String(err),
-            });
-          }
-        });
-
-      return () => {
-        isMounted = false;
-        pdfBufferRef.current = null;
-      };
-    }, [url, name, isMobile, paperCtx?.paperId]);
-
-    const handleDownload = useCallback(
-      async (preloadedBuffer?: ArrayBuffer) => {
-        if (preloadedBuffer && preloadedBuffer.byteLength > 0) {
-          pdfBufferRef.current = preloadedBuffer;
+    // Early parallel fetch for PDF bytes while pdfium.wasm compiles
+    fetch(url, { credentials: "same-origin" })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const buf = await res.arrayBuffer();
+        if (isMounted) {
+          setPreloadedBuffer(buf);
+          pdfBufferRef.current = buf;
+          trackEvent("pdf_opened", {
+            paper_id: paperCtx?.paperId,
+            paper_name: name,
+            is_mobile: isMobile,
+            duration_ms: Math.round(performance.now() - fetchStart),
+          });
         }
-        // PRESERVE GTM dataLayer EVENT EXACTLY:
-        window.dataLayer?.push({
-          event: "pdf_download_start",
-          paper_title: name,
-          paper_url: url,
-        });
-
-        const dlStart = performance.now();
-        const bufferToUse =
-          preloadedBuffer ?? pdfBufferRef.current ?? undefined;
-        let watermarkSuccess = true;
-        try {
-          await downloadFile(url, `${name}.pdf`, bufferToUse);
-        } catch {
-          watermarkSuccess = false;
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.warn(
+            "[PDF Early Fetch] Could not early fetch buffer, falling back to engine URL load:",
+            err,
+          );
+          setFetchFailed(true);
+          trackError("pdf_render_failed", {
+            paper_id: paperCtx?.paperId,
+            paper_name: name,
+            error_message: err instanceof Error ? err.message : String(err),
+          });
         }
-
-        trackEvent("pdf_downloaded", {
-          paper_id: paperCtx?.paperId,
-          paper_name: name,
-          watermark_success: watermarkSuccess,
-          duration_ms: Math.round(performance.now() - dlStart),
-        });
-      },
-      [url, name, paperCtx?.paperId],
-    );
-
-    const toggleFullscreen = useCallback(() => {
-      if (!document.fullscreenElement) {
-        void viewerRef.current?.requestFullscreen();
-      } else {
-        void document.exitFullscreen();
-      }
-    }, []);
-
-    useEffect(() => {
-      const handleFullscreenChange = () =>
-        setIsFullscreen(!!document.fullscreenElement);
-      document.addEventListener("fullscreenchange", handleFullscreenChange);
-      return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-    }, []);
-
-    const dismissReadingCoachmark = useCallback(() => {
-      setShowReadingCoachmark(false);
-      try {
-        window.localStorage.setItem("pdfReadingModeSeen", "1");
-      } catch {
-        // localStorage unavailable (private mode, etc) — coachmark just won't persist
-      }
-    }, []);
-
-    const toggleReadingMode = useCallback(() => {
-      setIsReadingMode((r) => {
-        const next = !r;
-        onReadingModeChange?.(next);
-        return next;
       });
-      dismissReadingCoachmark();
-    }, [dismissReadingCoachmark, onReadingModeChange]);
 
-    useEffect(() => {
-      try {
-        if (!window.localStorage.getItem("pdfReadingModeSeen")) {
-          setShowReadingCoachmark(true);
-        }
-      } catch {
-        // ignore
+    return () => {
+      isMounted = false;
+      pdfBufferRef.current = null;
+    };
+  }, [url, name, isMobile, paperCtx?.paperId]);
+
+  const handleDownload = useCallback(
+    async (preloadedBuffer?: ArrayBuffer) => {
+      if (preloadedBuffer && preloadedBuffer.byteLength > 0) {
+        pdfBufferRef.current = preloadedBuffer;
       }
-    }, []);
+      // PRESERVE GTM dataLayer EVENT EXACTLY:
+      window.dataLayer?.push({
+        event: "pdf_download_start",
+        paper_title: name,
+        paper_url: url,
+      });
 
-    useEffect(() => {
-      if (!isReadingMode) return;
-      const prevOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = prevOverflow;
-      };
-    }, [isReadingMode]);
+      const dlStart = performance.now();
+      const bufferToUse = preloadedBuffer ?? pdfBufferRef.current ?? undefined;
+      let watermarkSuccess = true;
+      try {
+        await downloadFile(url, `${name}.pdf`, bufferToUse);
+      } catch {
+        watermarkSuccess = false;
+      }
 
-    useEffect(() => {
-      const handleKeydown = (e: KeyboardEvent) => {
-        const target = e.target as HTMLElement | null;
-        if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
+      trackEvent("pdf_downloaded", {
+        paper_id: paperCtx?.paperId,
+        paper_name: name,
+        watermark_success: watermarkSuccess,
+        duration_ms: Math.round(performance.now() - dlStart),
+      });
+    },
+    [url, name, paperCtx?.paperId],
+  );
 
-        if (e.key === "r" || e.key === "R") {
-          toggleReadingMode();
-        } else if (e.key === "Escape" && isReadingMode) {
-          setIsReadingMode(false);
-          onReadingModeChange?.(false);
-        }
-      };
-      window.addEventListener("keydown", handleKeydown);
-      return () => window.removeEventListener("keydown", handleKeydown);
-    }, [isReadingMode, toggleReadingMode, onReadingModeChange]);
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      void viewerRef.current?.requestFullscreen();
+    } else {
+      void document.exitFullscreen();
+    }
+  }, []);
 
-    const plugins = useMemo(() => {
-      const initialDocs = preloadedBuffer
-        ? [{ buffer: preloadedBuffer, name: `${name}.pdf` }]
-        : [{ url }];
-      return [
-        createPluginRegistration(DocumentManagerPluginPackage, {
-          initialDocuments: initialDocs,
-        }),
-        createPluginRegistration(ViewportPluginPackage),
-        createPluginRegistration(ScrollPluginPackage),
-        createPluginRegistration(RenderPluginPackage),
-        createPluginRegistration(ZoomPluginPackage, {
-          defaultZoomLevel: ZoomMode.FitPage,
-        }),
-        createPluginRegistration(ExportPluginPackage, {
-          defaultFileName: `${name}.pdf`,
-        }),
-      ];
-    }, [url, name, preloadedBuffer]);
+  useEffect(() => {
+    const handleFullscreenChange = () =>
+      setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const dismissReadingCoachmark = useCallback(() => {
+    setShowReadingCoachmark(false);
+    try {
+      window.localStorage.setItem("pdfReadingModeSeen", "1");
+    } catch {
+      // localStorage unavailable (private mode, etc) — coachmark just won't persist
+    }
+  }, []);
+
+  const toggleReadingMode = useCallback(() => {
+    setIsReadingMode((r) => {
+      const next = !r;
+      onReadingModeChange?.(next);
+      return next;
+    });
+    dismissReadingCoachmark();
+  }, [dismissReadingCoachmark, onReadingModeChange]);
+
+  useEffect(() => {
+    try {
+      if (!window.localStorage.getItem("pdfReadingModeSeen")) {
+        setShowReadingCoachmark(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isReadingMode) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [isReadingMode]);
+
+  useEffect(() => {
+    const handleKeydown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target && ["INPUT", "TEXTAREA"].includes(target.tagName)) return;
+
+      if (e.key === "r" || e.key === "R") {
+        toggleReadingMode();
+      } else if (e.key === "Escape" && isReadingMode) {
+        setIsReadingMode(false);
+        onReadingModeChange?.(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, [isReadingMode, toggleReadingMode, onReadingModeChange]);
+
+  const plugins = useMemo(() => {
+    const initialDocs = preloadedBuffer
+      ? [{ buffer: preloadedBuffer, name: `${name}.pdf` }]
+      : [{ url }];
+    return [
+      createPluginRegistration(DocumentManagerPluginPackage, {
+        initialDocuments: initialDocs,
+      }),
+      createPluginRegistration(ViewportPluginPackage),
+      createPluginRegistration(ScrollPluginPackage),
+      createPluginRegistration(RenderPluginPackage),
+      createPluginRegistration(ZoomPluginPackage, {
+        defaultZoomLevel: ZoomMode.FitPage,
+      }),
+      createPluginRegistration(ExportPluginPackage, {
+        defaultFileName: `${name}.pdf`,
+      }),
+    ];
+  }, [url, name, preloadedBuffer]);
 
   if (engineError) {
     return (
@@ -760,8 +815,12 @@
           <X className="h-8 w-8" />
         </div>
         <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-white">PDF Engine Failed to Initialize</h3>
-          <p className="text-sm text-gray-400">Please refresh the page or try downloading the document directly.</p>
+          <h3 className="text-lg font-semibold text-white">
+            PDF Engine Failed to Initialize
+          </h3>
+          <p className="text-sm text-gray-400">
+            Please refresh the page or try downloading the document directly.
+          </p>
         </div>
         <div className="flex gap-3">
           <Button
@@ -785,89 +844,93 @@
 
   if (isLoading || !engine || (!preloadedBuffer && !fetchFailed)) {
     return (
-  <Loader
-    backgroundColor={effectiveBackgroundColor}
-    textColor={loaderTextColor}
-  />
+      <Loader
+        backgroundColor={effectiveBackgroundColor}
+        textColor={loaderTextColor}
+      />
     );
   }
 
-    return (
-      <>
-        {hideScrollbar && (
-          <style jsx global>{`
-            [data-pdf-viewer-scrollbars="hidden"] *,
-            [data-pdf-viewer-scrollbars="hidden"] {
-              scrollbar-width: none;
-              -ms-overflow-style: none;
-            }
+  return (
+    <>
+      {hideScrollbar && (
+        <style jsx global>{`
+          [data-pdf-viewer-scrollbars="hidden"] *,
+          [data-pdf-viewer-scrollbars="hidden"] {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
 
-            [data-pdf-viewer-scrollbars="hidden"] ::-webkit-scrollbar {
-              display: none;
-              width: 0;
-              height: 0;
-            }
-          `}</style>
-        )}
-        {isolateFromTheme && (
-          <style jsx global>{`
-            [data-pdf-viewer-theme="light"] {
-              color-scheme: light;
-              forced-color-adjust: none;
-            }
+          [data-pdf-viewer-scrollbars="hidden"] ::-webkit-scrollbar {
+            display: none;
+            width: 0;
+            height: 0;
+          }
+        `}</style>
+      )}
+      {isolateFromTheme && (
+        <style jsx global>{`
+          [data-pdf-viewer-theme="light"] {
+            color-scheme: light;
+            forced-color-adjust: none;
+          }
 
-            [data-pdf-viewer-theme="light"] canvas,
-            [data-pdf-viewer-theme="light"] img,
-            [data-pdf-viewer-theme="light"] svg {
-              filter: none !important;
-              forced-color-adjust: none;
-            }
-          `}</style>
-        )}
-        <div
-          ref={viewerRef}
-          data-pdf-viewer-theme={isolateFromTheme ? "light" : "inherited"}
-          data-pdf-viewer-scrollbars={hideScrollbar ? "hidden" : "visible"}
-          className={className}
-          style={{
-            height: isReadingMode ? "100dvh" : height,
-            width: "100%",
-            maxWidth: "100%",
-            position: isReadingMode ? "fixed" : "relative",
-            top: isReadingMode ? 0 : undefined,
-            left: isReadingMode ? 0 : undefined,
-            right: isReadingMode ? 0 : undefined,
-            bottom: isReadingMode ? 0 : undefined,
-            zIndex: isReadingMode ? 999 : undefined,
-            backgroundColor: effectiveBackgroundColor,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            colorScheme: isolateFromTheme ? "light" : undefined,
-            forcedColorAdjust: isolateFromTheme ? "none" : undefined,
-            transition: "height 0.2s ease",
-          }}
-        >
-          <EmbedPDF engine={engine} plugins={plugins}>
+          [data-pdf-viewer-theme="light"] canvas,
+          [data-pdf-viewer-theme="light"] img,
+          [data-pdf-viewer-theme="light"] svg {
+            filter: none !important;
+            forced-color-adjust: none;
+          }
+        `}</style>
+      )}
+      <div
+        ref={viewerRef}
+        data-pdf-viewer-theme={isolateFromTheme ? "light" : "inherited"}
+        data-pdf-viewer-scrollbars={hideScrollbar ? "hidden" : "visible"}
+        className={className}
+        style={{
+          height: isReadingMode ? "100dvh" : height,
+          width: "100%",
+          maxWidth: "100%",
+          position: isReadingMode ? "fixed" : "relative",
+          top: isReadingMode ? 0 : undefined,
+          left: isReadingMode ? 0 : undefined,
+          right: isReadingMode ? 0 : undefined,
+          bottom: isReadingMode ? 0 : undefined,
+          zIndex: isReadingMode ? 999 : undefined,
+          backgroundColor: effectiveBackgroundColor,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          colorScheme: isolateFromTheme ? "light" : undefined,
+          forcedColorAdjust: isolateFromTheme ? "none" : undefined,
+          transition: "height 0.2s ease",
+        }}
+      >
+        <EmbedPDF engine={engine} plugins={plugins}>
           {({ activeDocumentId }) =>
             activeDocumentId && (
               <>
-                <WheelZoom documentId={activeDocumentId} viewerRef={viewerRef} />
-                {!hideControls && (isMobile && !isFullscreen) && 
-                <Controls
+                <WheelZoom
                   documentId={activeDocumentId}
-                  toggleFullscreen={toggleFullscreen}
-                  isFullscreen={isFullscreen}
-                  onDownload={handleDownload}
-                  forceMobile={true}
-                  isMobile={isMobile}
-                  isSmall={isSmall}
                   viewerRef={viewerRef}
-                  isReadingMode={isReadingMode}
-                  toggleReadingMode={toggleReadingMode}
-                  showReadingCoachmark={showReadingCoachmark}
-                  dismissReadingCoachmark={dismissReadingCoachmark}
-                />}
+                />
+                {!hideControls && isMobile && !isFullscreen && (
+                  <Controls
+                    documentId={activeDocumentId}
+                    toggleFullscreen={toggleFullscreen}
+                    isFullscreen={isFullscreen}
+                    onDownload={handleDownload}
+                    forceMobile={true}
+                    isMobile={isMobile}
+                    isSmall={isSmall}
+                    viewerRef={viewerRef}
+                    isReadingMode={isReadingMode}
+                    toggleReadingMode={toggleReadingMode}
+                    showReadingCoachmark={showReadingCoachmark}
+                    dismissReadingCoachmark={dismissReadingCoachmark}
+                  />
+                )}
                 <DocumentContent documentId={activeDocumentId}>
                   {({ isLoaded, isError }) => (
                     <>
@@ -880,8 +943,12 @@
                             <X className="h-8 w-8" />
                           </div>
                           <div className="space-y-1">
-                            <h3 className="text-lg font-semibold text-white">Unable to load document preview</h3>
-                            <p className="text-sm text-gray-400">There was an issue preparing this PDF preview.</p>
+                            <h3 className="text-lg font-semibold text-white">
+                              Unable to load document preview
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              There was an issue preparing this PDF preview.
+                            </p>
                           </div>
                           <div className="flex gap-3">
                             <Button
@@ -934,7 +1001,10 @@
                               style={{ width, height }}
                               onClick={(e) => e.stopPropagation()}
                             >
-                              <RenderLayer documentId={activeDocumentId} pageIndex={pageIndex} />
+                              <RenderLayer
+                                documentId={activeDocumentId}
+                                pageIndex={pageIndex}
+                              />
                             </div>
                           )}
                         />
@@ -942,7 +1012,7 @@
                     </>
                   )}
                 </DocumentContent>
-                    
+
                 {!hideControls && (!isMobile || isFullscreen) && (
                   <Controls
                     documentId={activeDocumentId}
@@ -962,8 +1032,8 @@
               </>
             )
           }
-          </EmbedPDF>
-        </div>
-      </>
-    );
-  }
+        </EmbedPDF>
+      </div>
+    </>
+  );
+}

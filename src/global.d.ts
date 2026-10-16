@@ -1,8 +1,8 @@
 type DataLayer = Array<Record<string, unknown>>;
 
 interface Window {
-  dataLayer: DataLayer; 
+  dataLayer: DataLayer;
 }
 
 // eslint-disable-next-line no-var
-  declare var dataLayer: DataLayer;
+declare var dataLayer: DataLayer;

@@ -17,9 +17,11 @@ Thank you for your interest in contributing to **PyqVitAp**! This document provi
    pnpm install
    ```
 4. **Set up your environment variables**:
+
    ```bash
    cp .env.example .env
    ```
+
    Populate your `.env` with your development database and credentials.
 
 5. **Start the local development server**:
@@ -36,13 +38,13 @@ Thank you for your interest in contributing to **PyqVitAp**! This document provi
 - **Do not commit PDFs or datasets:** The repository contains website source code only. Do not commit question paper PDFs, scraping archives, or database dumps.
 - **Keep changes focused:** Small, well-scoped pull requests are much easier to review and merge than massive multi-feature PRs.
 - **Type safety:** Always verify that TypeScript compiles with zero errors before submitting:
-   ```bash
-   npx tsc --noEmit
-   ```
+  ```bash
+  npx tsc --noEmit
+  ```
 - **Build check:** Ensure the application builds cleanly:
-   ```bash
-   SKIP_ENV_VALIDATION=1 pnpm run build
-   ```
+  ```bash
+  SKIP_ENV_VALIDATION=1 pnpm run build
+  ```
 
 ---
 

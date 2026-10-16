@@ -1,4 +1,4 @@
-  "use client";
+"use client";
 
 import { useCallback, useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -94,7 +94,9 @@ export default function Page() {
       }
 
       const MAX_FILE_SIZE = 5 * 1024 * 1024;
-      const oversizedFiles = acceptedFiles.filter((file) => file.size > MAX_FILE_SIZE);
+      const oversizedFiles = acceptedFiles.filter(
+        (file) => file.size > MAX_FILE_SIZE,
+      );
       if (oversizedFiles.length > 0) {
         toast.error(
           `File "${oversizedFiles[0]?.name}" exceeds the 5 MB limit. Please select a file under 5 MB.`,
@@ -269,7 +271,8 @@ export default function Page() {
       return;
     }
 
-    const isDirectPdf = files.length === 1 && files[0]?.type === "application/pdf";
+    const isDirectPdf =
+      files.length === 1 && files[0]?.type === "application/pdf";
 
     setIsUploading(true);
 
@@ -285,7 +288,9 @@ export default function Page() {
           }
 
           if (fileToUpload.size > 5 * 1024 * 1024) {
-            throw new Error("File exceeds 5MB limit. Please select a smaller file or fewer images.");
+            throw new Error(
+              "File exceeds 5MB limit. Please select a smaller file or fewer images.",
+            );
           }
 
           const formData = new FormData();
@@ -310,7 +315,9 @@ export default function Page() {
           }
         },
         {
-          loading: isDirectPdf ? "Uploading paper..." : "Converting images & uploading paper...",
+          loading: isDirectPdf
+            ? "Uploading paper..."
+            : "Converting images & uploading paper...",
           success: "Papers uploaded successfully!",
           error: (err: Error) => err.message,
         },

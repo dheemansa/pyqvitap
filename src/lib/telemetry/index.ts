@@ -22,8 +22,14 @@ export function sanitizeErrorMessage(message: string): string {
   if (!message || typeof message !== "string") return "Unknown error";
   return message
     .replace(/mongodb(?:\+srv)?:\/\/[^\s]+/gi, "[REDACTED_DB_URI]")
-    .replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/gi, "[REDACTED_EMAIL]")
-    .replace(/(key|token|secret|password|authorization|auth)=([^&\s]+)/gi, "$1=[REDACTED]")
+    .replace(
+      /[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/gi,
+      "[REDACTED_EMAIL]",
+    )
+    .replace(
+      /(key|token|secret|password|authorization|auth)=([^&\s]+)/gi,
+      "$1=[REDACTED]",
+    )
     .slice(0, 300);
 }
 
@@ -31,7 +37,10 @@ export function sanitizeErrorMessage(message: string): string {
  * Safe, fail-open client event dispatcher for PostHog.
  * Under no circumstances will this throw an error into the application.
  */
-export function trackEvent(name: string, properties?: Record<string, unknown>): void {
+export function trackEvent(
+  name: string,
+  properties?: Record<string, unknown>,
+): void {
   try {
     if (typeof window === "undefined") return;
 
@@ -45,7 +54,10 @@ export function trackEvent(name: string, properties?: Record<string, unknown>): 
  * Safe, fail-open client error dispatcher for PostHog.
  * Under no circumstances will this throw an error into the application.
  */
-export function trackError(errorName: string, properties?: Record<string, unknown>): void {
+export function trackError(
+  errorName: string,
+  properties?: Record<string, unknown>,
+): void {
   try {
     if (typeof window === "undefined") return;
 
@@ -76,7 +88,7 @@ export function trackApiFailure(
   method: string,
   statusCode: number,
   durationMs?: number,
-  category?: string
+  category?: string,
 ): void {
   try {
     const endpoint = sanitizeEndpoint(rawUrlOrPath);
@@ -84,8 +96,10 @@ export function trackApiFailure(
       endpoint,
       method: method.toUpperCase(),
       status_code: statusCode,
-      duration_ms: durationMs !== undefined ? Math.round(durationMs) : undefined,
-      error_category: category ?? (statusCode >= 500 ? "server_error" : "client_error"),
+      duration_ms:
+        durationMs !== undefined ? Math.round(durationMs) : undefined,
+      error_category:
+        category ?? (statusCode >= 500 ? "server_error" : "client_error"),
     });
   } catch {
     // Fail-open
@@ -106,36 +120,45 @@ export function initGlobalErrorTelemetry(): void {
     window.addEventListener("error", (event: ErrorEvent) => {
       try {
         trackError("frontend_uncaught_exception", {
-          error_message: sanitizeErrorMessage(event.message || "Uncaught exception"),
-          filename: event.filename ? sanitizeEndpoint(event.filename) : undefined,
+          error_message: sanitizeErrorMessage(
+            event.message || "Uncaught exception",
+          ),
+          filename: event.filename
+            ? sanitizeEndpoint(event.filename)
+            : undefined,
           lineno: event.lineno,
           colno: event.colno,
-          stack: event.error?.stack ? sanitizeErrorMessage(String(event.error.stack)) : undefined,
+          stack: event.error?.stack
+            ? sanitizeErrorMessage(String(event.error.stack))
+            : undefined,
         });
       } catch {
         // Fail-open
       }
     });
 
-    window.addEventListener("unhandledrejection", (event: PromiseRejectionEvent) => {
-      try {
-        const reason = event.reason;
-        const msg =
-          reason instanceof Error
-            ? reason.message
-            : typeof reason === "string"
-            ? reason
-            : "Unhandled promise rejection";
-        const stack = reason instanceof Error ? reason.stack : undefined;
+    window.addEventListener(
+      "unhandledrejection",
+      (event: PromiseRejectionEvent) => {
+        try {
+          const reason = event.reason;
+          const msg =
+            reason instanceof Error
+              ? reason.message
+              : typeof reason === "string"
+                ? reason
+                : "Unhandled promise rejection";
+          const stack = reason instanceof Error ? reason.stack : undefined;
 
-        trackError("frontend_unhandled_rejection", {
-          error_message: sanitizeErrorMessage(msg),
-          stack: stack ? sanitizeErrorMessage(stack) : undefined,
-        });
-      } catch {
-        // Fail-open
-      }
-    });
+          trackError("frontend_unhandled_rejection", {
+            error_message: sanitizeErrorMessage(msg),
+            stack: stack ? sanitizeErrorMessage(stack) : undefined,
+          });
+        } catch {
+          // Fail-open
+        }
+      },
+    );
   } catch {
     // Fail-open
   }

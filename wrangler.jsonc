@@ -3,33 +3,31 @@
   "name": "pyqvitap-migration-test",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-04",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "alias": {
-    "mongoose": "mongoose/index.js"
+    "mongoose": "mongoose/index.js",
   },
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "pyqvitap-migration-test"
-    }
+      "service": "pyqvitap-migration-test",
+    },
   ],
   "r2_buckets": [
     {
       "binding": "R2_MEDIA",
       "bucket_name": "pyqvitap-media",
-      "remote": true
-    }
+      "remote": true,
+    },
   ],
   "flagship": [
     {
       "binding": "FLAGS",
-      "app_id": "123ed6a3-6dcc-421b-9745-ab68e3558b64"
-    }
-  ]
+      "app_id": "123ed6a3-6dcc-421b-9745-ab68e3558b64",
+    },
+  ],
 }

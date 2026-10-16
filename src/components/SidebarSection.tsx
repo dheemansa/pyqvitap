@@ -30,27 +30,23 @@ const SidebarSection: React.FC<SidebarSectionProps> = ({
 
   return (
     <div className="flex w-full flex-col items-baseline justify-between border-b-2 border-[#36266d] px-[10px]">
-      <Accordion
-        className="w-full"
-        type="single"
-        collapsible
-      >
+      <Accordion className="w-full" type="single" collapsible>
         <AccordionItem
           className="border-none"
           value={label} // ✅ IMPORTANT: stable value
         >
           <AccordionTrigger
-            className={`w-full -mx-[10px] px-[10px] transition-colors duration-200 ${
+            className={`-mx-[10px] w-full px-[10px] transition-colors duration-200 ${
               isActive ? "bg-[#562EE7]/5 dark:bg-[#7480FF]/10" : ""
             }`}
           >
-            <div className="flex flex-1 items-center justify-between mr-2.5">
+            <div className="mr-2.5 flex flex-1 items-center justify-between">
               <div className="font-play text-sm text-gray-900 dark:text-white">
                 {label}
               </div>
               {isActive && (
                 <span
-                  className="h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400 shrink-0 shadow-[0_0_4px_rgba(16,185,129,0.4)]"
+                  className="h-2 w-2 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.4)] dark:bg-emerald-400"
                   aria-label={`${label} filter active`}
                 />
               )}

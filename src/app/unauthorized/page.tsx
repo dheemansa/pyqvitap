@@ -45,7 +45,7 @@ export default function UnauthorizedPage() {
 
         {/* Content */}
         <div className="relative flex flex-col items-center text-center">
-          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400 shadow-inner">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-purple-500/30 bg-purple-500/10 text-purple-400 shadow-inner">
             <ShieldAlert className="h-9 w-9 text-purple-400" />
           </div>
 
@@ -57,7 +57,7 @@ export default function UnauthorizedPage() {
               height={28}
               className="rounded-md"
             />
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 to-indigo-300 bg-clip-text text-xl font-bold tracking-tight text-transparent">
               PyqVitAp
             </span>
           </div>
@@ -68,7 +68,11 @@ export default function UnauthorizedPage() {
 
           <p className="mt-4 text-sm leading-relaxed text-zinc-300 md:text-base">
             PyqVitAp is an independent academic resource platform built
-            exclusively for students of <span className="font-semibold text-purple-300">VIT-AP University</span>.
+            exclusively for students of{" "}
+            <span className="font-semibold text-purple-300">
+              VIT-AP University
+            </span>
+            .
           </p>
 
           <div className="my-6 w-full rounded-xl border border-purple-500/30 bg-purple-950/30 p-4 text-left">
@@ -82,7 +86,8 @@ export default function UnauthorizedPage() {
           </div>
 
           <p className="text-xs text-zinc-400">
-            Please sign in with your official university student email address to unlock access to question papers and examination materials.
+            Please sign in with your official university student email address
+            to unlock access to question papers and examination materials.
           </p>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">

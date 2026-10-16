@@ -7,8 +7,7 @@ import { trackError } from "../telemetry";
 
 export { getMediaGatewayUrl };
 
-export const getSecureUrl = (url: string): string =>
-  getMediaGatewayUrl(url);
+export const getSecureUrl = (url: string): string => getMediaGatewayUrl(url);
 
 export const generateFileName = (paper: IPaper): string => {
   const extension = paper.file_url.split(".").pop();

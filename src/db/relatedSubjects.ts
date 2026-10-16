@@ -7,7 +7,9 @@ const relatedSubjectSchema = new Schema<IRelatedSubject>({
   related_subjects: { type: [String], required: true },
 });
 
-const RelatedSubject: Model<IRelatedSubject> =
-  getModel<IRelatedSubject>("RelatedSubject", relatedSubjectSchema);
+const RelatedSubject: Model<IRelatedSubject> = getModel<IRelatedSubject>(
+  "RelatedSubject",
+  relatedSubjectSchema,
+);
 
 export default RelatedSubject;

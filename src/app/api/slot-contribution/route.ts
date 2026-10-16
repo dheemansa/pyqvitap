@@ -22,7 +22,10 @@ export async function GET(req: Request) {
     return success(status, "Status fetched successfully.", 200);
   } catch (err) {
     console.error("[SlotCrowdsource GET Error]:", err);
-    return customErrorHandler(err, "Failed to retrieve slot crowdsourcing status.");
+    return customErrorHandler(
+      err,
+      "Failed to retrieve slot crowdsourcing status.",
+    );
   }
 }
 

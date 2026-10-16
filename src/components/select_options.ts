@@ -30,12 +30,7 @@ const campuses: string[] = [
   "Bangalore",
   "Mauritius",
 ];
-const exams: string[] = [
-  "CAT",
-  "CAT-1",
-  "CAT-2",
-  "FAT",
-];
+const exams: string[] = ["CAT", "CAT-1", "CAT-2", "FAT"];
 const semesters: string[] = [
   "FALL",
   "WINTER",

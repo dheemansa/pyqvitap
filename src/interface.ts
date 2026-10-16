@@ -32,7 +32,16 @@ export interface IAdminPaper {
   subject: string | null;
   slot: string | null;
   year: string | null;
-  exam: "CAT" | "CAT-1" | "CAT-2" | "FAT" | "Model" | "Model CAT-1" | "Model CAT-2" | "Model FAT" | null;
+  exam:
+    | "CAT"
+    | "CAT-1"
+    | "CAT-2"
+    | "FAT"
+    | "Model"
+    | "Model CAT-1"
+    | "Model CAT-2"
+    | "Model FAT"
+    | null;
   semester:
     | "FALL"
     | "WINTER"
@@ -110,7 +119,14 @@ export interface IUpcomingPaper extends mongo.Document {
 
 export interface IPaper {
   _id: string;
-  exam: "CAT" | "CAT-1" | "CAT-2" | "FAT" | "Model CAT-1" | "Model CAT-2" | "Model FAT";
+  exam:
+    | "CAT"
+    | "CAT-1"
+    | "CAT-2"
+    | "FAT"
+    | "Model CAT-1"
+    | "Model CAT-2"
+    | "Model FAT";
   file_url: string;
   thumbnail_url: string;
   semester:

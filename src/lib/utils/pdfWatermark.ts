@@ -145,7 +145,8 @@ export async function applyWatermarkAndDisclaimer(
           }
 
           // Left text: "pyqvitap" (prominent) and tagline (lighter)
-          const brandX = cardMarginX + contentPadX + (logoImage ? logoSize + 8 : 0);
+          const brandX =
+            cardMarginX + contentPadX + (logoImage ? logoSize + 8 : 0);
           page.drawText("pyqvitap", {
             x: brandX,
             y: topRowY + 5,
@@ -168,7 +169,8 @@ export async function applyWatermarkAndDisclaimer(
           const webWidth = fontBold.widthOfTextAtSize(webText, webSize);
           const globeRadius = 4.5;
           const rightContentWidth = globeRadius * 2 + 5 + webWidth;
-          const rightStartX = cardMarginX + cardWidth - contentPadX - rightContentWidth;
+          const rightStartX =
+            cardMarginX + cardWidth - contentPadX - rightContentWidth;
 
           // Draw vector globe icon
           const globeCenterX = rightStartX + globeRadius;

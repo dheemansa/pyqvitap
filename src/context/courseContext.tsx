@@ -15,7 +15,7 @@ import {
   type ICourseWithCount,
 } from "@/interface";
 
-import { type ApiResponse } from '@/interface'
+import { type ApiResponse } from "@/interface";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
 
 interface CoursesContextType {
@@ -64,7 +64,8 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
 
     // 2. Fetch /api/papers/count independently
     try {
-      const countRes = await axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count");
+      const countRes =
+        await axios.get<ApiResponse<ICourseCount[]>>("/api/papers/count");
       const countMap = new Map<string, number>(
         (countRes.data.data ?? []).map((c) => [c.name, c.count]),
       );
@@ -73,10 +74,13 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
         prevCourses.map((course) => ({
           ...course,
           count: countMap.get(course.name) ?? course.count ?? 0,
-        }))
+        })),
       );
     } catch (countErr: unknown) {
-      console.warn("Failed to fetch paper counts, retaining course list with default counts:", countErr);
+      console.warn(
+        "Failed to fetch paper counts, retaining course list with default counts:",
+        countErr,
+      );
     } finally {
       setLoading(false);
     }
@@ -96,9 +100,7 @@ export function CoursesProvider({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <CoursesContext.Provider value={value}>
-      {children}
-    </CoursesContext.Provider>
+    <CoursesContext.Provider value={value}>{children}</CoursesContext.Provider>
   );
 }
 

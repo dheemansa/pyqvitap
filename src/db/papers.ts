@@ -10,7 +10,15 @@ const adminSchema = new Schema<IAdminPaper>({
   year: { type: String || null },
   exam: {
     type: String || null,
-    enum: ["CAT", "CAT-1", "CAT-2", "FAT", "Model CAT-1", "Model CAT-2", "Model FAT"],
+    enum: [
+      "CAT",
+      "CAT-1",
+      "CAT-2",
+      "FAT",
+      "Model CAT-1",
+      "Model CAT-2",
+      "Model FAT",
+    ],
   },
   semester: {
     type: String || null,
@@ -45,7 +53,19 @@ const adminSchema = new Schema<IAdminPaper>({
   },
   school: {
     type: String || null,
-    enum: ["SCOPE", "SITE", "SENSE", "SMEC", "SCE", "SELECT", "SAS", "SSL", "VITBS", "SBST","SCORE"],
+    enum: [
+      "SCOPE",
+      "SITE",
+      "SENSE",
+      "SMEC",
+      "SCE",
+      "SELECT",
+      "SAS",
+      "SSL",
+      "VITBS",
+      "SBST",
+      "SCORE",
+    ],
   },
   pdf_sha256: { type: String || null, required: false },
   answer_key_included: { type: Boolean || null, default: false },
@@ -69,7 +89,15 @@ const paperSchema = new Schema<IPaper>({
   year: { type: String, required: true },
   exam: {
     type: String,
-    enum: ["CAT", "CAT-1", "CAT-2", "FAT", "Model CAT-1", "Model CAT-2", "Model FAT"],
+    enum: [
+      "CAT",
+      "CAT-1",
+      "CAT-2",
+      "FAT",
+      "Model CAT-1",
+      "Model CAT-2",
+      "Model FAT",
+    ],
     required: true,
   },
   semester: {
@@ -107,15 +135,36 @@ const paperSchema = new Schema<IPaper>({
   },
   school: {
     type: String,
-    enum: ["SCOPE","SITE","SENSE","SMEC","SCE","SELECT","SAS","SSL","VITBS","SBST","SCORE","SCHEME","SHINE","V-SIGN","V-SMART","V-SPARC","VAIAL","HOT"],
+    enum: [
+      "SCOPE",
+      "SITE",
+      "SENSE",
+      "SMEC",
+      "SCE",
+      "SELECT",
+      "SAS",
+      "SSL",
+      "VITBS",
+      "SBST",
+      "SCORE",
+      "SCHEME",
+      "SHINE",
+      "V-SIGN",
+      "V-SMART",
+      "V-SPARC",
+      "VAIAL",
+      "HOT",
+    ],
   },
   pdf_sha256: { type: String, required: false },
   answer_key_included: { type: Boolean, default: false },
 });
 
-export const PaperAdmin: Model<IAdminPaper> =
-  getModel<IAdminPaper>("Admin", adminSchema, "admins");
-const Paper: Model<IPaper> =
-  getModel<IPaper>("Paper", paperSchema, "papers");
+export const PaperAdmin: Model<IAdminPaper> = getModel<IAdminPaper>(
+  "Admin",
+  adminSchema,
+  "admins",
+);
+const Paper: Model<IPaper> = getModel<IPaper>("Paper", paperSchema, "papers");
 
 export default Paper;

@@ -31,7 +31,12 @@ function isSafeKey(segments) {
   if (!segments || segments.length === 0) return false;
   for (const segment of segments) {
     if (!segment) return false;
-    if (segment === "." || segment === ".." || segment.includes("\\") || segment.includes("\0")) {
+    if (
+      segment === "." ||
+      segment === ".." ||
+      segment.includes("\\") ||
+      segment.includes("\0")
+    ) {
       return false;
     }
   }
@@ -113,7 +118,12 @@ class MockR2Storage {
     this.subrequestCount = 0;
   }
 
-  addFile(key, content, etag = '"etag-123"', lastModified = new Date("2026-10-10T00:00:00Z")) {
+  addFile(
+    key,
+    content,
+    etag = '"etag-123"',
+    lastModified = new Date("2026-10-10T00:00:00Z"),
+  ) {
     this.files.set(key, {
       size: Buffer.byteLength(content),
       body: Buffer.from(content),
@@ -142,7 +152,9 @@ class MockR2Storage {
     if (!file) return null;
 
     if (options.onlyIf) {
-      const ifNoneMatch = options.onlyIf.get ? options.onlyIf.get("if-none-match") : null;
+      const ifNoneMatch = options.onlyIf.get
+        ? options.onlyIf.get("if-none-match")
+        : null;
       if (ifNoneMatch && ifNoneMatch === file.httpEtag) {
         return {
           size: file.size,
@@ -220,19 +232,24 @@ async function simulateMediaRoute(req, params, env) {
             headers.set("Accept-Ranges", "bytes");
             headers.set("X-Content-Type-Options", "nosniff");
             if (cachedEtag) headers.set("ETag", cachedEtag);
-            if (cachedLastModified) headers.set("Last-Modified", cachedLastModified);
+            if (cachedLastModified)
+              headers.set("Last-Modified", cachedLastModified);
             return new Response(null, { status: 412, headers });
           }
         } else if (ifUnmodifiedSince) {
           // Step 2: If-Unmodified-Since (only if If-Match is absent)
-          const modified = isModifiedSince(cachedLastModified, ifUnmodifiedSince);
+          const modified = isModifiedSince(
+            cachedLastModified,
+            ifUnmodifiedSince,
+          );
           if (modified === true) {
             const headers = new Headers();
             headers.set("Cache-Control", "private, no-store");
             headers.set("Accept-Ranges", "bytes");
             headers.set("X-Content-Type-Options", "nosniff");
             if (cachedEtag) headers.set("ETag", cachedEtag);
-            if (cachedLastModified) headers.set("Last-Modified", cachedLastModified);
+            if (cachedLastModified)
+              headers.set("Last-Modified", cachedLastModified);
             return new Response(null, { status: 412, headers });
           }
         }
@@ -281,7 +298,8 @@ async function simulateMediaRoute(req, params, env) {
       });
 
       if (r2Object && !("body" in r2Object && r2Object.body)) {
-        const contentType = r2Object.httpMetadata?.contentType ?? "application/pdf";
+        const contentType =
+          r2Object.httpMetadata?.contentType ?? "application/pdf";
         const cacheControl = getCacheControl(key, contentType);
         const headers = new Headers();
         headers.set("Content-Type", contentType);
@@ -289,12 +307,15 @@ async function simulateMediaRoute(req, params, env) {
         headers.set("Accept-Ranges", "bytes");
         headers.set("X-Content-Type-Options", "nosniff");
         if (r2Object.httpEtag) headers.set("ETag", r2Object.httpEtag);
-        if (r2Object.uploaded) headers.set("Last-Modified", r2Object.uploaded.toUTCString());
+        if (r2Object.uploaded)
+          headers.set("Last-Modified", r2Object.uploaded.toUTCString());
         return new Response(null, { status: 304, headers });
       }
 
       if (r2Object && r2Object.body) {
-        const contentType = r2Object.httpMetadata?.contentType ?? (isPdf ? "application/pdf" : "image/webp");
+        const contentType =
+          r2Object.httpMetadata?.contentType ??
+          (isPdf ? "application/pdf" : "image/webp");
         const cacheControl = getCacheControl(key, contentType);
         const headers = new Headers();
         headers.set("Content-Type", contentType);
@@ -302,7 +323,8 @@ async function simulateMediaRoute(req, params, env) {
         headers.set("Accept-Ranges", "bytes");
         headers.set("X-Content-Type-Options", "nosniff");
         if (r2Object.httpEtag) headers.set("ETag", r2Object.httpEtag);
-        if (r2Object.uploaded) headers.set("Last-Modified", r2Object.uploaded.toUTCString());
+        if (r2Object.uploaded)
+          headers.set("Last-Modified", r2Object.uploaded.toUTCString());
 
         if (r2Object.range) {
           headers.set("Content-Range", `bytes 0-49/${r2Object.size}`);
@@ -316,7 +338,10 @@ async function simulateMediaRoute(req, params, env) {
         if (cfCache && cacheKeyUrl && isEligibleForCache) {
           try {
             const internalCacheHeaders = new Headers(headers);
-            internalCacheHeaders.set("Cache-Control", `max-age=${PDF_CACHE_TTL_SECONDS}`);
+            internalCacheHeaders.set(
+              "Cache-Control",
+              `max-age=${PDF_CACHE_TTL_SECONDS}`,
+            );
             const cacheResponse = new Response(Buffer.from(r2Object.body), {
               status: 200,
               headers: internalCacheHeaders,
@@ -339,7 +364,10 @@ async function simulateMediaRoute(req, params, env) {
     if (cldRes.status === 200 && isEligibleForCache && cfCache && cacheKeyUrl) {
       try {
         const internalCacheHeaders = new Headers(cldRes.headers);
-        internalCacheHeaders.set("Cache-Control", `max-age=${PDF_CACHE_TTL_SECONDS}`);
+        internalCacheHeaders.set(
+          "Cache-Control",
+          `max-age=${PDF_CACHE_TTL_SECONDS}`,
+        );
         const cacheResponse = new Response(Buffer.from(cldRes.body), {
           status: 200,
           headers: internalCacheHeaders,
@@ -348,7 +376,10 @@ async function simulateMediaRoute(req, params, env) {
         cldRes.headers.set("X-Cache", "MISS-CLOUDINARY");
       } catch {}
     }
-    return new Response(cldRes.body, { status: cldRes.status, headers: cldRes.headers });
+    return new Response(cldRes.body, {
+      status: cldRes.status,
+      headers: cldRes.headers,
+    });
   }
 
   return new Response("Media not found", { status: 404 });
@@ -378,16 +409,37 @@ async function simulateHeadRoute(req, params, env) {
   const mockCache = new MockWorkerCache();
   const mockR2 = new MockR2Storage();
   const baseUploadDate = new Date("2026-10-10T00:00:00Z");
-  mockR2.addFile("papers/pdfs/math-2025.pdf", "MATH-PDF-DATA-SAMPLE", '"etag-math-1"', baseUploadDate);
-  mockR2.addFile("papers/pdfs/physics-2025.pdf", "PHYSICS-PDF-DATA-SAMPLE", '"etag-phys-1"', baseUploadDate);
-  mockR2.addFile("papers/thumbnails/math-thumb.webp", "WEBP-THUMB-SAMPLE", '"etag-thumb-1"', baseUploadDate);
+  mockR2.addFile(
+    "papers/pdfs/math-2025.pdf",
+    "MATH-PDF-DATA-SAMPLE",
+    '"etag-math-1"',
+    baseUploadDate,
+  );
+  mockR2.addFile(
+    "papers/pdfs/physics-2025.pdf",
+    "PHYSICS-PDF-DATA-SAMPLE",
+    '"etag-phys-1"',
+    baseUploadDate,
+  );
+  mockR2.addFile(
+    "papers/thumbnails/math-thumb.webp",
+    "WEBP-THUMB-SAMPLE",
+    '"etag-thumb-1"',
+    baseUploadDate,
+  );
 
   const env = { mockR2, mockCache, isAuthAuthorized: true };
 
   console.log("Test 1: First full GET request is a cache miss");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "MISS");
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
@@ -395,48 +447,84 @@ async function simulateHeadRoute(req, params, env) {
     console.log("  PASSED: Status 200, X-Cache: MISS, 1 R2 subrequest");
   }
 
-  console.log("Test 2: Repeated full GET request hits Worker Cache (0 R2 subrequests)");
+  console.log(
+    "Test 2: Repeated full GET request hits Worker Cache (0 R2 subrequests)",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER");
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     assert.strictEqual(mockR2.subrequestCount, 1); // DID NOT INCREMENT!
     const text = await res.text();
     assert.strictEqual(text, "MATH-PDF-DATA-SAMPLE");
-    console.log("  PASSED: Status 200, X-Cache: HIT-WORKER, 0 R2 subrequests (bypassed R2)");
+    console.log(
+      "  PASSED: Status 200, X-Cache: HIT-WORKER, 0 R2 subrequests (bypassed R2)",
+    );
   }
 
-  console.log("Test 3: Different PDF keys have strictly isolated cache entries");
+  console.log(
+    "Test 3: Different PDF keys have strictly isolated cache entries",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/physics-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "physics-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/physics-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "physics-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "MISS");
     assert.strictEqual(mockR2.subrequestCount, 2);
-    console.log("  PASSED: Physics PDF triggered independent cache miss and R2 retrieval");
+    console.log(
+      "  PASSED: Physics PDF triggered independent cache miss and R2 retrieval",
+    );
   }
 
   console.log("Test 4: Range requests bypass cache lookup and cache put");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { range: "bytes=0-49" },
-    });
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { range: "bytes=0-49" },
+      },
+    );
     const subreqsBefore = mockR2.subrequestCount;
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 206);
     assert.strictEqual(res.headers.get("X-Cache"), null);
     assert.strictEqual(mockR2.subrequestCount, subreqsBefore + 1);
-    console.log("  PASSED: Range request returned 206 and bypassed Worker cache");
+    console.log(
+      "  PASSED: Range request returned 206 and bypassed Worker cache",
+    );
   }
 
   console.log("Test 5: HEAD requests bypass caching");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      method: "HEAD",
-    });
-    const res = await simulateHeadRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        method: "HEAD",
+      },
+    );
+    const res = await simulateHeadRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), null);
     assert.strictEqual(res.headers.get("Accept-Ranges"), "bytes");
@@ -446,26 +534,49 @@ async function simulateHeadRoute(req, params, env) {
   console.log("Test 6: Authentication failure occurs before cache lookup");
   {
     const unauthEnv = { ...env, isAuthAuthorized: false };
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, unauthEnv);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      unauthEnv,
+    );
     assert.strictEqual(res.status, 401);
-    console.log("  PASSED: Unauthorized request received 401 without accessing cached bytes");
+    console.log(
+      "  PASSED: Unauthorized request received 401 without accessing cached bytes",
+    );
   }
 
   console.log("Test 7: Unsafe paths are rejected before cache access");
   {
     const req = new Request("https://pyqvitap.site/api/media/../secret.pdf");
-    const res = await simulateMediaRoute(req, { path: ["..", "secret.pdf"] }, env);
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["..", "secret.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 400);
-    console.log("  PASSED: Traversal attempt blocked at 400 before cache lookup");
+    console.log(
+      "  PASSED: Traversal attempt blocked at 400 before cache lookup",
+    );
   }
 
   console.log("Test 8: 404 responses are never cached");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/non-existent.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "non-existent.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/non-existent.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "non-existent.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 404);
-    assert.strictEqual(mockCache.store.has(buildMediaCacheKey("papers/pdfs/non-existent.pdf")), false);
+    assert.strictEqual(
+      mockCache.store.has(buildMediaCacheKey("papers/pdfs/non-existent.pdf")),
+      false,
+    );
     console.log("  PASSED: 404 not written to Worker Cache");
   }
 
@@ -478,90 +589,165 @@ async function simulateHeadRoute(req, params, env) {
         cldHeaders.set("Content-Type", "application/pdf");
         cldHeaders.set("Cache-Control", "private, no-store");
         cldHeaders.set("ETag", '"cld-etag-1"');
-        return { status: 200, headers: cldHeaders, body: "CLOUDINARY-PDF-BYTES" };
+        return {
+          status: 200,
+          headers: cldHeaders,
+          body: "CLOUDINARY-PDF-BYTES",
+        };
       },
     };
-    const req1 = new Request("https://pyqvitap.site/api/media/papers/pdfs/cld-fallback.pdf");
-    const res1 = await simulateMediaRoute(req1, { path: ["papers", "pdfs", "cld-fallback.pdf"] }, cldEnv);
+    const req1 = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/cld-fallback.pdf",
+    );
+    const res1 = await simulateMediaRoute(
+      req1,
+      { path: ["papers", "pdfs", "cld-fallback.pdf"] },
+      cldEnv,
+    );
     assert.strictEqual(res1.status, 200);
     assert.strictEqual(res1.headers.get("X-Cache"), "MISS-CLOUDINARY");
 
-    const req2 = new Request("https://pyqvitap.site/api/media/papers/pdfs/cld-fallback.pdf");
-    const res2 = await simulateMediaRoute(req2, { path: ["papers", "pdfs", "cld-fallback.pdf"] }, cldEnv);
+    const req2 = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/cld-fallback.pdf",
+    );
+    const res2 = await simulateMediaRoute(
+      req2,
+      { path: ["papers", "pdfs", "cld-fallback.pdf"] },
+      cldEnv,
+    );
     assert.strictEqual(res2.status, 200);
     assert.strictEqual(res2.headers.get("X-Cache"), "HIT-WORKER");
-    console.log("  PASSED: Cloudinary fallback successfully populated cache and served on repeat");
+    console.log(
+      "  PASSED: Cloudinary fallback successfully populated cache and served on repeat",
+    );
   }
 
   console.log("Test 10: If-None-Match produces correct 304 on cache hit");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-none-match": '"etag-math-1"' },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-none-match": '"etag-math-1"' },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 304);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER-304");
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     assert.strictEqual(res.body, null);
-    console.log("  PASSED: 304 Not Modified generated from cache hit with empty body");
+    console.log(
+      "  PASSED: 304 Not Modified generated from cache hit with empty body",
+    );
   }
 
-  console.log("Test 11: Cache API failure falls back safely to direct delivery");
+  console.log(
+    "Test 11: Cache API failure falls back safely to direct delivery",
+  );
   {
     const faultyCache = {
-      async match() { throw new Error("Simulated Cache Storage Failure"); },
-      async put() { throw new Error("Simulated Cache Put Failure"); },
+      async match() {
+        throw new Error("Simulated Cache Storage Failure");
+      },
+      async put() {
+        throw new Error("Simulated Cache Put Failure");
+      },
     };
     const faultyEnv = { ...env, mockCache: faultyCache };
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, faultyEnv);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      faultyEnv,
+    );
     assert.strictEqual(res.status, 200);
-    console.log("  PASSED: Cache exception safely absorbed, PDF served without failure");
+    console.log(
+      "  PASSED: Cache exception safely absorbed, PDF served without failure",
+    );
   }
 
   console.log("Test 12: PDF Cache-Control remains strictly private, no-store");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf");
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     console.log("  PASSED: Downstream Cache-Control is private, no-store");
   }
 
-  console.log("Test 13: Thumbnail behavior is completely unchanged (bypasses PDF cache)");
+  console.log(
+    "Test 13: Thumbnail behavior is completely unchanged (bypasses PDF cache)",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/thumbnails/math-thumb.webp");
-    const res = await simulateMediaRoute(req, { path: ["papers", "thumbnails", "math-thumb.webp"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/thumbnails/math-thumb.webp",
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "thumbnails", "math-thumb.webp"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), null);
     assert.strictEqual(
       res.headers.get("Cache-Control"),
-      "public, max-age=604800, s-maxage=31536000, stale-while-revalidate=86400"
+      "public, max-age=604800, s-maxage=31536000, stale-while-revalidate=86400",
     );
     console.log("  PASSED: Thumbnails preserve 1-year public edge POP caching");
   }
 
   // --- NEW FOCUSED TESTS: CONDITIONAL HTTP PRECONDITIONS (RFC 9110) ---
 
-  console.log("\n--- Testing HTTP Preconditions on Cache Hits (RFC 9110 §13.2.2) ---");
+  console.log(
+    "\n--- Testing HTTP Preconditions on Cache Hits (RFC 9110 §13.2.2) ---",
+  );
 
   console.log("Test 14: Matching If-Match on cache hit returns 200 OK");
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-match": '"etag-math-1"' },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-match": '"etag-math-1"' },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER");
     assert.strictEqual(res.headers.get("ETag"), '"etag-math-1"');
-    console.log("  PASSED: Matching If-Match satisfies condition, returns 200 OK");
+    console.log(
+      "  PASSED: Matching If-Match satisfies condition, returns 200 OK",
+    );
   }
 
-  console.log("Test 15: Failing If-Match on cache hit returns 412 Precondition Failed");
+  console.log(
+    "Test 15: Failing If-Match on cache hit returns 412 Precondition Failed",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-match": '"wrong-etag"' },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-match": '"wrong-etag"' },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 412);
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     assert.strictEqual(res.headers.get("ETag"), '"etag-math-1"');
@@ -569,118 +755,211 @@ async function simulateHeadRoute(req, params, env) {
     console.log("  PASSED: Non-matching If-Match returns 412 with empty body");
   }
 
-  console.log("Test 16: Weak ETag in If-Match on cache hit returns 412 (RFC 9110 requires strong comparison)");
+  console.log(
+    "Test 16: Weak ETag in If-Match on cache hit returns 412 (RFC 9110 requires strong comparison)",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-match": 'W/"etag-math-1"' },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-match": 'W/"etag-math-1"' },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 412);
-    console.log("  PASSED: Weak entity tag in If-Match correctly rejected as 412");
+    console.log(
+      "  PASSED: Weak entity tag in If-Match correctly rejected as 412",
+    );
   }
 
-  console.log("Test 17: Matching If-Unmodified-Since on cache hit returns 200 OK");
+  console.log(
+    "Test 17: Matching If-Unmodified-Since on cache hit returns 200 OK",
+  );
   {
     // Date is 1 day after upload date (2026-10-10) -> not modified since
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-unmodified-since": "Sun, 11 Oct 2026 00:00:00 GMT" },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-unmodified-since": "Sun, 11 Oct 2026 00:00:00 GMT" },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER");
-    console.log("  PASSED: If-Unmodified-Since date >= Last-Modified returns 200 OK");
+    console.log(
+      "  PASSED: If-Unmodified-Since date >= Last-Modified returns 200 OK",
+    );
   }
 
-  console.log("Test 18: Failing If-Unmodified-Since on cache hit returns 412 Precondition Failed");
+  console.log(
+    "Test 18: Failing If-Unmodified-Since on cache hit returns 412 Precondition Failed",
+  );
   {
     // Date is before upload date (2026-10-10) -> modified since client date
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-unmodified-since": "Thu, 08 Oct 2026 00:00:00 GMT" },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-unmodified-since": "Thu, 08 Oct 2026 00:00:00 GMT" },
+      },
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 412);
     assert.strictEqual(res.headers.get("Cache-Control"), "private, no-store");
     assert.strictEqual(res.body, null);
-    console.log("  PASSED: If-Unmodified-Since date < Last-Modified returns 412 with empty body");
+    console.log(
+      "  PASSED: If-Unmodified-Since date < Last-Modified returns 412 with empty body",
+    );
   }
 
-  console.log("Test 19: Precedence: If-Match takes precedence over If-None-Match");
+  console.log(
+    "Test 19: Precedence: If-Match takes precedence over If-None-Match",
+  );
   {
     // If-Match fails, even though If-None-Match matches -> MUST return 412, NOT 304!
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: {
-        "if-match": '"wrong-etag"',
-        "if-none-match": '"etag-math-1"',
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: {
+          "if-match": '"wrong-etag"',
+          "if-none-match": '"etag-math-1"',
+        },
       },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 412);
-    console.log("  PASSED: Precedence verified: If-Match failure yields 412 before If-None-Match");
+    console.log(
+      "  PASSED: Precedence verified: If-Match failure yields 412 before If-None-Match",
+    );
   }
 
-  console.log("Test 20: Precedence: If-Match match allows subsequent If-None-Match evaluation (yields 304)");
+  console.log(
+    "Test 20: Precedence: If-Match match allows subsequent If-None-Match evaluation (yields 304)",
+  );
   {
     // If-Match matches AND If-None-Match matches -> Step 1 passes, Step 3 yields 304
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: {
-        "if-match": '"etag-math-1"',
-        "if-none-match": '"etag-math-1"',
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: {
+          "if-match": '"etag-math-1"',
+          "if-none-match": '"etag-math-1"',
+        },
       },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 304);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER-304");
-    console.log("  PASSED: Precedence verified: If-Match passing permits If-None-Match to emit 304");
+    console.log(
+      "  PASSED: Precedence verified: If-Match passing permits If-None-Match to emit 304",
+    );
   }
 
-  console.log("Test 21: Precedence: If-None-Match takes precedence over If-Modified-Since");
+  console.log(
+    "Test 21: Precedence: If-None-Match takes precedence over If-Modified-Since",
+  );
   {
     // If-None-Match does NOT match, but If-Modified-Since is in the past -> Step 3 does not match, Step 4 skipped -> returns 200!
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: {
-        "if-none-match": '"different-etag"',
-        "if-modified-since": "Sun, 11 Oct 2026 00:00:00 GMT", // would yield 304 if evaluated alone
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: {
+          "if-none-match": '"different-etag"',
+          "if-modified-since": "Sun, 11 Oct 2026 00:00:00 GMT", // would yield 304 if evaluated alone
+        },
       },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER");
-    console.log("  PASSED: Precedence verified: If-None-Match mismatch causes If-Modified-Since to be ignored (returns 200)");
+    console.log(
+      "  PASSED: Precedence verified: If-None-Match mismatch causes If-Modified-Since to be ignored (returns 200)",
+    );
   }
 
-  console.log("Test 22: Malformed or unparseable date headers are safely ignored");
+  console.log(
+    "Test 22: Malformed or unparseable date headers are safely ignored",
+  );
   {
-    const req = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: {
-        "if-unmodified-since": "invalid-garbage-date",
-        "if-modified-since": "not-a-date",
+    const req = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: {
+          "if-unmodified-since": "invalid-garbage-date",
+          "if-modified-since": "not-a-date",
+        },
       },
-    });
-    const res = await simulateMediaRoute(req, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    );
+    const res = await simulateMediaRoute(
+      req,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
     assert.strictEqual(res.status, 200);
     assert.strictEqual(res.headers.get("X-Cache"), "HIT-WORKER");
-    console.log("  PASSED: Unparseable date headers safely ignored, full 200 representation served");
+    console.log(
+      "  PASSED: Unparseable date headers safely ignored, full 200 representation served",
+    );
   }
 
   console.log("Test 23: 304 and 412 responses are never written to the cache");
   {
     // Check cache store size before and after 304 and 412 requests
     const initialCacheSize = mockCache.store.size;
-    const req412 = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-match": '"wrong-etag"' },
-    });
-    await simulateMediaRoute(req412, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req412 = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-match": '"wrong-etag"' },
+      },
+    );
+    await simulateMediaRoute(
+      req412,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
 
-    const req304 = new Request("https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf", {
-      headers: { "if-none-match": '"etag-math-1"' },
-    });
-    await simulateMediaRoute(req304, { path: ["papers", "pdfs", "math-2025.pdf"] }, env);
+    const req304 = new Request(
+      "https://pyqvitap.site/api/media/papers/pdfs/math-2025.pdf",
+      {
+        headers: { "if-none-match": '"etag-math-1"' },
+      },
+    );
+    await simulateMediaRoute(
+      req304,
+      { path: ["papers", "pdfs", "math-2025.pdf"] },
+      env,
+    );
 
     assert.strictEqual(mockCache.store.size, initialCacheSize);
     console.log("  PASSED: Zero cache pollution from 304 and 412 responses");
   }
 
-  console.log("\n=== ALL 23 MEDIA WORKER CACHE & PRECONDITION TESTS PASSED SUCCESSFULLY! ===");
+  console.log(
+    "\n=== ALL 23 MEDIA WORKER CACHE & PRECONDITION TESTS PASSED SUCCESSFULLY! ===",
+  );
 })().catch((err) => {
   console.error("Test execution failed:", err);
   process.exit(1);

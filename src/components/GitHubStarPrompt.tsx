@@ -54,7 +54,7 @@ export default function GitHubStarPrompt() {
       role="dialog"
       aria-label="GitHub Star Prompt"
       aria-modal="false"
-      className={`fixed bottom-4 left-4 z-[45] w-[calc(100%-2rem)] max-w-sm pointer-events-auto transition-all duration-300 ease-out sm:bottom-6 sm:left-6 ${
+      className={`pointer-events-auto fixed bottom-4 left-4 z-[45] w-[calc(100%-2rem)] max-w-sm transition-all duration-300 ease-out sm:bottom-6 sm:left-6 ${
         isVisible
           ? "translate-y-0 scale-100 opacity-100"
           : "pointer-events-none translate-y-4 scale-95 opacity-0"

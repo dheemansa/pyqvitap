@@ -1,10 +1,4 @@
-import {
-  User,
-  Download,
-  Database,
-  Filter,
-  Book,
-} from "lucide-react";
+import { User, Download, Database, Filter, Book } from "lucide-react";
 import Image from "next/image";
 import man from "@/assets/man.svg" with { type: "image/svg" };
 import man1 from "@/assets/man1.svg" with { type: "image/svg" };
@@ -76,7 +70,7 @@ function Info() {
 
       {/* Create Request Section */}
 
-      <div className=" md:hidden z-50 flex justify-center py-4">
+      <div className="z-50 flex justify-center py-4 md:hidden">
         <PWAInstallButton />
       </div>
     </>

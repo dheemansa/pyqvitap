@@ -16,11 +16,11 @@ import { chunkArray } from "@/lib/utils/array";
 import { type StoredSubjects } from "@/interface";
 import SkeletonPaperCard from "./SkeletonPaperCard";
 import PinnedModal from "./ui/PinnedModal";
-import { type ApiResponse } from "@/interface"
+import { type ApiResponse } from "@/interface";
 
 interface userPaperResponse {
   subject: string;
-  slots: string[]
+  slots: string[];
 }
 
 function PinnedPapersCarousel() {
@@ -120,7 +120,10 @@ function PinnedPapersCarousel() {
             localStorage.getItem("userSubjects") ?? "[]",
           ) as StoredSubjects;
 
-          const response = await axios.post<ApiResponse<userPaperResponse[]>>("/api/user-papers", storedSubjects);
+          const response = await axios.post<ApiResponse<userPaperResponse[]>>(
+            "/api/user-papers",
+            storedSubjects,
+          );
 
           const fetchedPapers = response.data.data!;
 
@@ -204,7 +207,10 @@ function PinnedPapersCarousel() {
               ) : (
                 chunkedPapers.map((paperGroup, index) => {
                   const columns = chunkSize === 2 ? 1 : chunkSize === 4 ? 2 : 4;
-                  const rows = Math.max(1, Math.ceil(paperGroup.length / columns));
+                  const rows = Math.max(
+                    1,
+                    Math.ceil(paperGroup.length / columns),
+                  );
                   const placeholdersNeeded = columns * rows - paperGroup.length;
                   return (
                     <CarouselItem

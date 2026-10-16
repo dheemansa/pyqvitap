@@ -4,7 +4,12 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import { type IPaper, type Filters, type StoredSubjects, type ApiResponse } from "@/interface";
+import {
+  type IPaper,
+  type Filters,
+  type StoredSubjects,
+  type ApiResponse,
+} from "@/interface";
 import Card from "./Card";
 import Loader from "./ui/loader";
 import SideBar from "../components/SideBar";
@@ -75,7 +80,9 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
     if (!subject) return;
     const fetchRelatedSubjects = async () => {
       try {
-        const res = await axios.get<ApiResponse<{ related_subjects: string[] }>>("/api/related-subject", {
+        const res = await axios.get<
+          ApiResponse<{ related_subjects: string[] }>
+        >("/api/related-subject", {
           params: { subject },
         });
         const data = res.data.data?.related_subjects;
@@ -190,7 +197,9 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
     } catch (error) {
       setPapers([]);
       const duration = performance.now() - reqStart;
-      const status = axios.isAxiosError(error) ? (error.response?.status ?? 0) : 0;
+      const status = axios.isAxiosError(error)
+        ? (error.response?.status ?? 0)
+        : 0;
       trackApiFailure("/api/papers", "GET", status, duration);
 
       setError(
@@ -312,13 +321,18 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
                     ? `Open filters (${activeFilterCount} active)`
                     : "Open filters"
                 }
-                className="fixed z-40 flex h-12 items-center gap-2 rounded-full border-2 border-black bg-white px-5 font-sans text-sm font-semibold text-gray-900 shadow-[3px_3px_0_0_#000] transition-all duration-200 hover:bg-slate-50 hover:shadow-[4px_4px_0_0_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 dark:border-[#434dba] dark:bg-[#0c061d] dark:text-white dark:shadow-[3px_3px_0_0_#434dba] dark:hover:bg-[#150a30] dark:hover:shadow-[4px_4px_0_0_#7480FF] dark:active:shadow-[1px_1px_0_0_#434dba] dark:focus-visible:ring-[#7480FF] md:hidden"
+                className="fixed z-40 flex h-12 items-center gap-2 rounded-full border-2 border-black bg-white px-5 font-sans text-sm font-semibold text-gray-900 shadow-[3px_3px_0_0_#000] transition-all duration-200 hover:bg-slate-50 hover:shadow-[4px_4px_0_0_#000] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[1px_1px_0_0_#000] dark:border-[#434dba] dark:bg-[#0c061d] dark:text-white dark:shadow-[3px_3px_0_0_#434dba] dark:hover:bg-[#150a30] dark:hover:shadow-[4px_4px_0_0_#7480FF] dark:focus-visible:ring-[#7480FF] dark:active:shadow-[1px_1px_0_0_#434dba] md:hidden"
                 style={{
-                  bottom: "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))",
-                  right: "max(1.25rem, calc(1.25rem + env(safe-area-inset-right, 0px)))",
+                  bottom:
+                    "max(1.5rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)))",
+                  right:
+                    "max(1.25rem, calc(1.25rem + env(safe-area-inset-right, 0px)))",
                 }}
               >
-                <Filter size={18} className="shrink-0 text-black dark:text-[#7480FF]" />
+                <Filter
+                  size={18}
+                  className="shrink-0 text-black dark:text-[#7480FF]"
+                />
                 <span>Filters</span>
                 {activeFilterCount > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[#562EE7] px-1.5 text-[11px] font-bold text-white dark:bg-[#7480FF]">
@@ -406,7 +420,8 @@ const CatalogueContentInner = ({ subject }: { subject: string | null }) => {
               Search for Question Papers
             </h2>
             <p className="mt-2 max-w-md text-sm text-gray-600 dark:text-gray-400 md:text-base">
-              Search for a subject or course code above to explore and download previous year question papers.
+              Search for a subject or course code above to explore and download
+              previous year question papers.
             </p>
           </div>
         ) : loading ? (

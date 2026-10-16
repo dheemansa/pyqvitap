@@ -14,12 +14,18 @@ export function getOrCreateContributorId(): string {
     }
 
     let newId = "";
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    if (
+      typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
+    ) {
       newId = crypto.randomUUID();
     } else {
       // Fallback using crypto.getRandomValues
       const bytes = new Uint8Array(16);
-      if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+      if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.getRandomValues === "function"
+      ) {
         crypto.getRandomValues(bytes);
       } else {
         for (let i = 0; i < 16; i++) {

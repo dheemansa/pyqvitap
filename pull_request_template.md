@@ -1,4 +1,5 @@
 ## 📌 Purpose
+
 Explain the goal of this PR.  
 What problem does it solve, or what feature does it add?
 
@@ -9,11 +10,13 @@ What problem does it solve, or what feature does it add?
 ---
 
 ## 🖼️ Showcase
+
 (Add screenshots, screen recordings, or terminal outputs if the PR affects the UI or workflows.)
 
 ---
 
 ## 🔧 Changes
+
 - List the major changes made in this PR.
 - Example:
   - Added upcoming subjects section
@@ -22,13 +25,12 @@ What problem does it solve, or what feature does it add?
 ---
 
 ## ➕ Additional Notes
+
 - Mention any bug fixes, known issues, or follow-ups needed.
 - Add any extra context or considerations for reviewers.
 
-
-Examples of a good PR - 
+Examples of a good PR -
 
 https://github.com/CodeChefVIT/papers-codechef/pull/247
-
 
 **Note:** Open all pull requests to `staging` branch

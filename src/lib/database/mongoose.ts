@@ -22,7 +22,7 @@ const opts = {
 export function getModel<T>(
   name: string,
   schema: mongoose.Schema<T>,
-  collection?: string
+  collection?: string,
 ): mongoose.Model<T> {
   const baseModel =
     (mongoose.models[name] as mongoose.Model<T>) ??
@@ -69,7 +69,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
   const MONGODB_URI = process.env.MONGODB_DIRECT_URI || process.env.MONGODB_URI;
   if (!MONGODB_URI) {
     throw new Error(
-      "Please define the MONGODB_URI environment variable inside .env.local"
+      "Please define the MONGODB_URI environment variable inside .env.local",
     );
   }
 
@@ -90,7 +90,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
  * caused by shared connections whose underlying TCP streams are severed across request boundaries.
  */
 export async function withDatabase<T>(
-  operation: (m: typeof mongoose) => Promise<T>
+  operation: (m: typeof mongoose) => Promise<T>,
 ): Promise<T> {
   // Support nested withDatabase invocations safely within the same request
   const existingConn = connectionStorage.getStore();
@@ -101,7 +101,7 @@ export async function withDatabase<T>(
   const MONGODB_URI = process.env.MONGODB_DIRECT_URI || process.env.MONGODB_URI;
   if (!MONGODB_URI) {
     throw new Error(
-      "Please define the MONGODB_URI environment variable inside .env.local"
+      "Please define the MONGODB_URI environment variable inside .env.local",
     );
   }
 

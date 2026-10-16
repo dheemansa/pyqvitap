@@ -1,22 +1,19 @@
-import { NextResponse } from "next/server"
-import { type ApiResponse } from '@/interface'
+import { NextResponse } from "next/server";
+import { type ApiResponse } from "@/interface";
 
 export const success = <T>(
   data: T,
   message = "OK",
   status = 200,
-  headers?: HeadersInit
+  headers?: HeadersInit,
 ) =>
   NextResponse.json<ApiResponse<T>>(
     { status: "success", data, message },
-    { status, headers }
+    { status, headers },
   );
 
-export const failure = <T>(
-  message: string,
-  status = 400,
-) =>
+export const failure = <T>(message: string, status = 400) =>
   NextResponse.json<ApiResponse<T>>(
-    { status: "error", data: null, message},
-    { status }
-  )
+    { status: "error", data: null, message },
+    { status },
+  );

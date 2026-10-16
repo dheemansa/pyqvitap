@@ -14,7 +14,11 @@ export async function POST(req: Request & { ip?: string }) {
     await rateLimitCheck(req, paperId);
     const newReport = await reportTag(paperId, body);
 
-    return success({ message: "Report submitted.", report: newReport }, "Created", 201);
+    return success(
+      { message: "Report submitted.", report: newReport },
+      "Created",
+      201,
+    );
   } catch (err) {
     console.error(err);
     return customErrorHandler(err, "Failed to submit tag report.");

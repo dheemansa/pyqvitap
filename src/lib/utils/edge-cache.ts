@@ -17,7 +17,9 @@ const isolateMemoryCache = new Map<string, CacheEntry<unknown>>();
  *   first value differs (as read by URLSearchParams.get()) receive separate cache keys.
  * - Deterministically normalizes equivalent query parameter orderings with distinct keys.
  */
-export function buildNormalizedQueryString(searchParams: URLSearchParams): string {
+export function buildNormalizedQueryString(
+  searchParams: URLSearchParams,
+): string {
   const entries: [string, string][] = [];
   searchParams.forEach((value, key) => {
     entries.push([key.trim(), value.trim()]);
@@ -41,7 +43,10 @@ export function buildNormalizedQueryString(searchParams: URLSearchParams): strin
  * Falls back conservatively to (now - ttlMs) if no trustworthy metadata exists,
  * preventing unverified entries from gaining an artificial full-fresh TTL.
  */
-export function extractResponseTimestamp(res: Response, ttlSeconds: number): number {
+export function extractResponseTimestamp(
+  res: Response,
+  ttlSeconds: number,
+): number {
   const now = Date.now();
 
   // 1. High-fidelity internal generation header (millisecond epoch)
@@ -113,8 +118,7 @@ export async function cachedJsonEndpoint<T>({
 }): Promise<Response> {
   // Bypass cache if request contains authentication or user-specific headers
   const isAuth =
-    request.headers.has("authorization") ||
-    request.headers.has("x-user-id");
+    request.headers.has("authorization") || request.headers.has("x-user-id");
 
   if (isAuth) {
     try {
@@ -128,10 +132,13 @@ export async function cachedJsonEndpoint<T>({
             "Cache-Control": "private, no-cache, no-store, must-revalidate",
             "X-Cache": "BYPASS-AUTH",
           },
-        }
+        },
       );
     } catch (authErr) {
-      console.error(`[EdgeCache] Authenticated producer failed for ${cacheKeyPrefix}:`, authErr);
+      console.error(
+        `[EdgeCache] Authenticated producer failed for ${cacheKeyPrefix}:`,
+        authErr,
+      );
       return NextResponse.json<ApiResponse<null>>(
         { status: "error", data: null, message: errorMessage },
         {
@@ -140,14 +147,16 @@ export async function cachedJsonEndpoint<T>({
             "Cache-Control": "private, no-cache, no-store, must-revalidate",
             "X-Cache": "BYPASS-AUTH-ERROR",
           },
-        }
+        },
       );
     }
   }
 
   const u = new URL(request.url);
   const normalizedQuery = buildNormalizedQueryString(u.searchParams);
-  const memoryKey = normalizedQuery ? `${cacheKeyPrefix}:${normalizedQuery}` : cacheKeyPrefix;
+  const memoryKey = normalizedQuery
+    ? `${cacheKeyPrefix}:${normalizedQuery}`
+    : cacheKeyPrefix;
   const normalizedCacheUrl = normalizedQuery
     ? `${u.origin}${u.pathname}?${normalizedQuery}`
     : `${u.origin}${u.pathname}`;
@@ -157,7 +166,9 @@ export async function cachedJsonEndpoint<T>({
   const now = Date.now();
 
   // 1. Check Tier 1 (In-Memory Isolate Cache)
-  const memoryEntry = isolateMemoryCache.get(memoryKey) as CacheEntry<T> | undefined;
+  const memoryEntry = isolateMemoryCache.get(memoryKey) as
+    | CacheEntry<T>
+    | undefined;
   if (memoryEntry && now - memoryEntry.timestamp < ttlMs) {
     return NextResponse.json<ApiResponse<T>>(
       { status: "success", data: memoryEntry.data, message: "OK" },
@@ -168,7 +179,7 @@ export async function cachedJsonEndpoint<T>({
           "Cache-Control": `public, max-age=60, s-maxage=${ttlSeconds}, stale-while-revalidate=86400`,
           "X-Cache": "HIT-MEMORY",
         },
-      }
+      },
     );
   }
 
@@ -176,7 +187,9 @@ export async function cachedJsonEndpoint<T>({
   let cfCache: Cache | null = null;
 
   try {
-    const defaultCache = (globalThis as unknown as { caches?: { default?: Cache } }).caches?.default;
+    const defaultCache = (
+      globalThis as unknown as { caches?: { default?: Cache } }
+    ).caches?.default;
     if (defaultCache) {
       cfCache = defaultCache;
       const cacheReq = new Request(normalizedCacheUrl, { method: "GET" });
@@ -206,20 +219,23 @@ export async function cachedJsonEndpoint<T>({
           } catch (hydrationErr) {
             console.warn(
               `[EdgeCache] Failed hydrating Tier 1 from Tier 2 for ${memoryKey}:`,
-              hydrationErr
+              hydrationErr,
             );
           }
 
           return res;
         } else {
           console.warn(
-            `[EdgeCache] Tier 2 match for ${memoryKey} exceeded maxStaleAge (${Math.round(edgeAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`
+            `[EdgeCache] Tier 2 match for ${memoryKey} exceeded maxStaleAge (${Math.round(edgeAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`,
           );
         }
       }
     }
   } catch (err) {
-    console.warn(`[EdgeCache] Error reading from Cloudflare Cache API for ${memoryKey}:`, err);
+    console.warn(
+      `[EdgeCache] Error reading from Cloudflare Cache API for ${memoryKey}:`,
+      err,
+    );
   }
 
   // 3. Tier 3: Execute Producer (Database query via withDatabase)
@@ -236,7 +252,7 @@ export async function cachedJsonEndpoint<T>({
             "Cache-Control": "no-store, no-cache, must-revalidate",
             "X-Cache": "MISS-404",
           },
-        }
+        },
       );
     }
 
@@ -249,7 +265,7 @@ export async function cachedJsonEndpoint<T>({
             "Cache-Control": "no-store, no-cache, must-revalidate",
             "X-Cache": "MISS-INVALID",
           },
-        }
+        },
       );
     }
 
@@ -270,9 +286,9 @@ export async function cachedJsonEndpoint<T>({
           "Cache-Control": `public, max-age=60, s-maxage=${ttlSeconds}, stale-while-revalidate=86400`,
           "X-Cache": "MISS",
           "X-Edge-Created-At": generationTime.toString(),
-          "Date": new Date(generationTime).toUTCString(),
+          Date: new Date(generationTime).toUTCString(),
         },
-      }
+      },
     );
 
     // Save to Tier 2 Cloudflare Cache API
@@ -281,33 +297,43 @@ export async function cachedJsonEndpoint<T>({
         const cacheReq = new Request(normalizedCacheUrl, { method: "GET" });
         await cfCache.put(cacheReq, response.clone());
       } catch (putErr) {
-        console.warn(`[EdgeCache] Error writing to Cloudflare Cache API for ${memoryKey}:`, putErr);
+        console.warn(
+          `[EdgeCache] Error writing to Cloudflare Cache API for ${memoryKey}:`,
+          putErr,
+        );
       }
     }
 
     return response;
   } catch (producerError) {
-    console.error(`[EdgeCache] Producer failed for ${memoryKey}:`, producerError);
+    console.error(
+      `[EdgeCache] Producer failed for ${memoryKey}:`,
+      producerError,
+    );
 
     // Stale-if-error: only serve stale if entry exists AND is within maxStaleMs
     if (memoryEntry) {
       const staleAgeMs = now - memoryEntry.timestamp;
       if (staleAgeMs <= maxStaleMs) {
         return NextResponse.json<ApiResponse<T>>(
-          { status: "success", data: memoryEntry.data, message: "OK (Stale Fallback)" },
+          {
+            status: "success",
+            data: memoryEntry.data,
+            message: "OK (Stale Fallback)",
+          },
           {
             status: 200,
             headers: {
               "Content-Type": "application/json",
               "Cache-Control": "no-store, no-cache, must-revalidate",
               "X-Cache": "STALE-FALLBACK",
-              "Warning": `110 - "Response is Stale (age: ${Math.round(staleAgeMs / 1000)}s)"`,
+              Warning: `110 - "Response is Stale (age: ${Math.round(staleAgeMs / 1000)}s)"`,
             },
-          }
+          },
         );
       } else {
         console.warn(
-          `[EdgeCache] Stale entry for ${memoryKey} exceeded maxStaleAge (${Math.round(staleAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`
+          `[EdgeCache] Stale entry for ${memoryKey} exceeded maxStaleAge (${Math.round(staleAgeMs / 1000)}s > ${maxStaleAgeSeconds}s). Discarding.`,
         );
         isolateMemoryCache.delete(memoryKey);
       }
@@ -321,7 +347,7 @@ export async function cachedJsonEndpoint<T>({
           "Cache-Control": "no-store, no-cache, must-revalidate",
           "X-Cache": "ERROR-NO-CACHE",
         },
-      }
+      },
     );
   }
 }

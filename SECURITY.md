@@ -12,6 +12,7 @@ Instead, please send an email to:
 📧 **pyqvitap@gmail.com**
 
 In your report, please include:
+
 - A description of the vulnerability and its potential impact.
 - Clear, safe steps to reproduce the issue (proof of concept code or request samples).
 - Any recommendations or suggestions you have to resolve the issue.

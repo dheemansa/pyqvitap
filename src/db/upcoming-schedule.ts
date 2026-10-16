@@ -28,7 +28,9 @@ const upcomingScheduleSchema = new Schema<IUpcomingSchedule>(
   { timestamps: true },
 );
 
-const UpcomingSchedule: Model<IUpcomingSchedule> =
-  getModel<IUpcomingSchedule>("UpcomingSchedule", upcomingScheduleSchema);
+const UpcomingSchedule: Model<IUpcomingSchedule> = getModel<IUpcomingSchedule>(
+  "UpcomingSchedule",
+  upcomingScheduleSchema,
+);
 
 export default UpcomingSchedule;

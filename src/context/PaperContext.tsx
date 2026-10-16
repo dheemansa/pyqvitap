@@ -13,8 +13,16 @@ interface PaperContextType {
 
 const PaperContext = createContext<PaperContextType | undefined>(undefined);
 
-export const PaperProvider = ({ children, value }: { children: ReactNode; value: PaperContextType }) => {
-  return <PaperContext.Provider value={value}>{children}</PaperContext.Provider>;
+export const PaperProvider = ({
+  children,
+  value,
+}: {
+  children: ReactNode;
+  value: PaperContextType;
+}) => {
+  return (
+    <PaperContext.Provider value={value}>{children}</PaperContext.Provider>
+  );
 };
 
 export const usePaper = () => {

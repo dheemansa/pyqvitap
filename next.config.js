@@ -1,5 +1,7 @@
 if (process.env.NODE_ENV !== "production") {
-  const { initOpenNextCloudflareForDev } = await import("@opennextjs/cloudflare");
+  const { initOpenNextCloudflareForDev } = await import(
+    "@opennextjs/cloudflare"
+  );
   initOpenNextCloudflareForDev();
 }
 
@@ -96,7 +98,8 @@ const config = {
         ],
       },
       {
-        source: "/((?!api/).*\\.(?:css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2))",
+        source:
+          "/((?!api/).*\\.(?:css|js|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2))",
         headers: [
           {
             key: "Cache-Control",

@@ -21,8 +21,11 @@ async function verifyMediaAuth(): Promise<Response | null> {
   const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
   if (!publishableKey) {
     return new Response(
-      JSON.stringify({ error: "Unauthorized", message: "Authentication configuration missing" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: "Unauthorized",
+        message: "Authentication configuration missing",
+      }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
     );
   }
 
@@ -30,12 +33,17 @@ async function verifyMediaAuth(): Promise<Response | null> {
     const session = await auth();
     if (!session || !session.userId) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized", message: "Authentication required to access media" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({
+          error: "Unauthorized",
+          message: "Authentication required to access media",
+        }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    const claims = session.sessionClaims as (SessionClaimsWithEmail & Record<string, unknown>) | null;
+    const claims = session.sessionClaims as
+      | (SessionClaimsWithEmail & Record<string, unknown>)
+      | null;
     let email =
       claims?.email ??
       claims?.primaryEmail ??
@@ -45,13 +53,20 @@ async function verifyMediaAuth(): Promise<Response | null> {
 
     if (!email && process.env.CLERK_SECRET_KEY) {
       try {
-        const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+        const clerk = createClerkClient({
+          secretKey: process.env.CLERK_SECRET_KEY,
+        });
         const user = await clerk.users.getUser(session.userId);
         const primaryEmailId = user.primaryEmailAddressId;
-        const primaryObj = user.emailAddresses.find((e) => e.id === primaryEmailId);
+        const primaryObj = user.emailAddresses.find(
+          (e) => e.id === primaryEmailId,
+        );
         email = primaryObj?.emailAddress ?? "";
       } catch (lookupErr) {
-        console.error("[Media Gateway Auth] Failed to lookup user primary email:", lookupErr);
+        console.error(
+          "[Media Gateway Auth] Failed to lookup user primary email:",
+          lookupErr,
+        );
       }
     }
 
@@ -61,7 +76,7 @@ async function verifyMediaAuth(): Promise<Response | null> {
           error: "Forbidden",
           message: "Access restricted to @vitapstudent.ac.in verified accounts",
         }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
+        { status: 403, headers: { "Content-Type": "application/json" } },
       );
     }
 
@@ -69,8 +84,11 @@ async function verifyMediaAuth(): Promise<Response | null> {
   } catch (err) {
     console.error("[Media Gateway Auth Exception]", err);
     return new Response(
-      JSON.stringify({ error: "Unauthorized", message: "Authentication verification failed" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({
+        error: "Unauthorized",
+        message: "Authentication verification failed",
+      }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
     );
   }
 }
@@ -109,7 +127,12 @@ function isSafeKey(segments: string[]): boolean {
   for (const segment of segments) {
     if (!segment) return false;
     // Check for traversal or path tampering
-    if (segment === "." || segment === ".." || segment.includes("\\") || segment.includes("\0")) {
+    if (
+      segment === "." ||
+      segment === ".." ||
+      segment.includes("\\") ||
+      segment.includes("\0")
+    ) {
       return false;
     }
   }
@@ -149,7 +172,7 @@ async function getR2Bucket(): Promise<R2Bucket | undefined> {
 
 export async function GET(
   req: Request,
-  { params }: { params: { path: string[] } }
+  { params }: { params: { path: string[] } },
 ) {
   const authResponse = await verifyMediaAuth();
   if (authResponse) {
@@ -208,7 +231,7 @@ export async function GET(
         reason,
         fallback_enabled: false,
         key,
-      })
+      }),
     );
 
     if (r2Error) {
@@ -226,7 +249,7 @@ export async function GET(
       reason,
       media_type: inferMediaType(key),
       key,
-    })
+    }),
   );
 
   // 4. Server-side Cloudinary Fallback (NO REDIRECTS to client)
@@ -249,7 +272,9 @@ export async function GET(
       if (cldResponse.status === 404) {
         return new Response("Media not found", { status: 404 });
       }
-      return new Response("Upstream media error", { status: cldResponse.status });
+      return new Response("Upstream media error", {
+        status: cldResponse.status,
+      });
     }
 
     // Structured Fallback Success Log
@@ -259,7 +284,7 @@ export async function GET(
         primary: "r2",
         fallback: "cloudinary",
         key,
-      })
+      }),
     );
 
     const contentType =
@@ -289,7 +314,7 @@ export async function GET(
   } catch (fallbackError) {
     console.error(
       `[Media Gateway] Cloudinary fallback error for key "${key}":`,
-      fallbackError
+      fallbackError,
     );
     return new Response("Failed to fetch media asset", { status: 502 });
   }
@@ -297,7 +322,7 @@ export async function GET(
 
 export async function HEAD(
   req: Request,
-  { params }: { params: { path: string[] } }
+  { params }: { params: { path: string[] } },
 ) {
   const authResponse = await verifyMediaAuth();
   if (authResponse) {
@@ -331,14 +356,18 @@ export async function HEAD(
         headers.set("Content-Length", head.size.toString());
 
         if (head.httpEtag) headers.set("ETag", head.httpEtag);
-        if (head.uploaded) headers.set("Last-Modified", head.uploaded.toUTCString());
+        if (head.uploaded)
+          headers.set("Last-Modified", head.uploaded.toUTCString());
 
         return new Response(null, { status: 200, headers });
       }
     }
   } catch (err) {
     r2Error = err;
-    console.error(`[Media Gateway HEAD] R2 head error for key "${key}":`, r2Error);
+    console.error(
+      `[Media Gateway HEAD] R2 head error for key "${key}":`,
+      r2Error,
+    );
   }
 
   // 2. Check if Cloudinary Fallback is Enabled
@@ -352,7 +381,7 @@ export async function HEAD(
         reason,
         fallback_enabled: false,
         key,
-      })
+      }),
     );
 
     if (r2Error) {
@@ -370,7 +399,7 @@ export async function HEAD(
       reason,
       media_type: inferMediaType(key),
       key,
-    })
+    }),
   );
 
   // 4. Cloudinary HEAD fallback
@@ -389,7 +418,9 @@ export async function HEAD(
     const cldResponse = await fetch(cloudinaryUrl, { method: "HEAD" });
 
     if (!cldResponse.ok) {
-      return new Response(null, { status: cldResponse.status === 404 ? 404 : 502 });
+      return new Response(null, {
+        status: cldResponse.status === 404 ? 404 : 502,
+      });
     }
 
     console.info(
@@ -398,7 +429,7 @@ export async function HEAD(
         primary: "r2",
         fallback: "cloudinary",
         key,
-      })
+      }),
     );
 
     const contentType =

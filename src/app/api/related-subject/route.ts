@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
       return Boolean(
         data &&
           typeof data === "object" &&
-          Array.isArray((data as { related_subjects?: unknown[] }).related_subjects)
+          Array.isArray(
+            (data as { related_subjects?: unknown[] }).related_subjects,
+          ),
       );
     },
   });

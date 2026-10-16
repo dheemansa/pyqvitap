@@ -41,7 +41,11 @@ function SearchBarChild({
 
       // Automatically re-evaluate suggestions if user typed before course data arrived
       if (searchText.length > 1) {
-        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse).slice(0, 10);
+        const filteredSuggestions = rankCourses(
+          initialSubjects,
+          searchText,
+          newFuse,
+        ).slice(0, 10);
         setSuggestions(filteredSuggestions);
       }
     }
@@ -52,7 +56,11 @@ function SearchBarChild({
     setSearchText(text);
 
     if (text.length > 1 && initialSubjects.length > 0) {
-      const filteredSuggestions = rankCourses(initialSubjects, text, fuzzy).slice(0, 10);
+      const filteredSuggestions = rankCourses(
+        initialSubjects,
+        text,
+        fuzzy,
+      ).slice(0, 10);
       setSuggestions(filteredSuggestions);
       trackEvent("search_performed", {
         query_length: text.trim().length,
@@ -64,7 +72,10 @@ function SearchBarChild({
     }
   };
 
-  const handleSelectSuggestion = (suggestion: ICourseWithCount, rankIndex?: number) => {
+  const handleSelectSuggestion = (
+    suggestion: ICourseWithCount,
+    rankIndex?: number,
+  ) => {
     const codeMatch = /\[([^\]]+)\]$/.exec(suggestion.name);
     trackEvent("search_result_selected", {
       course_name: suggestion.name,
@@ -136,7 +147,10 @@ function SearchBarChild({
                   highlightedIndex < suggestions.length &&
                   suggestions[highlightedIndex] !== undefined
                 ) {
-                  handleSelectSuggestion(suggestions[highlightedIndex], highlightedIndex);
+                  handleSelectSuggestion(
+                    suggestions[highlightedIndex],
+                    highlightedIndex,
+                  );
                 } else {
                   router.push(
                     `/catalogue?subject=${encodeURIComponent(searchText)}`,
@@ -196,7 +210,7 @@ function SearchBarChild({
 
                   <span
                     id="subject"
-                    className="flex-1 min-w-0 flex items-center text-sm tracking-wide text-black dark:text-white sm:text-base"
+                    className="flex min-w-0 flex-1 items-center text-sm tracking-wide text-black dark:text-white sm:text-base"
                   >
                     {(() => {
                       const codeMatch = /\[[^\]]+\]$/.exec(suggestion.name);

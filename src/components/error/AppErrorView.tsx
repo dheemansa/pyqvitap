@@ -46,7 +46,7 @@ export default function AppErrorView({
   const content = (
     <div className="relative flex min-h-[70vh] w-full flex-col items-center justify-center px-4 py-12 text-zinc-900 transition-colors duration-300 dark:text-zinc-100">
       {/* Background ambient radial glow accents */}
-      <div className="pointer-events-none absolute -top-40 -left-40 h-[400px] w-[400px] rounded-full bg-purple-600/15 blur-[140px]" />
+      <div className="pointer-events-none absolute -left-40 -top-40 h-[400px] w-[400px] rounded-full bg-purple-600/15 blur-[140px]" />
       <div className="pointer-events-none absolute -bottom-40 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-600/15 blur-[140px]" />
 
       <div className="relative z-10 mx-auto w-full max-w-lg overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/85 p-8 shadow-2xl backdrop-blur-xl dark:border-purple-500/20 dark:bg-[#0c061d]/90 md:p-10">
@@ -111,7 +111,8 @@ export default function AppErrorView({
 
           {retryCount > 1 && (
             <p className="mt-4 text-[11px] text-zinc-500 dark:text-zinc-400">
-              If the problem persists, please check your network connection or try again later.
+              If the problem persists, please check your network connection or
+              try again later.
             </p>
           )}
         </div>
@@ -122,9 +123,7 @@ export default function AppErrorView({
   if (isGlobal) {
     return (
       <html lang="en" className="dark">
-        <body className="bg-[#F3F5FF] dark:bg-[#070114]">
-          {content}
-        </body>
+        <body className="bg-[#F3F5FF] dark:bg-[#070114]">{content}</body>
       </html>
     );
   }

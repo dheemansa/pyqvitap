@@ -1,6 +1,5 @@
 import { type IPaper } from "../../interface";
 
-
 export function extractUniqueValues(papers: IPaper[]) {
   if (papers.length === 0) {
     return {
@@ -13,12 +12,16 @@ export function extractUniqueValues(papers: IPaper[]) {
   }
 
   const unique_years = Array.from(new Set(papers.map((paper) => paper.year)));
-  const unique_slots = Array.from(new Set(papers.map((paper) => paper.slot))).filter(
-    (slot) => Boolean(slot && slot.trim())
-  );
+  const unique_slots = Array.from(
+    new Set(papers.map((paper) => paper.slot)),
+  ).filter((slot) => Boolean(slot && slot.trim()));
   const unique_exams = Array.from(new Set(papers.map((paper) => paper.exam)));
-  const unique_campuses = Array.from(new Set(papers.map((paper) => paper.campus)));
-  const unique_semesters = Array.from(new Set(papers.map((paper) => paper.semester)));
+  const unique_campuses = Array.from(
+    new Set(papers.map((paper) => paper.campus)),
+  );
+  const unique_semesters = Array.from(
+    new Set(papers.map((paper) => paper.semester)),
+  );
 
   return {
     unique_years,

@@ -34,7 +34,9 @@ const tagReportSchema = new Schema<ITagReport>({
 
 tagReportSchema.index({ paperId: 1, resolved: 1, createdAt: -1 });
 
-const TagReport: Model<ITagReport> =
-  getModel<ITagReport>("TagReport", tagReportSchema);
+const TagReport: Model<ITagReport> = getModel<ITagReport>(
+  "TagReport",
+  tagReportSchema,
+);
 
 export default TagReport;

@@ -39,16 +39,22 @@ export default function Banner({
   if (!visible) return null;
 
   return (
-    <div className="z-[60] w-full shadow-sm" style={{ backgroundColor: bgColor, color: textColor }}>
-      <div className="relative mx-auto flex max-w-screen-2xl flex-col items-start justify-between gap-3 px-4 py-3 sm:justify-center sm:flex-row sm:items-center sm:gap-4 md:px-8 md:py-3">
+    <div
+      className="z-[60] w-full shadow-sm"
+      style={{ backgroundColor: bgColor, color: textColor }}
+    >
+      <div className="relative mx-auto flex max-w-screen-2xl flex-col items-start justify-between gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4 md:px-8 md:py-3">
         <div className="flex items-center gap-2">
           <Info className="h-5 w-5" style={{ color: iconColor }} />
-          <span className="font-semibold text-base tracking-wide" style={{ color: accentColor }}>
+          <span
+            className="text-base font-semibold tracking-wide"
+            style={{ color: accentColor }}
+          >
             {title}
           </span>
         </div>
 
-        <p className="text-sm flex-1 sm:text-right">{message}</p>
+        <p className="flex-1 text-sm sm:text-right">{message}</p>
 
         <button
           onClick={closeBanner}
@@ -56,7 +62,7 @@ export default function Banner({
           aria-label="Dismiss banner"
           style={{ color: accentColor }}
         >
-          <X className="text-sm"/>
+          <X className="text-sm" />
         </button>
       </div>
     </div>

@@ -50,13 +50,24 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    <strong>PyqVitAp</strong> is an independent student-built platform for academic resources, maintained by an individual student for fellow students.
+                    <strong>PyqVitAp</strong> is an independent student-built
+                    platform for academic resources, maintained by an individual
+                    student for fellow students.
                   </p>
                   <p>
-                    This website is <strong>not affiliated with, endorsed by, sponsored by, or operated by VIT-AP University</strong> or any of its constituent schools, departments, centres, or governing bodies.
+                    This website is{" "}
+                    <strong>
+                      not affiliated with, endorsed by, sponsored by, or
+                      operated by VIT-AP University
+                    </strong>{" "}
+                    or any of its constituent schools, departments, centres, or
+                    governing bodies.
                   </p>
                   <p>
-                    VIT-AP University, its faculty, examination cells, and administration bear no responsibility for the creation, operation, maintenance, content accuracy, or availability of materials on this site.
+                    VIT-AP University, its faculty, examination cells, and
+                    administration bear no responsibility for the creation,
+                    operation, maintenance, content accuracy, or availability of
+                    materials on this site.
                   </p>
                 </div>
               </div>
@@ -75,10 +86,15 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    The sole purpose of PyqVitAp is to support student learning and examination preparation by providing convenient, organized access to past university question papers and related academic materials.
+                    The sole purpose of PyqVitAp is to support student learning
+                    and examination preparation by providing convenient,
+                    organized access to past university question papers and
+                    related academic materials.
                   </p>
                   <p>
-                    This platform operates as a non-commercial educational aid created to assist students in understanding exam patterns, practice question styles, and revision material.
+                    This platform operates as a non-commercial educational aid
+                    created to assist students in understanding exam patterns,
+                    practice question styles, and revision material.
                   </p>
                 </div>
               </div>
@@ -97,10 +113,16 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    Question papers and related academic documents accessible through PyqVitAp are primarily sourced from publicly accessible institutional resources, including the university&apos;s public <strong>DSpace</strong> digital repository, as well as voluntary student contributions.
+                    Question papers and related academic documents accessible
+                    through PyqVitAp are primarily sourced from publicly
+                    accessible institutional resources, including the
+                    university&apos;s public <strong>DSpace</strong> digital
+                    repository, as well as voluntary student contributions.
                   </p>
                   <p>
-                    PyqVitAp does not claim authorship, original formulation, or ownership of the question papers or course syllabi created by course instructors and university academic divisions.
+                    PyqVitAp does not claim authorship, original formulation, or
+                    ownership of the question papers or course syllabi created
+                    by course instructors and university academic divisions.
                   </p>
                 </div>
               </div>
@@ -119,10 +141,17 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    All copyrights, trademarks, institutional names, course titles, course codes, and question paper contents remain the property of their respective owners, including VIT-AP University and individual course instructors.
+                    All copyrights, trademarks, institutional names, course
+                    titles, course codes, and question paper contents remain the
+                    property of their respective owners, including VIT-AP
+                    University and individual course instructors.
                   </p>
                   <p>
-                    Nothing on this website should be construed as claiming that examination papers are copyright-free or &ldquo;free to use&rdquo; beyond personal educational study. All rights to the underlying intellectual property remain with the original creators and respective rights holders.
+                    Nothing on this website should be construed as claiming that
+                    examination papers are copyright-free or &ldquo;free to
+                    use&rdquo; beyond personal educational study. All rights to
+                    the underlying intellectual property remain with the
+                    original creators and respective rights holders.
                   </p>
                 </div>
               </div>
@@ -141,10 +170,18 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    While reasonable care is taken to index and organize papers correctly by subject code, slot, and exam term, PyqVitAp provides all resources on an <em>&ldquo;as-is&rdquo;</em> and <em>&ldquo;as-available&rdquo;</em> basis without warranty of any kind, express or implied.
+                    While reasonable care is taken to index and organize papers
+                    correctly by subject code, slot, and exam term, PyqVitAp
+                    provides all resources on an <em>&ldquo;as-is&rdquo;</em>{" "}
+                    and <em>&ldquo;as-available&rdquo;</em> basis without
+                    warranty of any kind, express or implied.
                   </p>
                   <p>
-                    Course syllabi, exam patterns, question formats, and module distributions change across semesters. Students are strongly advised to verify all current syllabus requirements, exam guidelines, and instructions directly with their respective course instructors and official academic bulletins.
+                    Course syllabi, exam patterns, question formats, and module
+                    distributions change across semesters. Students are strongly
+                    advised to verify all current syllabus requirements, exam
+                    guidelines, and instructions directly with their respective
+                    course instructors and official academic bulletins.
                   </p>
                 </div>
               </div>
@@ -163,7 +200,10 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    The availability of question papers, categories, and site features may change at any time without prior notice. Papers may be added, reorganized, or taken down as needed to maintain accuracy and address rights-holder requests.
+                    The availability of question papers, categories, and site
+                    features may change at any time without prior notice. Papers
+                    may be added, reorganized, or taken down as needed to
+                    maintain accuracy and address rights-holder requests.
                   </p>
                 </div>
               </div>
@@ -182,10 +222,16 @@ export default function DisclaimerPage() {
                 </h2>
                 <div className="space-y-2 font-play text-sm leading-relaxed text-gray-700 dark:text-gray-300">
                   <p>
-                    PyqVitAp respects the intellectual property rights of institutions, faculty members, and content creators. If you are an authorized representative or copyright holder and wish to request the review, update, or removal of any document or content on this website, please reach out to us.
+                    PyqVitAp respects the intellectual property rights of
+                    institutions, faculty members, and content creators. If you
+                    are an authorized representative or copyright holder and
+                    wish to request the review, update, or removal of any
+                    document or content on this website, please reach out to us.
                   </p>
                   <p>
-                    Please include the specific course code, course name, paper URL/link, and your details in your correspondence so that the request can be verified and addressed promptly.
+                    Please include the specific course code, course name, paper
+                    URL/link, and your details in your correspondence so that
+                    the request can be verified and addressed promptly.
                   </p>
                   <div className="pt-2">
                     <a

@@ -50,8 +50,11 @@ const userSchema = new Schema<IUserDoc>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const User: Model<IUserDoc> =
-  getModel<IUserDoc>("User", userSchema, "users");
+export const User: Model<IUserDoc> = getModel<IUserDoc>(
+  "User",
+  userSchema,
+  "users",
+);

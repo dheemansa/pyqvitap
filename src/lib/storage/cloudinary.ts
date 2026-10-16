@@ -1,5 +1,9 @@
 import { v2 as cloudinary } from "cloudinary";
-import type { StorageService, StorageUploadResult, StorageObjectResult } from "./types";
+import type {
+  StorageService,
+  StorageUploadResult,
+  StorageObjectResult,
+} from "./types";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -8,7 +12,10 @@ cloudinary.config({
   secure: true,
 });
 
-export async function uploadPDFToCloudinary(folder: string, buffer: Buffer): Promise<string> {
+export async function uploadPDFToCloudinary(
+  folder: string,
+  buffer: Buffer,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -23,13 +30,15 @@ export async function uploadPDFToCloudinary(folder: string, buffer: Buffer): Pro
           return reject(error || new Error("Cloudinary upload failed"));
         }
         resolve(result.secure_url);
-      }
+      },
     );
     uploadStream.end(buffer);
   });
 }
 
-export async function uploadThumbnailToCloudinary(buffer: Buffer): Promise<string> {
+export async function uploadThumbnailToCloudinary(
+  buffer: Buffer,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}_thumb`;
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -41,10 +50,12 @@ export async function uploadThumbnailToCloudinary(buffer: Buffer): Promise<strin
       },
       (error, result) => {
         if (error || !result) {
-          return reject(error || new Error("Cloudinary thumbnail upload failed"));
+          return reject(
+            error || new Error("Cloudinary thumbnail upload failed"),
+          );
         }
         resolve(result.secure_url);
-      }
+      },
     );
     uploadStream.end(buffer);
   });
@@ -53,11 +64,16 @@ export async function uploadThumbnailToCloudinary(buffer: Buffer): Promise<strin
 export class CloudinaryStorage implements StorageService {
   readonly providerName = "cloudinary";
 
-  async uploadPDF(folder: string, buffer: Buffer | Uint8Array): Promise<StorageUploadResult> {
+  async uploadPDF(
+    folder: string,
+    buffer: Buffer | Uint8Array,
+  ): Promise<StorageUploadResult> {
     const buf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
     const url = await uploadPDFToCloudinary(folder, buf);
     // Extract key relative to root
-    const key = url.split(/\/upload\/(?:v\d+\/)?/)[1] || `papers/${folder}/${Date.now()}.pdf`;
+    const key =
+      url.split(/\/upload\/(?:v\d+\/)?/)[1] ||
+      `papers/${folder}/${Date.now()}.pdf`;
     return {
       url,
       key,
@@ -65,10 +81,14 @@ export class CloudinaryStorage implements StorageService {
     };
   }
 
-  async uploadThumbnail(buffer: Buffer | Uint8Array): Promise<StorageUploadResult> {
+  async uploadThumbnail(
+    buffer: Buffer | Uint8Array,
+  ): Promise<StorageUploadResult> {
     const buf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
     const url = await uploadThumbnailToCloudinary(buf);
-    const key = url.split(/\/upload\/(?:v\d+\/)?/)[1] || `papers/thumbnails/${Date.now()}_thumb.png`;
+    const key =
+      url.split(/\/upload\/(?:v\d+\/)?/)[1] ||
+      `papers/thumbnails/${Date.now()}_thumb.png`;
     return {
       url,
       key,
@@ -80,19 +100,28 @@ export class CloudinaryStorage implements StorageService {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     if (!cloudName) return null;
 
-    const isRaw = key.endsWith(".pdf") || key.startsWith("papers/pdfs/") || key.startsWith("papers/unapproved/");
+    const isRaw =
+      key.endsWith(".pdf") ||
+      key.startsWith("papers/pdfs/") ||
+      key.startsWith("papers/unapproved/");
     const url = `https://res.cloudinary.com/${cloudName}/${isRaw ? "raw" : "image"}/upload/${key}`;
 
     try {
       const res = await fetch(url);
       if (!res.ok || !res.body) return null;
 
-      const contentType = res.headers.get("content-type") || (isRaw ? "application/pdf" : "image/webp");
+      const contentType =
+        res.headers.get("content-type") ||
+        (isRaw ? "application/pdf" : "image/webp");
       const contentLengthHeader = res.headers.get("content-length");
-      const contentLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : undefined;
+      const contentLength = contentLengthHeader
+        ? parseInt(contentLengthHeader, 10)
+        : undefined;
       const etag = res.headers.get("etag") || undefined;
       const lastModifiedHeader = res.headers.get("last-modified");
-      const lastModified = lastModifiedHeader ? new Date(lastModifiedHeader) : undefined;
+      const lastModified = lastModifiedHeader
+        ? new Date(lastModifiedHeader)
+        : undefined;
 
       return {
         body: res.body,
@@ -110,7 +139,10 @@ export class CloudinaryStorage implements StorageService {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
     if (!cloudName) return false;
 
-    const isRaw = key.endsWith(".pdf") || key.startsWith("papers/pdfs/") || key.startsWith("papers/unapproved/");
+    const isRaw =
+      key.endsWith(".pdf") ||
+      key.startsWith("papers/pdfs/") ||
+      key.startsWith("papers/unapproved/");
     const url = `https://res.cloudinary.com/${cloudName}/${isRaw ? "raw" : "image"}/upload/${key}`;
 
     try {

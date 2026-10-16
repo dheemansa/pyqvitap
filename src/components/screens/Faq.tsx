@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import Link from 'next/link';
+import Link from "next/link";
 import RequestModal from "../ui/RequestModal";
 import { useState } from "react";
 
 function Faq() {
-const faqs = [
+  const faqs = [
     {
       question: "How do you source exam papers for the website?",
       answer:
@@ -24,45 +24,48 @@ const faqs = [
     },
     {
       question: "How can I upload an exam paper to the website?",
-      answer:
+      answer: (
         <>
-      Click the {" "}
-        <Link
-          href="/upload"
-          rel="noopener noreferrer"
-          className="text-[#562EE7] dark:text-[#A47DE5] underline"
-        >
-          Upload
-        </Link>
-      {" "}button at the top-right corner to submit your exam papers.
-    </>
+          Click the{" "}
+          <Link
+            href="/upload"
+            rel="noopener noreferrer"
+            className="text-[#562EE7] underline dark:text-[#A47DE5]"
+          >
+            Upload
+          </Link>{" "}
+          button at the top-right corner to submit your exam papers.
+        </>
+      ),
     },
     {
       question: "How do I reach out for support or assistance?",
-      answer:
-       <>
-      For any queries or issues, you can mail us at{" "}
-      <Link
-        href="mailto:pyqvitap@gmail.com"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-[#562EE7] dark:text-[#A47DE5] underline"
-      >
-        pyqvitap@gmail.com
-      </Link>
-      .
-    </>,
+      answer: (
+        <>
+          For any queries or issues, you can mail us at{" "}
+          <Link
+            href="mailto:pyqvitap@gmail.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#562EE7] underline dark:text-[#A47DE5]"
+          >
+            pyqvitap@gmail.com
+          </Link>
+          .
+        </>
+      ),
     },
     {
       question:
         "What should I do if I can’t find a specific exam paper on the website?",
-      answer:
+      answer: (
         <>
-      If the paper you&apos;re looking for isn’t available, you can{" "}
-      <span>
-        <RequestModal section="faq"/>
-      </span>
-    </>,
+          If the paper you&apos;re looking for isn’t available, you can{" "}
+          <span>
+            <RequestModal section="faq" />
+          </span>
+        </>
+      ),
     },
     {
       question: "Are uploaded papers immediately visible on the website?",
@@ -70,7 +73,6 @@ const faqs = [
         "Once uploaded, our AI system identifies and categorizes the paper by subject, slot, and other relevant tags. The paper then undergoes a quick manual review to ensure quality before it becomes visible on the site.",
     },
   ];
-
 
   const [faqActive, setFaqActive] = useState<number | null>(null);
 
@@ -97,7 +99,7 @@ const faqs = [
               <h2
                 className={`w-full text-sm font-semibold leading-snug transition-colors sm:text-base md:text-lg ${
                   faqActive === index
-                    ? "text-[#562EE7] dark:text-[#A47DE5] "
+                    ? "text-[#562EE7] dark:text-[#A47DE5]"
                     : "text-black dark:text-white"
                 }`}
               >
@@ -106,7 +108,7 @@ const faqs = [
               <button
                 className={`flex h-6 w-8 shrink-0 items-center justify-center rounded-full text-base font-bold transition-all duration-200 sm:h-7 sm:w-9 sm:text-lg ${
                   faqActive === index
-                    ? "bg-[#562EE7] dark:bg-[#A47DE5]  text-white"
+                    ? "bg-[#562EE7] text-white dark:bg-[#A47DE5]"
                     : "bg-black text-white"
                 }`}
               >

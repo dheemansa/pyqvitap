@@ -3,7 +3,15 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ChevronDown, UploadIcon, Github, Pin, ArrowUpRight, Sun, Moon } from "lucide-react";
+import {
+  ChevronDown,
+  UploadIcon,
+  Github,
+  Pin,
+  ArrowUpRight,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { useTheme } from "next-themes";
 import ModeToggle from "./toggle-theme";
 import { MAINTENANCE_MODE } from "@/config/maintenance";
@@ -39,7 +47,7 @@ function MobileThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-lg transition-transform duration-200 hover:scale-105 hover:bg-slate-50 active:scale-95 motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F] pointer-events-auto after:absolute after:-inset-1 after:content-['']"
+      className="pointer-events-auto relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-lg transition-transform duration-200 after:absolute after:-inset-1 after:content-[''] hover:scale-105 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] active:scale-95 motion-reduce:transform-none motion-reduce:transition-none dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F]"
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
@@ -57,12 +65,12 @@ export default function FloatingNavbar({ onNavigate }: Props) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   return (
-    <div className="flex items-center gap-2 pointer-events-none shrink-0">
+    <div className="pointer-events-none flex shrink-0 items-center gap-2">
       <MobileThemeToggle />
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
         <DropdownMenuTrigger asChild>
           <button
-            className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 hover:bg-slate-50 dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] shadow-lg transition-transform duration-200 hover:scale-105 active:scale-95 pointer-events-auto motion-reduce:transition-none motion-reduce:transform-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F] after:absolute after:-inset-1 after:content-['']"
+            className="pointer-events-auto relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#3A3745] bg-[#e8e9ff] text-gray-700 shadow-lg transition-transform duration-200 after:absolute after:-inset-1 after:content-[''] hover:scale-105 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#562EE7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#B2B8FF] active:scale-95 motion-reduce:transform-none motion-reduce:transition-none dark:bg-[#1E1B2E] dark:text-white dark:hover:bg-[#2A263D] dark:focus-visible:ring-[#7480FF] dark:focus-visible:ring-offset-[#130E1F]"
             aria-label="Toggle dropdown"
           >
             <ChevronDown
@@ -72,15 +80,21 @@ export default function FloatingNavbar({ onNavigate }: Props) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent
-          className="xl:hidden mt-2 p-1.5 w-48 space-y-0.5 rounded-xl 
-          border border-[#3A3745] shadow-xl backdrop-blur-md transition-colors
-          bg-[#e8e9ff] text-gray-800 
-          dark:bg-[#181528] dark:text-white dark:border-[#3A3745]"
+          className="mt-2 w-48 space-y-0.5 rounded-xl border border-[#3A3745] bg-[#e8e9ff] p-1.5 text-gray-800 shadow-xl backdrop-blur-md transition-colors dark:border-[#3A3745] dark:bg-[#181528] dark:text-white xl:hidden"
           align="end"
         >
-          <DropdownMenuItem asChild className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer">
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D]"
+          >
             <Link
-              href={MAINTENANCE_MODE ? "/upload" : (pathname === "/upload" ? "/" : "/upload")}
+              href={
+                MAINTENANCE_MODE
+                  ? "/upload"
+                  : pathname === "/upload"
+                    ? "/"
+                    : "/upload"
+              }
               onClick={() => {
                 setDropdownOpen(false);
                 onNavigate();
@@ -89,7 +103,11 @@ export default function FloatingNavbar({ onNavigate }: Props) {
             >
               <UploadIcon className="h-4 w-4" />
               <span className="text-xs font-medium">
-                {MAINTENANCE_MODE ? "Upload Papers" : (pathname === "/upload" ? "Search Papers" : "Upload Papers")}
+                {MAINTENANCE_MODE
+                  ? "Upload Papers"
+                  : pathname === "/upload"
+                    ? "Search Papers"
+                    : "Upload Papers"}
               </span>
             </Link>
           </DropdownMenuItem>
@@ -104,7 +122,7 @@ export default function FloatingNavbar({ onNavigate }: Props) {
                 e.preventDefault();
               }
             }}
-            className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D]"
           >
             {MAINTENANCE_MODE ? (
               <Link
@@ -129,7 +147,7 @@ export default function FloatingNavbar({ onNavigate }: Props) {
                 e.preventDefault();
               }
             }}
-            className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer"
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D]"
           >
             {MAINTENANCE_MODE ? (
               <Link
@@ -144,7 +162,10 @@ export default function FloatingNavbar({ onNavigate }: Props) {
             )}
           </DropdownMenuItem>
 
-          <DropdownMenuItem asChild className="rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D] cursor-pointer">
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer rounded-lg px-2.5 py-1.5 hover:bg-slate-200 dark:hover:bg-[#1F2A3D] dark:focus:bg-[#1F2A3D]"
+          >
             <a
               href="https://github.com/sabarishwaran-v/pyqvitap"
               target="_blank"
@@ -156,9 +177,11 @@ export default function FloatingNavbar({ onNavigate }: Props) {
             </a>
           </DropdownMenuItem>
 
-          <div className="pt-1 mt-1 border-t border-gray-300 dark:border-[#2E2B3E] flex items-center justify-between px-2.5 py-1">
-            <span className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">Theme</span>
-            <div className="border border-gray-300 dark:border-[#3A3745] rounded-full p-0.5 scale-90">
+          <div className="mt-1 flex items-center justify-between border-t border-gray-300 px-2.5 py-1 pt-1 dark:border-[#2E2B3E]">
+            <span className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
+              Theme
+            </span>
+            <div className="scale-90 rounded-full border border-gray-300 p-0.5 dark:border-[#3A3745]">
               <ModeToggle />
             </div>
           </div>

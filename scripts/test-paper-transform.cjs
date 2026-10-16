@@ -62,9 +62,7 @@ function runTests() {
     },
     {
       name: "2. Single Paper",
-      input: [
-        { subject: "Calculus", slot: "A1+TA1" }
-      ],
+      input: [{ subject: "Calculus", slot: "A1+TA1" }],
     },
     {
       name: "3. Multiple Subjects (distinct)",
@@ -148,7 +146,9 @@ function runTests() {
     }
   }
 
-  console.log(`\nAll ${passedCount}/${testCases.length} equivalence test cases passed!`);
+  console.log(
+    `\nAll ${passedCount}/${testCases.length} equivalence test cases passed!`,
+  );
 
   // 10. Performance benchmark comparison (10,000 papers)
   console.log("\n------------------------------------------------------------");
@@ -172,8 +172,12 @@ function runTests() {
 
   console.log(`Original O(N*S) Time:   ${origTime.toFixed(3)} ms`);
   console.log(`Refactored O(N) Time:   ${refactoredTime.toFixed(3)} ms`);
-  console.log(`Speedup Factor:         ${(origTime / refactoredTime).toFixed(1)}x faster`);
-  console.log(`CPU Time Reduction:     ${(((origTime - refactoredTime) / origTime) * 100).toFixed(1)}%`);
+  console.log(
+    `Speedup Factor:         ${(origTime / refactoredTime).toFixed(1)}x faster`,
+  );
+  console.log(
+    `CPU Time Reduction:     ${(((origTime - refactoredTime) / origTime) * 100).toFixed(1)}%`,
+  );
   console.log("------------------------------------------------------------\n");
 }
 

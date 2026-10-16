@@ -50,7 +50,11 @@ export function isAuthorizedEmail(email: string | null | undefined): boolean {
  * 3. Fail-safe default: `false`.
  */
 interface FlagshipBinding {
-  getBooleanValue(name: string, defaultValue?: boolean, context?: Record<string, unknown>): Promise<boolean>;
+  getBooleanValue(
+    name: string,
+    defaultValue?: boolean,
+    context?: Record<string, unknown>,
+  ): Promise<boolean>;
 }
 
 export async function isAuthEnabled(): Promise<boolean> {

@@ -23,7 +23,7 @@ if (
   process.env.GOOGLE_CLOUD_BUCKET
 ) {
   const credentials: GCPCredentials = JSON.parse(
-    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON,
   ) as GCPCredentials;
 
   storage = new Storage({
@@ -41,7 +41,9 @@ export async function uploadPDF(folder: string, buffer: Buffer) {
   }
   const bucketName = process.env.GOOGLE_CLOUD_BUCKET ?? "";
   const pdfFilename = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.pdf`;
-  await bucket.file(pdfFilename).save(buffer, { resumable: false, contentType: "application/pdf" });
+  await bucket
+    .file(pdfFilename)
+    .save(buffer, { resumable: false, contentType: "application/pdf" });
   return `https://storage.googleapis.com/${bucketName}/${pdfFilename}`;
 }
 
@@ -51,6 +53,8 @@ export async function uploadThumbnail(buffer: Buffer, pdfFilename: string) {
   }
   const bucketName = process.env.GOOGLE_CLOUD_BUCKET ?? "";
   const thumbFilename = pdfFilename.replace(".pdf", ".png");
-  await bucket.file(thumbFilename).save(buffer, { resumable: false, contentType: "image/png" });
+  await bucket
+    .file(thumbFilename)
+    .save(buffer, { resumable: false, contentType: "image/png" });
   return `https://storage.googleapis.com/${bucketName}/${thumbFilename}`;
 }

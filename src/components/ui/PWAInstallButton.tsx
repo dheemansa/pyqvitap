@@ -54,15 +54,7 @@ const PWAInstallButton = () => {
 
   return (
     <>
-      <div className="flex w-fit items-center justify-between 
-        gap-1.5 
-        rounded-full border border-[#3A3745] 
-        bg-[#e8e9ff] dark:bg-black 
-        px-2.5 py-1.5 
-        text-xs font-medium text-gray-700 
-        shadow-md transition 
-        hover:bg-slate-50 dark:text-white dark:hover:bg-[#2b2b30] 
-        md:hidden h-9">
+      <div className="flex h-9 w-fit items-center justify-between gap-1.5 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-md transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#2b2b30] md:hidden">
         <div className="flex items-center gap-3">
           <Image
             src="/assets/images/papers_logo.png?v=4"
@@ -83,19 +75,14 @@ const PWAInstallButton = () => {
 
       <div
         onClick={handleInstall}
-        className="hidden md:flex 
-          cursor-pointer items-center 
-          gap-2 sm:gap-2.5 md:gap-3 
-          rounded-full border border-[#3A3745] 
-          bg-[#e8e9ff] dark:bg-black 
-          px-3 sm:px-4 md:px-5 
-          py-1.5 sm:py-2 
-          text-sm sm:text-base 
-          text-gray-700 dark:text-white 
-          transition hover:bg-slate-50 dark:hover:bg-[#1A1823] 
-          h-9 sm:h-10"
+        className="hidden h-9 cursor-pointer items-center gap-2 rounded-full border border-[#3A3745] bg-[#e8e9ff] px-3 py-1.5 text-sm text-gray-700 transition hover:bg-slate-50 dark:bg-black dark:text-white dark:hover:bg-[#1A1823] sm:h-10 sm:gap-2.5 sm:px-4 sm:py-2 sm:text-base md:flex md:gap-3 md:px-5"
       >
-        <Image src="/assets/images/papers_logo.png?v=4" alt="Pyq App" width={28} height={28} />
+        <Image
+          src="/assets/images/papers_logo.png?v=4"
+          alt="Pyq App"
+          width={28}
+          height={28}
+        />
         <span className="text-sm font-semibold">Pyq App</span>
       </div>
     </>

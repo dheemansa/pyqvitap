@@ -10,7 +10,8 @@ interface MaintenanceGateProps {
 
 export default function MaintenanceGate({ children }: MaintenanceGateProps) {
   const pathname = usePathname();
-  const isDisclaimer = pathname === "/disclaimer" || pathname === "/disclaimer/";
+  const isDisclaimer =
+    pathname === "/disclaimer" || pathname === "/disclaimer/";
 
   if (isDisclaimer) {
     return (

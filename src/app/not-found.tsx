@@ -31,7 +31,8 @@ export default function NotFound() {
             Page or paper not found
           </h1>
           <p className="mt-3 text-xs leading-relaxed text-zinc-600 dark:text-zinc-300 sm:text-sm">
-            The question paper or page you requested could not be found or may have been moved.
+            The question paper or page you requested could not be found or may
+            have been moved.
           </p>
 
           <div className="mt-8 flex w-full flex-col gap-3 sm:flex-row">

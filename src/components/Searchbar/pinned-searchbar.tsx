@@ -5,7 +5,11 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import PinButton from "../PinButton";
 import Fuse from "fuse.js";
-import { type StoredSubjects, type ICourseWithCount, type IUpcomingPaper } from "@/interface";
+import {
+  type StoredSubjects,
+  type ICourseWithCount,
+  type IUpcomingPaper,
+} from "@/interface";
 import { rankCourses } from "@/lib/utils/search-ranking";
 import { trackEvent } from "@/lib/telemetry";
 
@@ -15,8 +19,8 @@ function PinnedSearchBar({
   filtersNotPulled,
 }: {
   initialSubjects: ICourseWithCount[];
-  setDisplayPapers: React.Dispatch<React.SetStateAction<IUpcomingPaper[]>>; 
-  displayPapers : IUpcomingPaper[];
+  setDisplayPapers: React.Dispatch<React.SetStateAction<IUpcomingPaper[]>>;
+  displayPapers: IUpcomingPaper[];
   filtersNotPulled?: () => void;
 }) {
   const [searchText, setSearchText] = useState("");
@@ -31,11 +35,18 @@ function PinnedSearchBar({
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   useEffect(() => {
     if (initialSubjects && initialSubjects.length > 0) {
-      const newFuse = new Fuse(initialSubjects, { keys: ["name"], threshold: 0.3 });
+      const newFuse = new Fuse(initialSubjects, {
+        keys: ["name"],
+        threshold: 0.3,
+      });
       setFuzzy(newFuse);
 
       if (searchText.length > 1) {
-        const filteredSuggestions = rankCourses(initialSubjects, searchText, newFuse)
+        const filteredSuggestions = rankCourses(
+          initialSubjects,
+          searchText,
+          newFuse,
+        )
           .map((item) => item.name)
           .slice(0, 10);
         setSuggestions(filteredSuggestions);
@@ -91,7 +102,6 @@ function PinnedSearchBar({
     filtersNotPulled?.();
   };
 
-
   useEffect(() => {
     const handleAddClicked = () => {
       searchRef.current?.focus();
@@ -104,10 +114,12 @@ function PinnedSearchBar({
     };
   }, []);
 
-  const handlePinToggle = (searchTextOverride? : string) => {
+  const handlePinToggle = (searchTextOverride?: string) => {
     const current = !pinned;
     setPinned(current);
-    const subject : string = (searchTextOverride ?? searchText).toString().trim();
+    const subject: string = (searchTextOverride ?? searchText)
+      .toString()
+      .trim();
     if (
       subject.trim() === "" ||
       !initialSubjects.find((s) => s.name === subject)
@@ -128,7 +140,6 @@ function PinnedSearchBar({
       updated = [...new Set([...saved, subject])];
       setPinned(true);
     }
-    
 
     if (updated.length === 0) {
       setShowControls(false);
@@ -204,18 +215,26 @@ function PinnedSearchBar({
                     suggestions.length > 0 ? "rounded-b-none" : ""
                   }`}
                   onKeyDown={(e) => {
-                    if(suggestions.length == 0 && searchText.trim() == "") return;
-                    if(e.key == 'ArrowDown'){
+                    if (suggestions.length == 0 && searchText.trim() == "")
+                      return;
+                    if (e.key == "ArrowDown") {
                       e.preventDefault();
-                      setHighlightedIndex((curr) => (curr + 1) % suggestions.length);
-                    }
-                    else if(e.key == 'ArrowUp'){
+                      setHighlightedIndex(
+                        (curr) => (curr + 1) % suggestions.length,
+                      );
+                    } else if (e.key == "ArrowUp") {
                       e.preventDefault();
-                      setHighlightedIndex((curr) => (curr - 1 + suggestions.length) % suggestions.length);
-                    }
-                    else if(e.key == 'Enter'){
+                      setHighlightedIndex(
+                        (curr) =>
+                          (curr - 1 + suggestions.length) % suggestions.length,
+                      );
+                    } else if (e.key == "Enter") {
                       e.preventDefault();
-                      if(suggestions.length > 0 && highlightedIndex >=0 && suggestions[highlightedIndex] != undefined){
+                      if (
+                        suggestions.length > 0 &&
+                        highlightedIndex >= 0 &&
+                        suggestions[highlightedIndex] != undefined
+                      ) {
                         handlePinToggle(suggestions[highlightedIndex]);
                         setSuggestions([]);
                       }
@@ -237,10 +256,11 @@ function PinnedSearchBar({
                       <li
                         key={index}
                         onClick={() => handleSelectSuggestion(suggestion)}
-                        className={`flex cursor-pointer items-center rounded p-2 
-                        ${index === highlightedIndex
-                          ? "bg-gray-200 dark:bg-gray-800"
-                          : "hover:bg-gray-200 dark:hover:bg-gray-800"}`}
+                        className={`flex cursor-pointer items-center rounded p-2 ${
+                          index === highlightedIndex
+                            ? "bg-gray-200 dark:bg-gray-800"
+                            : "hover:bg-gray-200 dark:hover:bg-gray-800"
+                        }`}
                       >
                         {suggestion}
                       </li>

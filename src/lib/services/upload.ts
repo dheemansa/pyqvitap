@@ -32,7 +32,8 @@ export async function uploadPaper({
   if (files[0].size > COMPRESS_THRESHOLD) {
     return {
       success: false,
-      message: "PDF file exceeds the 5MB limit. Please select a PDF file under 5MB.",
+      message:
+        "PDF file exceeds the 5MB limit. Please select a PDF file under 5MB.",
       status: 400,
     };
   }
@@ -42,7 +43,8 @@ export async function uploadPaper({
   if (pdfBytes.length > MAX_COMPRESSED_PDF_SIZE) {
     return {
       success: false,
-      message: "PDF is too large after compression. The compressed file must be under 5MB.",
+      message:
+        "PDF is too large after compression. The compressed file must be under 5MB.",
       status: 413,
     };
   }
@@ -79,11 +81,12 @@ export async function uploadPaper({
   const backgroundTask = analyzePDFMetadata(base64Pdf)
     .then(async (analyzed) => {
       await withDatabase(async () => {
-        const subjectFormatted = analyzed.course_name && analyzed.subject !== "UNKNOWN"
-          ? `${analyzed.course_name.toUpperCase()} [${analyzed.subject.toUpperCase()}]`
-          : analyzed.subject !== "UNKNOWN"
-          ? analyzed.subject.toUpperCase()
-          : null;
+        const subjectFormatted =
+          analyzed.course_name && analyzed.subject !== "UNKNOWN"
+            ? `${analyzed.course_name.toUpperCase()} [${analyzed.subject.toUpperCase()}]`
+            : analyzed.subject !== "UNKNOWN"
+              ? analyzed.subject.toUpperCase()
+              : null;
 
         await PaperAdmin.findByIdAndUpdate(paper._id, {
           subject: subjectFormatted,
@@ -92,11 +95,17 @@ export async function uploadPaper({
           year: analyzed.year,
           ambiguous_tags: analyzed.ambiguous_tags,
         });
-        console.log(`[AI Analyzer] Successfully analyzed and tagged uploaded paper ${paper._id}:`, analyzed);
+        console.log(
+          `[AI Analyzer] Successfully analyzed and tagged uploaded paper ${paper._id}:`,
+          analyzed,
+        );
       });
     })
     .catch((err) => {
-      console.error(`[AI Analyzer] Background analysis failed for paper ${paper._id}:`, err);
+      console.error(
+        `[AI Analyzer] Background analysis failed for paper ${paper._id}:`,
+        err,
+      );
     });
 
   let cfCtx: ReturnType<typeof getCloudflareContext> | undefined;
@@ -106,11 +115,15 @@ export async function uploadPaper({
     // In local development or contexts where Cloudflare global state is not initialized
   }
 
-  const executionCtx = cfCtx?.ctx as { waitUntil?: (promise: Promise<unknown>) => void } | undefined;
+  const executionCtx = cfCtx?.ctx as
+    | { waitUntil?: (promise: Promise<unknown>) => void }
+    | undefined;
   if (typeof executionCtx?.waitUntil === "function") {
     executionCtx.waitUntil(backgroundTask);
   } else {
-    console.warn(`[AI Analyzer] Cloudflare execution context unavailable; background task running detached for paper ${paper._id}`);
+    console.warn(
+      `[AI Analyzer] Cloudflare execution context unavailable; background task running detached for paper ${paper._id}`,
+    );
   }
 
   return { success: true, file_url, thumbnail_url };

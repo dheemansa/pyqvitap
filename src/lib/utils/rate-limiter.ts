@@ -2,10 +2,10 @@ import { redis } from "@/lib/utils/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { CustomError } from "./error";
 
-function getClientIp(req: Request & { ip?: string}): string {
+function getClientIp(req: Request & { ip?: string }): string {
   const xff = req.headers.get("x-forwarded-for");
   if (typeof xff === "string" && xff.length > 0) {
-    return xff.split(",")[0]?.trim()??"";
+    return xff.split(",")[0]?.trim() ?? "";
   }
   const xri = req.headers.get("x-real-ip");
   if (typeof xri === "string" && xri.length > 0) {
@@ -14,10 +14,13 @@ function getClientIp(req: Request & { ip?: string}): string {
   return "0.0.0.0";
 }
 
-export async function rateLimitCheck(req: Request & { ip?: string }, paperId: string) {
+export async function rateLimitCheck(
+  req: Request & { ip?: string },
+  paperId: string,
+) {
   const ratelimit = new Ratelimit({
     redis,
-    limiter: Ratelimit.slidingWindow(3, "1 h"),//per id - 3 request - per hour
+    limiter: Ratelimit.slidingWindow(3, "1 h"), //per id - 3 request - per hour
     analytics: true,
   });
 
@@ -32,10 +35,13 @@ export async function rateLimitCheck(req: Request & { ip?: string }, paperId: st
 
 export async function slotContributionRateLimitCheck(
   req: Request & { ip?: string },
-  contributorId: string
+  contributorId: string,
 ) {
   try {
-    if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
+    if (
+      !process.env.UPSTASH_REDIS_REST_URL ||
+      !process.env.UPSTASH_REDIS_REST_TOKEN
+    ) {
       return;
     }
 
@@ -52,7 +58,7 @@ export async function slotContributionRateLimitCheck(
     if (!success) {
       throw new CustomError(
         "Rate limit exceeded. Please wait a few minutes before submitting more slot contributions.",
-        429
+        429,
       );
     }
   } catch (err) {
@@ -60,6 +66,9 @@ export async function slotContributionRateLimitCheck(
       throw err;
     }
     // Fail-open on Redis connection errors in dev/local
-    console.warn("[RateLimit] Slot contribution rate limit check bypassed:", err);
+    console.warn(
+      "[RateLimit] Slot contribution rate limit check bypassed:",
+      err,
+    );
   }
 }

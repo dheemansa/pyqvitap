@@ -14,7 +14,9 @@ export function getTodayDateInIST(): string {
   return `${year}-${month}-${day}`;
 }
 
-export function isAtOrAfterCutoffInIST(examType: "CAT" | "FAT" = "CAT"): boolean {
+export function isAtOrAfterCutoffInIST(
+  examType: "CAT" | "FAT" = "CAT",
+): boolean {
   const parts = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Kolkata",
     hour: "2-digit",

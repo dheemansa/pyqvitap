@@ -28,13 +28,13 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 
-import { type ApiResponse } from '@/interface'
+import { type ApiResponse } from "@/interface";
 
 import { CSS } from "@dnd-kit/utilities";
 
 interface userPaperResponse {
   subject: string;
-  slots: string[]
+  slots: string[];
 }
 
 const SortableItem = ({
@@ -188,7 +188,7 @@ const PinnedModal = ({
       }}
     >
       {page === "Navbar" ? (
-        <DialogTrigger className="flex w-full items-center gap-2.5 bg-transparent hover:bg-transparent focus:bg-transparent text-left cursor-pointer border-0 shadow-none outline-none">
+        <DialogTrigger className="flex w-full cursor-pointer items-center gap-2.5 border-0 bg-transparent text-left shadow-none outline-none hover:bg-transparent focus:bg-transparent">
           <Pin className="h-4 w-4" />
           <span className="text-xs font-medium">{triggerName}</span>
         </DialogTrigger>

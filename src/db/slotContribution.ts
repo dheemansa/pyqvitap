@@ -1,5 +1,8 @@
 import { Schema, type Model, Types } from "mongoose";
-import { AUTHORITATIVE_SLOTS, type AuthoritativeSlot } from "@/lib/constants/slots";
+import {
+  AUTHORITATIVE_SLOTS,
+  type AuthoritativeSlot,
+} from "@/lib/constants/slots";
 import { getModel } from "@/lib/database/mongoose";
 
 export interface ISlotContributionDoc {
@@ -36,11 +39,14 @@ const slotContributionSchema = new Schema<ISlotContributionDoc>(
   {
     collection: "slot_contributions",
     timestamps: { createdAt: true, updatedAt: false },
-  }
+  },
 );
 
 // Enforce unique contribution per contributor per paper:
-slotContributionSchema.index({ paperId: 1, contributorId: 1 }, { unique: true });
+slotContributionSchema.index(
+  { paperId: 1, contributorId: 1 },
+  { unique: true },
+);
 // Index for fast vote aggregation:
 slotContributionSchema.index({ paperId: 1, slot: 1 });
 
@@ -48,7 +54,7 @@ const SlotContribution: Model<ISlotContributionDoc> =
   getModel<ISlotContributionDoc>(
     "SlotContribution",
     slotContributionSchema,
-    "slot_contributions"
+    "slot_contributions",
   );
 
 export default SlotContribution;

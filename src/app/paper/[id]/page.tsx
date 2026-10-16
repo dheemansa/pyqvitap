@@ -170,9 +170,10 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
   return (
     <div className="w-full max-w-full overflow-x-hidden">
       <link rel="preload" href={pdfUrl} as="fetch" crossOrigin="anonymous" />
-      <h1 className="my-4 px-3 sm:px-6 text-center font-play text-lg sm:text-2xl md:text-3xl font-semibold break-words max-w-4xl mx-auto leading-snug">
+      <h1 className="mx-auto my-4 max-w-4xl break-words px-3 text-center font-play text-lg font-semibold leading-snug sm:px-6 sm:text-2xl md:text-3xl">
         <span>
-          {paper.subject} {paper.exam} {formatSlotDisplay(paper.slot)} {paper.year}
+          {paper.subject} {paper.exam} {formatSlotDisplay(paper.slot)}{" "}
+          {paper.year}
         </span>
       </h1>
       <div className="px-2 sm:px-4">
@@ -183,7 +184,7 @@ const PaperPage = async ({ params }: { params: { id: string } }) => {
           slotContributionCount={paper.slotContributionCount}
         />
       </div>
-      <div className="w-full max-w-full flex flex-col items-center">
+      <div className="flex w-full max-w-full flex-col items-center">
         <PaperProvider
           value={{
             paperId: params.id,

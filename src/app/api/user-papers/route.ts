@@ -1,5 +1,5 @@
 import { type StoredSubjects } from "@/interface";
-import { getPapersBySubjects } from "@/lib/services/paper"
+import { getPapersBySubjects } from "@/lib/services/paper";
 import { success, failure } from "@/lib/utils/response";
 
 export const dynamic = "force-dynamic";
@@ -13,10 +13,13 @@ export async function POST(req: Request) {
     }
 
     if (!Array.isArray(subjects)) {
-      return failure("Invalid request body. Expected an array of subjects.", 400);
+      return failure(
+        "Invalid request body. Expected an array of subjects.",
+        400,
+      );
     }
 
-    const transformedPapers = await getPapersBySubjects(subjects)
+    const transformedPapers = await getPapersBySubjects(subjects);
 
     return success(transformedPapers);
   } catch (error) {

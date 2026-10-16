@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AUTHORITATIVE_SLOTS, type AuthoritativeSlot } from "@/lib/constants/slots";
+import {
+  AUTHORITATIVE_SLOTS,
+  type AuthoritativeSlot,
+} from "@/lib/constants/slots";
 import {
   getOrCreateContributorId,
   hasContributedLocally,
@@ -28,12 +31,16 @@ export default function SlotContributionBox({
 }: SlotContributionBoxProps) {
   const [slot, setSlot] = useState<string>(initialSlot);
   const [source, setSource] = useState<string | undefined>(slotSource);
-  const [totalContributions, setTotalContributions] = useState<number>(slotContributionCount);
+  const [totalContributions, setTotalContributions] = useState<number>(
+    slotContributionCount,
+  );
   const [selectedSlot, setSelectedSlot] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [userContributed, setUserContributed] = useState<boolean>(false);
   const [isSkipped, setIsSkipped] = useState<boolean>(false);
-  const [isConfirmed, setIsConfirmed] = useState<boolean>(Boolean(initialSlot && slotSource === "crowdsourced"));
+  const [isConfirmed, setIsConfirmed] = useState<boolean>(
+    Boolean(initialSlot && slotSource === "crowdsourced"),
+  );
 
   useEffect(() => {
     if (!paperId) return;
@@ -56,7 +63,9 @@ export default function SlotContributionBox({
 
     // Fetch fresh status from the server
     const contributorId = getOrCreateContributorId();
-    fetch(`/api/slot-contribution?paperId=${encodeURIComponent(paperId)}&contributorId=${encodeURIComponent(contributorId)}`)
+    fetch(
+      `/api/slot-contribution?paperId=${encodeURIComponent(paperId)}&contributorId=${encodeURIComponent(contributorId)}`,
+    )
       .then(async (res) => {
         if (!res.ok) return null;
         const data = (await res.json()) as ApiResponse<SlotCrowdsourceStatus>;
@@ -91,14 +100,16 @@ export default function SlotContributionBox({
   // 2. If paper slot has been confirmed via crowdsourcing, show the authoritative confirmation tag
   if (slot && (source === "crowdsourced" || isConfirmed)) {
     return (
-      <div className="mx-auto my-3 flex max-w-2xl items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50/90 px-3.5 py-2 text-xs font-play text-emerald-950 shadow-sm backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-200">
+      <div className="mx-auto my-3 flex max-w-2xl items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50/90 px-3.5 py-2 font-play text-xs text-emerald-950 shadow-sm backdrop-blur-sm dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-200">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="font-semibold text-sm">Slot: {slot} ✓</span>
-          <span className="text-[11px] opacity-80">· Confirmed from student contributions</span>
+          <span className="text-sm font-semibold">Slot: {slot} ✓</span>
+          <span className="text-[11px] opacity-80">
+            · Confirmed from student contributions
+          </span>
         </div>
         {totalContributions > 0 && (
-          <span className="text-[11px] opacity-75 font-medium">
+          <span className="text-[11px] font-medium opacity-75">
             {totalContributions} contribution{totalContributions > 1 ? "s" : ""}
           </span>
         )}
@@ -112,7 +123,9 @@ export default function SlotContributionBox({
       <div className="mx-auto my-3 flex max-w-2xl items-center justify-between rounded-xl border border-[#7480FF]/30 bg-white/90 px-4 py-2.5 font-play text-xs text-gray-700 shadow-sm backdrop-blur-sm dark:border-[#3A3745] dark:bg-[#130E1F]/90 dark:text-gray-300">
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <span className="font-medium">Thanks! Your contribution was recorded.</span>
+          <span className="font-medium">
+            Thanks! Your contribution was recorded.
+          </span>
         </div>
         <span className="text-[11px] text-gray-500 dark:text-gray-400">
           {totalContributions > 0
@@ -130,7 +143,7 @@ export default function SlotContributionBox({
         <button
           type="button"
           onClick={() => setIsSkipped(false)}
-          className="text-[11px] font-play text-gray-500 underline underline-offset-2 transition hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+          className="font-play text-[11px] text-gray-500 underline underline-offset-2 transition hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
         >
           Know the slot for this paper? Help add it
         </button>
@@ -184,14 +197,18 @@ export default function SlotContributionBox({
         setSource("crowdsourced");
         setIsConfirmed(true);
         setTotalContributions(json.data.totalContributions);
-        toast.success(`Consensus reached! Slot confirmed as ${json.data.confirmedSlot}.`);
+        toast.success(
+          `Consensus reached! Slot confirmed as ${json.data.confirmedSlot}.`,
+        );
       } else {
-        const newTotal = json.data?.totalContributions ?? totalContributions + 1;
+        const newTotal =
+          json.data?.totalContributions ?? totalContributions + 1;
         setTotalContributions(newTotal);
         toast.success("Thanks! Your contribution was recorded.");
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Failed to record contribution.";
+      const message =
+        err instanceof Error ? err.message : "Failed to record contribution.";
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -200,7 +217,7 @@ export default function SlotContributionBox({
 
   // Render minimal contextual box
   return (
-    <div className="mx-auto my-3 max-w-2xl rounded-xl border border-[#7480FF]/30 bg-white/95 p-3.5 shadow-sm backdrop-blur-md dark:border-[#3A3745] dark:bg-[#130E1F]/95 sm:p-4 font-play">
+    <div className="mx-auto my-3 max-w-2xl rounded-xl border border-[#7480FF]/30 bg-white/95 p-3.5 font-play shadow-sm backdrop-blur-md dark:border-[#3A3745] dark:bg-[#130E1F]/95 sm:p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Metadata info & polite prompt */}
         <div className="flex-1 space-y-1">

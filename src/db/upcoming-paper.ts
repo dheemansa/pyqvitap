@@ -7,7 +7,9 @@ const upcomingSubjectSchema = new Schema<IUpcomingSubject>({
   slots: { type: [String], required: true },
 });
 
-const UpcomingSubject: Model<IUpcomingSubject> =
-  getModel<IUpcomingSubject>("UpcomingSubject", upcomingSubjectSchema);
+const UpcomingSubject: Model<IUpcomingSubject> = getModel<IUpcomingSubject>(
+  "UpcomingSubject",
+  upcomingSubjectSchema,
+);
 
 export default UpcomingSubject;

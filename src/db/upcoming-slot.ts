@@ -6,13 +6,15 @@ const upcomingSlotSchema = new Schema<IUpcomingSlot>({
   slot: { type: String, required: true, unique: true },
   lastSyncedDate: { type: String },
   syncMode: {
-    type: String, 
+    type: String,
     enum: ["CAT", "FAT"],
     default: "CAT",
   },
 });
 
-const UpcomingSlot: Model<IUpcomingSlot> =
-  getModel<IUpcomingSlot>("UpcomingSlot", upcomingSlotSchema);
+const UpcomingSlot: Model<IUpcomingSlot> = getModel<IUpcomingSlot>(
+  "UpcomingSlot",
+  upcomingSlotSchema,
+);
 
 export default UpcomingSlot;
