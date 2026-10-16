@@ -11,7 +11,9 @@
     "lint": "next lint",
     "start": "next start",
     "test": "node scripts/test-paper-transform.cjs && node scripts/test-paper-by-id-cache.cjs && node scripts/test-media-range.cjs && node scripts/test-media-cache.cjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "format": "pnpm exec prettier --write .",
+    "format:check": "pnpm exec prettier --check ."
   },
   "dependencies": {
     "@clerk/nextjs": "^6.39.7",

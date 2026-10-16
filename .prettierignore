@@ -1,0 +1,26 @@
+# Dependencies & package managers
+node_modules
+pnpm-lock.yaml
+package-lock.json
+
+# Build outputs & caches
+.next
+.open-next
+.wrangler
+dist
+build
+out
+coverage
+
+# Auto-generated Cloudflare types
+worker-configuration.d.ts
+
+# Environment and secrets
+.env
+.env.*
+.dev.vars
+.dev.vars.*
+.vercel
+
+# Static public directory
+public
