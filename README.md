@@ -82,10 +82,34 @@ pnpm run build pnpm start
 
 <h2>🍰 Contribution Guidelines:</h2>
 
-Contributions are welcome! PyqVitAp is a student-built open-source project and contributions from students and developers are encouraged. Before contributing: 1. Fork the repository. 2. Create a new branch for your change. 3. Make your changes while following the existing project structure and coding style. 4. Test your changes locally before submitting them. 5. Run the available type checks and linting checks. 6. Commit your changes with a clear and meaningful commit message. 7. Push your branch and open a Pull Request. Good contributions include: - Bug fixes - UI/UX improvements - Search and filtering improvements - Performance improvements - Accessibility improvements - Documentation improvements - New student-focused features - Improvements to the paper browsing experience Please do not: - Commit .env files or API credentials - Commit private data or database dumps - Commit large PDF collections or internal datasets - Modify or redistribute university documents outside the scope of the project - Introduce unnecessary dependencies or unrelated changes For major feature changes opening an issue first is recommended so the approach can be discussed before implementation. Please keep Pull Requests focused on one feature fix or improvement whenever possible.
+Contributions are welcome! PyqVitAp is a student-built open-source project and contributions from students and developers are encouraged. Before contributing: 
+1. Fork the repository. 
+2. Create a new branch for your change. 
+3. Make your changes while following the existing project structure and coding style. 
+4. Test your changes locally before submitting them. 
+5. Run the available type checks and linting checks. 
+6. Commit your changes with a clear and meaningful commit message. 
+7. Push your branch and open a Pull Request. 
+> [!TIP]
+>    **Good contributions include**: 
+>    - Bug fixes - UI/UX improvements 
+>    - Search and filtering improvements 
+>    - Performance improvements 
+>    - Accessibility improvements 
+>    - Documentation improvements 
+>    - New student focused features 
+>    - Improvements to the paper browsing experience 
 
-  
-  
+> [!CAUTION]
+> **Please do not**: 
+>    - Commit .env files or API credentials 
+>    - Commit private data or database dumps 
+>    - Commit large PDF collections or internal datasets 
+>    - Modify or redistribute university documents outside the scope of the project 
+>    - Introduce unnecessary dependencies or unrelated changes For major feature changes opening an issue first is recommended so the approach can be discussed before implementation. 
+>
+>Please keep Pull Requests focused on one feature fix or improvement whenever possible.
+
 <h2>💻 Built with</h2>
 
 Technologies used in the project:
@@ -108,7 +132,17 @@ Technologies used in the project:
 
 <h2>🛡️ License:</h2>
 
-This project is licensed under the PyqVitAp's original website source code is licensed under the MIT License. The MIT License applies only to the original software source code contained in this repository. It does not grant ownership or redistribution rights to: - University question papers - Answer keys - Syllabus documents - University logos or trademarks - Third-party PDFs - Third-party assets or content The rights to question papers and other third-party materials remain with their respective owners. See the LICENSE file for the complete software license and the project's disclaimer for additional information.
+This project is licensed under the PyqVitAp's original website source code is licensed under the MIT License. 
+The MIT License applies only to the original software source code contained in this repository. 
+It does not grant ownership or redistribution rights to: 
+- University question papers 
+- Answer keys 
+- Syllabus documents 
+- University logos or trademarks 
+- Third party PDFs 
+- Third-party assets or content The rights to question papers and other third-party materials remain with their respective owners. 
+
+See the LICENSE file for the complete software license and the project's disclaimer for additional information.
 
 <h2>💖Like my work?</h2>
 
